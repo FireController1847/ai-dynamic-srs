@@ -1,3 +1,6 @@
+import Popover from "bootstrap/js/dist/popover.js";
+import Tooltip from "bootstrap/js/dist/tooltip.js";
+
 function replaceInstance(element, key, Constructor, options) {
   element[key]?.dispose();
   element[key] = new Constructor(element, options);
@@ -5,14 +8,14 @@ function replaceInstance(element, key, Constructor, options) {
 
 export const bootstrapTooltip = {
   mounted(element, binding) {
-    replaceInstance(element, "__dsrsTooltip", window.bootstrap.Tooltip, {
+    replaceInstance(element, "__dsrsTooltip", Tooltip, {
       title: binding.value,
       trigger: "hover focus"
     });
   },
   updated(element, binding) {
     if (binding.value !== binding.oldValue) {
-      replaceInstance(element, "__dsrsTooltip", window.bootstrap.Tooltip, {
+      replaceInstance(element, "__dsrsTooltip", Tooltip, {
         title: binding.value,
         trigger: "hover focus"
       });
@@ -25,7 +28,7 @@ export const bootstrapTooltip = {
 
 export const bootstrapPopover = {
   mounted(element, binding) {
-    replaceInstance(element, "__dsrsPopover", window.bootstrap.Popover, {
+    replaceInstance(element, "__dsrsPopover", Popover, {
       ...binding.value,
       container: "body",
       html: binding.value.html ?? true,
@@ -36,7 +39,7 @@ export const bootstrapPopover = {
   updated(element, binding) {
     if (binding.value.content !== binding.oldValue?.content
       || binding.value.title !== binding.oldValue?.title) {
-      replaceInstance(element, "__dsrsPopover", window.bootstrap.Popover, {
+      replaceInstance(element, "__dsrsPopover", Popover, {
         ...binding.value,
         container: "body",
         html: binding.value.html ?? true,

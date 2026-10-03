@@ -2,10 +2,12 @@
 
 ## Runtime flow
 
-`npm start` launches the zero-dependency `server.mjs` static server and redirects `/` to `src/html/index.html`. The page loads Bootstrap, Vue, and `src/app/app.js`. The app imports the feature registry, generic Vue components, and browser controllers. The feature registry supplies ordered page schemas and specialized feature components.
+Install dependencies with `npm ci` using Node.js 24 or newer. `npm start` launches webpack-dev-server at `http://127.0.0.1:3000`; `HOST` and `PORT` override the address. The server compiles in memory and reloads the page after source changes. `npm run build` emits the complete static site into ignored `dist/`; `npm run pages:prepare` runs the same production build.
+
+`webpack.config.mjs` uses `src/html/index.html` as the HTML template and `src/app/app.js` as the JavaScript entry. HTML injection loads the emitted bundles and extracted CSS. The app imports Vue, Bootstrap CSS, the application styles, feature registry, generic components, and browser controllers. The feature registry supplies ordered page schemas and specialized feature components. Vue aliases to the full ESM bundler build so the existing HTML shell and string component templates can compile at runtime; DefinePlugin supplies Vue's feature flags. Only the Bootstrap tooltip and popover modules are imported.
 
 ```text
-HTML entry
+Generated HTML and bundled CSS/JavaScript
   → app/app.js
     → features/feature-registry.js
       → feature schemas and specialized components
@@ -13,6 +15,25 @@ HTML entry
       → core schema/value/prompt helpers
     → core/workspace/* and core/printing/*
 ```
+
+## Bundled and print assets
+
+Runtime dependencies come from npm and are pinned in `package.json` and `package-lock.json`. The previous checked-in `lib/` copies and `server.mjs` have been removed. No TypeScript or component-format conversion is part of this migration.
+
+MiniCssExtractPlugin and css-loader bundle Bootstrap and the application's CSS imports. Production uses content-hashed JS/CSS, shared chunks, JavaScript/CSS minimization, and a clean output directory. CopyPlugin emits the project license, dependency licenses and `.nojekyll` alongside the application.
+
+Printing runs in a separate iframe. CopyPlugin therefore also emits `assets/paged.polyfill.js` and the independent Markdown/compact-document styles under `assets/print/`. The print helper resolves these URLs through `document.baseURI`; they are not injected as application scripts or substituted with source-tree URLs. Paged.js remains isolated to the print document. DrawIO preview continues to load its official diagrams.net viewer on demand.
+
+The default deployment base is `/`. Set `PAGES_BASE_PATH=/ai-dynamic-srs/` when building for a repository subdirectory; webpack's public path and the HTML `<base>` use the same normalized value. Publish the generated `dist/` contents, rather than `src/html/` or the repository root. The development server serves compiled output only, so workspace files and the repository are not exposed by a generic static file server. Autosave retains the same storage keys and `.dsrs` validation boundary. Browser storage remains scoped to the origin; use `PORT=4173 npm start` to reuse the previous development origin, or import a downloaded backup at the new default port.
+
+## Manual migration verification
+
+Builds, tests and browser checks remain manual at the user's request. This migration has not run them.
+
+1. Run `npm ci`, then `npm start`. Confirm the seven tabs, human guides, progress, Bootstrap tips and copied prompts work. Edit a source file and confirm live reload.
+2. Save and import a `.dsrs` workspace with diagrams and existing IDs. Verify autosave and restored navigation; use the prior port or a backup when moving between origins.
+3. Print planning documents and SRS stage previews, including Markdown, compact layouts and uploaded figures. Confirm pagination completes and all print assets load.
+4. Run `npm run build` and serve `dist/`. Inspect the app, licenses and print behavior. Repeat with `PAGES_BASE_PATH=/ai-dynamic-srs/` under that subdirectory; app bundles and print assets must use the same base.
 
 ## Dependency direction
 

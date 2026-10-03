@@ -1,3 +1,6 @@
+import { createApp } from "vue";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/index.css";
 import { createDocumentDateTracker } from "./document-date-tracker.js";
 import { withFinancialEvidence } from "../features/cost-benefit-analysis/financial-evidence.js";
 import { bootstrapPopover, bootstrapTooltip } from "../core/bootstrap/overlay-directives.js";
@@ -21,7 +24,6 @@ import { writeClipboard } from "./clipboard.js";
 import { printPage } from "./print-controller.js";
 import { workspaceStateFrom } from "./workspace-controller.js";
 
-const { createApp } = window.Vue;
 const FORM_SIDEBAR_PREFERENCE_KEY = "dynamic-srs:form-sidebar-visible";
 
 function loadFormSidebarPreference() {

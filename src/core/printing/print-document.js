@@ -1,6 +1,6 @@
-const MARKDOWN_STYLES_URL = new URL("../../styles/markdown.css", import.meta.url).href;
-const COMPACT_STYLES_URL = new URL("../../styles/compact-documents.css", import.meta.url).href;
-const PAGED_SCRIPT_URL = new URL("../../lib/paged-0.4.3.polyfill.js", document.baseURI).href;
+const MARKDOWN_STYLES_URL = new URL("assets/print/markdown.css", document.baseURI).href;
+const COMPACT_STYLES_URL = new URL("assets/print/compact-documents.css", document.baseURI).href;
+const PAGED_SCRIPT_URL = new URL("assets/paged.polyfill.js", document.baseURI).href;
 
   function escapeHtml(value) {
     return String(value)

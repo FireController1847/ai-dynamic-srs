@@ -8,6 +8,7 @@ For SRS authoring 0.3.0, start with `docs/srs-simplification.md` and `features/s
 
 | Request | Primary files | Read shared code only if needed |
 |---|---|---|
+| Change webpack, npm scripts, deployment base, or emitted assets | `webpack.config.mjs`, `package.json`, `package-lock.json`, `src/html/index.html` | `src/app/app.js` for CSS/runtime imports; `core/printing/print-document.js` for copied iframe assets; `docs/architecture.md` |
 | Add, remove, or rename a field | Relevant `src/features/*/schema.js` or feasibility section | `core/schema/state-factory.js` |
 | Add a new page/feature | New `src/features/<feature>` and `features/feature-registry.js` | Generic components if existing field types are insufficient |
 | Change field rendering | `components/fields/SchemaField.js` | `styles/forms.css` |
@@ -36,7 +37,7 @@ For SRS authoring 0.3.0, start with `docs/srs-simplification.md` and `features/s
 | Change SRS reference checks | `features/software-requirements/record-review.js` | Phase-specific reviews for relationship semantics |
 | Change Phase 4 review outcome consistency | `features/software-requirements/phase-four/review-outcomes.js` | `quality-review.js` |
 | Plan remaining SRS phases or review course alignment | `docs/srs-phase-three-four-review.md` | `docs/srs-construction-workflow.md`, relevant stage only |
-| Verify SRS Phase 3/4 handoffs | `tests/srs-handoffs.test.mjs` | Run with `node --test`; no application build step |
+| Verify SRS Phase 3/4 handoffs | `tests/srs-handoffs.test.mjs` | Run with `node --test` only when requested; these checks import source modules directly |
 | Change requirement kinds, IDs, or filters | `features/software-requirements/requirement-records.js` | Phase 3 functional and Phase 4 quality/interface schemas; keep saved IDs and the single collection |
 | Change diagram upload or replacement | `components/diagrams/DiagramUploadControl.js`, `DiagramFileField.js`, `core/artifacts/diagram-files.js` | `components/forms/FormWorkspace.js` for batch record creation |
 | Change diagram rendering/printing | `components/diagrams/DiagramMedia.js`, `DrawioDiagramPreview.js`, `core/printing/print-media.js` | `styles/diagram-artifacts.css`, `core/printing/print-document.js` |

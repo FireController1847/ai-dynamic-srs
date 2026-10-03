@@ -70,17 +70,26 @@ Diagram uploads retain their actual files in the workspace. Copied text prompts 
 
 ## Try it
 
-Install Node.js 20 or newer, clone the repository, and run:
+Install Node.js 24 or newer, clone the repository, and run:
 
 ```bash
 git clone https://github.com/FireController1847/ai-dynamic-srs.git
 cd ai-dynamic-srs
+npm ci
 npm start
 ```
 
-Then open **[http://127.0.0.1:4173](http://127.0.0.1:4173)**.
+Then open **[http://127.0.0.1:3000](http://127.0.0.1:3000)**.
 
-There is no dependency installation or application build step. The Node server serves the source directly; Vue, Bootstrap, and the pagination library are bundled in `lib/`, so loading the application does not require a runtime CDN connection. Refresh the browser after changing source files.
+The webpack development server compiles the application and reloads the page as source files change. Vue, Bootstrap and the pagination library are installed through npm and included in the generated site; they do not require a runtime CDN connection. Installing dependencies requires network access. DrawIO previews load the official diagrams.net viewer on demand.
+
+To create a production build:
+
+```bash
+npm run build
+```
+
+The complete static site is written to `dist/`. `npm run pages:prepare` runs the same build. Generated output is ignored by Git; commit the source and lockfile. Serve or publish the contents of `dist/` rather than opening the source HTML directly.
 
 To use a different address or port in macOS or Linux:
 
@@ -89,6 +98,14 @@ HOST=127.0.0.1 PORT=8080 npm start
 ```
 
 Document and stage previews can be printed through the browser's print dialog, including saving to PDF where supported.
+
+For hosting beneath a repository path, set the deployment base when building:
+
+```bash
+PAGES_BASE_PATH=/ai-dynamic-srs/ npm run pages:prepare
+```
+
+The generated HTML, application bundles and print assets use that base path. Publishing the site is a separate step.
 
 ## Your workspace data
 
@@ -100,14 +117,17 @@ The current application version is **0.3.0**, and new workspace files use **form
 
 If the browser's site data is cleared without a downloaded backup, locally saved project content may be lost. Workspace downloads are excluded from Git because they can contain client answers and uploaded project material.
 
+Browser storage belongs to the site's origin, including its port. If you have an existing workspace at the previous local address, run `PORT=4173 npm start` to reuse it, or download a backup there and import it at the new address.
+
 Resolved shared questions and accepted exceptions are hidden from the shared questions panel but remain saved and available in Evidence Intake.
 
 ## Project shape
 
 Dynamic SRS deliberately keeps its runtime simple:
 
-- `server.mjs` is a zero-dependency static server launched by `npm start`.
-- `src/html/index.html` loads the bundled browser libraries and starts `src/app/app.js` as a native JavaScript module.
+- `webpack.config.mjs` owns the development server, production build, generated HTML, extracted CSS and deployment base path.
+- `src/html/index.html` is the HTML template, and `src/app/app.js` is the JavaScript bundle entry. Source remains JavaScript ES modules with plain Vue components.
+- Vue, Bootstrap and Paged.js are pinned npm dependencies. Vue includes the template compiler for existing inline templates; Paged.js and supporting print styles are emitted for the separate print document.
 - Vue owns application state, forms, navigation, and previews. Bootstrap JavaScript supplies isolated tooltips and popovers.
 - Features and document schemas live under `src/features`; shared application coordination lives under `src/app`.
 - Generic Vue renderers live under `src/components`, and feature-neutral helpers live under `src/core`.

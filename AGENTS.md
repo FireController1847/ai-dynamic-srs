@@ -1,6 +1,6 @@
 # Dynamic SRS maintenance map
 
-This is a browser-native Vue 3 application. It has no application build step: `src/html/index.html` loads Vue and Bootstrap globals, then starts the application through `src/app/app.js` as a native ES module. Use `npm start` to serve it locally through the zero-dependency Node server.
+This is a Vue 3 application using JavaScript ES modules and webpack. Install dependencies with `npm ci` on Node.js 24 or newer. `npm start` launches the webpack development server; `npm run build` creates the static site in ignored `dist/`. `src/html/index.html` is the HTML template and `src/app/app.js` is the bundle entry. Vue includes the runtime compiler for existing inline templates; Bootstrap is imported only for isolated overlays. `webpack.config.mjs` owns bundling, HTML, CSS, print assets, and deployment base paths. See `docs/architecture.md` for the runtime contract.
 
 Before changing code, use `docs/change-routing.md` to identify the smallest relevant file set. Do not scan every schema for a feature-local request.
 
