@@ -1,0 +1,159 @@
+.cba-live-model {
+  border: 1px solid var(--dsrs-soft-border) !important;
+  border-top: 3px solid var(--dsrs-accent) !important;
+  box-shadow: var(--dsrs-card-shadow) !important;
+}
+
+.cba-kpi-grid,
+.cba-document-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.cba-kpi-grid div {
+  padding: 0.85rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.cba-kpi-grid dt,
+.cba-document-kpis dt {
+  color: var(--bs-secondary-color);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cba-kpi-grid dd,
+.cba-document-kpis dd {
+  margin: 0.2rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.cba-chart-card {
+  margin-bottom: 0;
+  padding: 1rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.65rem;
+  background: var(--bs-body-bg);
+}
+
+.cba-document-chart {
+  margin: 1rem 0 1.25rem;
+}
+
+.cba-chart-card figcaption strong,
+.cba-chart-card figcaption span {
+  display: block;
+}
+
+.cba-chart-card figcaption span {
+  margin-top: 0.15rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.8125rem;
+}
+
+.cba-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.15rem;
+  margin: 0.8rem 0 0.25rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+}
+
+.cba-chart-legend span::before {
+  display: inline-block;
+  width: 1rem;
+  height: 0.2rem;
+  margin-right: 0.35rem;
+  border-radius: 999px;
+  background: currentColor;
+  content: "";
+  vertical-align: middle;
+}
+
+.cba-chart-legend .benefits,
+.cba-chart-series.benefits {
+  color: #2f6fa8;
+}
+
+.cba-chart-legend .costs,
+.cba-chart-series.costs {
+  color: #b9823a;
+}
+
+.cba-chart-legend .net,
+.cba-chart-series.net {
+  color: #3f7775;
+}
+
+.cba-chart {
+  display: block;
+  width: 100%;
+  min-width: 34rem;
+  height: auto;
+  overflow: visible;
+}
+
+.cba-chart-card {
+  overflow-x: auto;
+}
+
+.cba-chart-grid line {
+  stroke: #dfe3ea;
+  stroke-width: 1;
+}
+
+.cba-chart-grid .zero-line {
+  stroke: #8993a4;
+  stroke-width: 1.5;
+}
+
+.cba-chart-grid text {
+  fill: #687489;
+  font-size: 10px;
+}
+
+.cba-chart-series polyline {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.cba-chart-series.costs polyline {
+  stroke-dasharray: 8 5;
+}
+
+.cba-chart-series.net polyline {
+  stroke-width: 4;
+}
+
+.cba-chart-series circle {
+  fill: var(--bs-body-bg);
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.cba-table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.cba-table-scroll table {
+  min-width: 62rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cba-table-scroll th:not(:first-child),
+.cba-table-scroll td {
+  text-align: right;
+  white-space: nowrap;
+}

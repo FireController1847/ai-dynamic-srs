@@ -1,0 +1,13 @@
+/* Shared by previews and print; never clip long authored content. */
+.document-content .document-markdown { white-space: normal; overflow-wrap: anywhere; }
+.document-content .document-markdown p { margin: 0 0 0.4rem; }
+.document-content .document-markdown ul,
+.document-content .document-markdown ol { margin: 0.25rem 0 0.5rem; padding-left: 1.5rem; }
+.document-content .document-markdown li { margin: 0.1rem 0; }
+.document-content .document-markdown li > ul,
+.document-content .document-markdown li > ol { margin: 0.15rem 0; }
+.document-content .document-markdown > :last-child { margin-bottom: 0; }
+.document-content .document-markdown { margin-bottom: 0.4rem; }
+.document-content .document-markdown code { font-size: 0.95em; color: inherit; }
+.document-content .document-markdown a { color: var(--document-blue); text-decoration: underline; }
+.document-content .document-record-heading > .document-markdown { min-width: 0; }

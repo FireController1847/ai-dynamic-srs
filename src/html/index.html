@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Build a software requirements specification dynamically.">
+    <title>Dynamic SRS Builder</title>
+    <link rel="stylesheet" href="../../lib/bootstrap-5.3.8.min.css">
+    <link rel="stylesheet" href="../styles/index.css">
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <header class="bg-white">
+        <div class="container py-4">
+          <div class="workspace-header d-flex flex-column flex-md-row gap-4 align-items-md-center justify-content-between">
+            <div>
+              <p class="workspace-eyebrow text-uppercase fw-semibold small mb-1">Planning workspace</p>
+              <h1 class="h3 mb-1">Dynamic SRS Builder</h1>
+              <p class="text-body-secondary mb-0">Create and organize your software requirements specification.</p>
+            </div>
+
+            <div class="workspace-actions d-flex flex-wrap gap-2 justify-content-md-end" aria-label="Workspace file actions">
+              <button class="btn btn-light" type="button" @click="newWip">New WIP</button>
+              <label class="btn btn-outline-primary mb-0" for="workspace-file">Import WIP</label>
+              <input id="workspace-file" class="visually-hidden" type="file" accept=".dsrs,application/json,application/gzip,application/x-gzip" @change="importWip">
+              <button class="btn btn-primary" type="button" @click="downloadWip">Download WIP</button>
+            </div>
+          </div>
+
+          <div class="workspace-status d-flex gap-2 align-items-center mt-3" role="status" aria-live="polite">
+            <span class="workspace-status-dot" aria-hidden="true"></span>
+            <span>{{ workspaceStatus }}</span>
+            <span v-if="lastSavedLabel" class="text-body-secondary">· Last saved {{ lastSavedLabel }}</span>
+            <span class="workspace-format ms-auto">.dsrs · gzip · format v1</span>
+          </div>
+        </div>
+
+      </header>
+
+      <nav class="workspace-tabs-sticky bg-white border-bottom" aria-label="SRS document sections">
+        <div class="container workspace-tabs-shell" tabindex="0">
+          <div class="nav nav-tabs workspace-tabs" role="tablist">
+            <button
+              v-for="page in pages"
+              :id="page.id + '-tab'"
+              :key="page.id"
+              class="nav-link"
+              :class="{ active: activePage === page.id, 'is-form-complete': pageIsComplete(page) }"
+              type="button"
+              role="tab"
+              :aria-controls="page.id + '-panel'"
+              :aria-selected="activePage === page.id"
+              @click="selectPage(page.id, $event)"
+            >
+              <span :class="{ 'tab-label-complete': pageIsComplete(page) }">{{ page.label }}</span>
+              <tab-completion-check v-if="pageIsComplete(page)"></tab-completion-check>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main class="container py-4 py-lg-5">
+        <section
+          v-for="page in pages"
+          v-show="activePage === page.id"
+          :id="page.id + '-panel'"
+          :key="page.id"
+          class="page-panel"
+          role="tabpanel"
+          tabindex="0"
+          :aria-labelledby="page.id + '-tab'"
+        >
+          <subpage-workspace
+            v-if="page.subpages?.length"
+            :active-subpages="activeSubpages"
+            :page-schema="page"
+            :data-model="documentSections[page.stateKey]"
+            :document-model="documentSections"
+            :document-schemas="pages"
+            :project-context="documentSections[projectContextStateKey]"
+            :print-date-label="printDateLabel"
+            :is-printing="printingPageId === page.id"
+            :copied-section="copiedSection"
+            :form-sidebar-visible="formSidebarVisible"
+            @copy-markdown="copyMarkdown"
+            @navigate-workspace="navigateWorkspace"
+            @print="printCurrentDocument"
+            @select-subpage="selectSubpage"
+            @set-form-sidebar-visible="setFormSidebarVisible"
+          ></subpage-workspace>
+
+          <template v-else-if="page.sections.length">
+            <preview-navigation-control
+              :form-id="page.id + '-form-top'"
+              :target-id="page.id + '-preview'"
+            >
+              <form-sidebar-toggle
+                v-if="!page.form?.fullWidth && !formSidebarVisible"
+                :visible="formSidebarVisible"
+                @toggle="setFormSidebarVisible"
+              ></form-sidebar-toggle>
+            </preview-navigation-control>
+            <div :id="page.id + '-form-top'" class="row g-4 form-workspace-row">
+              <aside
+                v-if="!page.form?.fullWidth"
+                class="col-lg-3 form-sidebar-column"
+                :class="{ 'is-collapsed': !formSidebarVisible }"
+                :aria-hidden="!formSidebarVisible"
+              >
+                <div class="card border-0 shadow-sm sticky-lg-top section-summary">
+                  <div class="card-body">
+                    <div class="form-sidebar-heading">
+                      <p class="section-kicker mb-2">{{ page.form?.kicker || page.code }}</p>
+                      <form-sidebar-toggle
+                        :visible="formSidebarVisible"
+                        @toggle="setFormSidebarVisible"
+                      ></form-sidebar-toggle>
+                    </div>
+                    <h2 class="h5">{{ page.title }}</h2>
+                    <p class="small text-body-secondary">{{ page.form?.intro || page.description }}</p>
+
+                    <form-progress
+                      v-if="page.form?.showCompletion !== false || page.ai?.compactInterview"
+                      :page-schema="page"
+                      :data-model="documentSections[page.stateKey]"
+                      :document-model="documentSections"
+                      :document-schemas="pages"
+                      :copied-section="copiedSection"
+                      @copy-markdown="copyMarkdown"
+                    ></form-progress>
+
+                    <nav class="section-links mt-4" :aria-label="page.title + ' sections'">
+                      <a v-for="section in page.sections" :key="section.key" :href="'#' + page.id + '-' + section.id">{{ section.title }}</a>
+                    </nav>
+                  </div>
+                </div>
+              </aside>
+
+              <div
+                class="form-content-column"
+                :class="page.form?.fullWidth || !formSidebarVisible ? 'col-12' : 'col-lg-9'"
+              >
+                <page-guide :page-schema="page"></page-guide>
+                <component
+                  :is="page.formComponent || 'dynamic-form'"
+                  :page-schema="page"
+                  :data-model="documentSections[page.stateKey]"
+                  :document-model="documentSections"
+                  :document-schemas="pages"
+                  :copied-section="copiedSection"
+                  @copy-markdown="copyMarkdown"
+                  @navigate-workspace="navigateWorkspace"
+                ></component>
+                <component
+                  v-if="page.summaryComponent"
+                  :is="page.summaryComponent"
+                  :data-model="documentSections[page.stateKey]"
+                ></component>
+              </div>
+            </div>
+          </template>
+
+          <div v-else class="card border-0 shadow-sm">
+            <div class="card-body p-4 p-md-5">
+              <h2 class="h4">{{ page.label }}</h2>
+              <p class="text-body-secondary mb-0">{{ page.description }}</p>
+            </div>
+          </div>
+
+          <template v-if="!page.subpages?.length">
+            <component
+              :is="page.previewComponent || 'document-preview'"
+              :page-schema="page"
+              :data-model="documentSections[page.stateKey]"
+              :document-model="documentSections"
+              :document-schemas="pages"
+              :project-context="documentSections[projectContextStateKey]"
+              :print-date-label="printDateLabel"
+              :is-printing="printingPageId === page.id"
+              @print="printCurrentDocument"
+            ></component>
+          </template>
+        </section>
+      </main>
+    </div>
+
+    <script src="../../lib/bootstrap-5.3.8.bundle.min.js"></script>
+    <script src="../../lib/vue-3.5.41.global.prod.js"></script>
+    <script type="module" src="../app/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+/* Opt-in planning document layout, shared by live previews and printed output. */
+.document-content.document-compact {
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.document-content.document-compact .document-cover-page {
+  display: block;
+  min-height: 0;
+  padding: 0 0 1rem;
+  margin: 0 0 1rem;
+  border-bottom: 2px solid var(--document-blue);
+  break-after: auto;
+  page-break-after: auto;
+}
+.document-content.document-compact .document-cover-heading {
+  margin: 0;
+  padding-top: 0;
+  border: 0;
+}
+.document-content.document-compact .document-cover-code {
+  margin-bottom: 0.35rem !important;
+}
+.document-content.document-compact .document-cover-page h1 { font-size: 23pt; }
+.document-content.document-compact .document-cover-page h2 { font-size: 17pt; }
+.document-content.document-compact .document-cover-for { margin: 0.4rem 0 !important; }
+.document-content.document-compact .document-cover-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin: 0.75rem 0 0;
+}
+.document-content.document-compact .document-cover-meta > div { padding: 0; border: 0; }
+.document-content.document-compact .document-cover-meta dt,
+.document-content.document-compact .document-cover-meta dd { display: inline; margin: 0; }
+.document-content.document-compact .document-cover-meta dt::after { content: ': '; }
+.document-content.document-compact .document-body-after-cover {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.document-content.document-compact section { margin-top: 1rem; }
+.document-content.document-compact .document-body > section:first-child { margin-top: 0; }
+.document-content.document-compact .document-body h2 {
+  font-size: 14pt;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.15rem;
+}
+.document-content.document-compact .document-body h3 {
+  font-size: 11pt;
+  margin: 0.85rem 0 0.5rem;
+}
+.document-content.document-compact p { margin: 0 0 0.4rem; orphans: 2; widows: 2; }
+.document-content.document-compact ul { margin: 0.25rem 0 0.5rem; padding-left: 1.25rem; }
+.document-content.document-compact .document-record-list { display: block; }
+.document-content.document-compact .document-record {
+  padding: 0;
+  margin: 0 0 0.8rem;
+  border: 0;
+  break-inside: auto;
+}
+.document-content.document-compact .document-record-heading {
+  display: block;
+  break-after: avoid;
+}
+.document-content.document-compact .document-record-id { margin-right: 0.4rem; font-size: 9pt; }
+.document-content.document-compact .document-record-primary { display: inline; margin: 0; }
+.document-content.document-compact .document-record-meta {
+  display: block;
+  padding: 0;
+  margin: 0.35rem 0 0;
+  font-size: inherit;
+}
+.document-content.document-compact .document-record-meta > div { margin: 0.1rem 0; }
+.document-content.document-compact .document-nested-records { gap: 0.25rem; }
+.document-content.document-compact .document-nested-records dl { display: block; }
+.document-content.document-compact .document-nested-records dl > div { display: block; }
+.document-content.document-compact table { margin: 0.4rem 0 0.65rem; }
+.document-content.document-compact th,
+.document-content.document-compact td { padding: 0.3rem 0.4rem; }
+.document-content.document-compact .document-source-list > article { margin-bottom: 0.8rem; }
+.document-content.document-compact .cba-document-kpis { margin: 0.4rem 0 0.65rem; gap: 0.35rem; }
+.document-content.document-compact .cba-document-kpis > div { padding: 0.3rem 0.4rem; }
+
+/* Separate record titles and field labels from their narrative content. */
+.document-content.document-compact .document-record-heading > .document-markdown {
+  margin-top: 0.3rem;
+}
+.document-content.document-compact .document-body strong + .document-markdown {
+  margin-top: 0.3rem;
+}

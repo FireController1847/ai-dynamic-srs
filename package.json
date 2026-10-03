@@ -1,0 +1,13 @@
+{
+  "name": "dynamic-srs",
+  "version": "0.3.0",
+  "private": true,
+  "description": "A local, browser-based Dynamic SRS planning workspace.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

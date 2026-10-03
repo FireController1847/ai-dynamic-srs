@@ -1,0 +1,34 @@
+:root {
+  --dsrs-app-background: #f4f6f9;
+  --dsrs-ink: #263544;
+  --dsrs-muted-ink: #617080;
+  --dsrs-strong-ink: #33485c;
+  --dsrs-border: #cfd8e2;
+  --dsrs-soft-border: #e1e7ed;
+  --dsrs-surface: #fff;
+  --dsrs-soft-surface: #f7f9fb;
+  --dsrs-accent: #2f6fa8;
+  --dsrs-accent-strong: #245781;
+  --dsrs-accent-soft: #eaf2f9;
+  --dsrs-accent-border: #bfd3e5;
+  --dsrs-secondary: #3f7775;
+  --dsrs-secondary-strong: #315f5d;
+  --dsrs-secondary-soft: #edf5f4;
+  --dsrs-secondary-border: #c7ddda;
+  --dsrs-highlight: #b9823a;
+  --dsrs-highlight-strong: #7e5928;
+  --dsrs-highlight-soft: #fbf5ea;
+  --dsrs-highlight-border: #e4cfad;
+  --dsrs-card-shadow: 0 0.2rem 0.65rem rgba(31, 55, 78, 0.055);
+  --dsrs-workspace-tabs-height: 2.75rem;
+}
+
+[v-cloak] {
+  display: none;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--dsrs-app-background);
+  color: var(--dsrs-ink);
+}
