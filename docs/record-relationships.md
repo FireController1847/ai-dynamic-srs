@@ -23,11 +23,11 @@ This review concerns repeated entry of an existing parent/context link, not crea
 
 ## Implementation entry points
 
-- `src/core/records/parent-records.js`: read-only grouping of canonical records and parent-scoped section descriptors. It preserves each section's original filter.
-- `src/components/forms/RelatedRecordGroups.js`: add, move, retire, and scoped copy actions; used by `DynamicForm` only when a section opts in.
-- `src/components/forms/RelatedRecordItem.js`: ordinary fields plus an optional name-based reassignment control. No repeated parent field in normal grouped editing.
+- `src/core/records/parent-records.ts`: read-only grouping of canonical records and parent-scoped section descriptors. It preserves each section's original filter.
+- `src/components/forms/RelatedRecordGroups.ts`: add, move, retire, and scoped copy actions; used by `DynamicForm` only when a section opts in.
+- `src/components/forms/RelatedRecordItem.ts`: ordinary fields plus an optional name-based reassignment control. No repeated parent field in normal grouped editing.
 - `repeatable.parent` in the relevant feature schema: owns domain vocabulary, relationship field, parent source, eligibility, and ungrouped behavior.
-- `core/ai/prompt-contract.js` and `prompt-builder.js`: explain automatic links, provide available parent contexts, and keep existing links as context rather than asking for redundant field answers.
+- `core/ai/prompt-contract.ts` and `prompt-builder.ts`: explain automatic links, provide available parent contexts, and keep existing links as context rather than asking for redundant field answers.
 
 Generic components do not import feature modules. Parent grouping is a display projection, not a new saved structure. Previews and downstream catalogs retain canonical record placement and links. The existing Actors & Goals component remains specialized because it edits the parent itself alongside its children.
 

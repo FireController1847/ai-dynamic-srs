@@ -17,14 +17,14 @@ CBA retains the mathematical inputs: baseline/target quantities and unit values,
 
 ## Implementation map
 
-- `src/features/planning/schema-helpers.js`: small declarative field/section helpers; no schema overlay or migration.
-- `src/features/planning/help-content.js`: human guides and section tips for CR/SR/CBA/FSA, separate from schema `ai` instructions and definitions. Guides remain available after completion; helper popovers use prose rather than a fixed three-question template.
-- `src/features/client-requirements/schema.js` and `system-request/schema.js`: complete active forms.
-- `src/features/cost-benefit-analysis/schema.js`: model settings and decision; `sections/*.js`: benefits, cost schedules and sources.
-- `src/features/feasibility-analysis/sections/*.js`: distinct feasibility questions; `schema.js`: composition and carried sources.
-- `cost-benefit-analysis/financial-evidence.js`: shared computed context for FSA and AI. `feasibility-analysis/FeasibilityViews.js` renders that context without saving copies.
-- `app/app.js`: adds financial context when copying CBA/FSA prompts. The generic prompt builder remains feature-neutral.
-- `software-requirements/phase-one/{evidence,preview-model}.js`: SRS uses the current planning fields.
+- `src/features/planning/schema-helpers.ts`: small declarative field/section helpers; no schema overlay or migration.
+- `src/features/planning/help-content.ts`: human guides and section tips for CR/SR/CBA/FSA, separate from schema `ai` instructions and definitions. Guides remain available after completion; helper popovers use prose rather than a fixed three-question template.
+- `src/features/client-requirements/schema.ts` and `system-request/schema.ts`: complete active forms.
+- `src/features/cost-benefit-analysis/schema.ts`: model settings and decision; `sections/*.ts`: benefits, cost schedules and sources.
+- `src/features/feasibility-analysis/sections/*.ts`: distinct feasibility questions; `schema.ts`: composition and carried sources.
+- `cost-benefit-analysis/financial-evidence.ts`: shared computed context for FSA and AI. `feasibility-analysis/FeasibilityViews.ts` renders that context without saving copies.
+- `app/app.ts`: adds financial context when copying CBA/FSA prompts. The generic prompt builder remains feature-neutral.
+- `software-requirements/phase-one/{evidence,preview-model}.ts`: SRS uses the current planning fields.
 
 All cited records retain stable IDs. Removing a financial item retires it; calculations and previews exclude retired records. Financial preview IDs use record IDs rather than filtered row positions. Source selection uses names but saves exact CBA-SRC IDs. Neither selecting a source nor calculating a number establishes that the estimate is confirmed.
 

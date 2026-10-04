@@ -22,10 +22,10 @@ The supplied template is an academic adaptation of an older IEEE outline. The ap
 
 ## Changes from this review
 
-- `requirement-fields.js` owns the common statement, source, acceptance, verification, priority, status, and question fields for all three requirement kinds. Kind/ID/filter ownership stays in `requirement-records.js`.
-- `issue-follow-up.js` adds affected IDs, resolution phase, next action, and resolution evidence/authority to existing `records.evidenceIssues`. The existing owner, resolution, status, IDs, and old answers remain intact. Both the explicit Phase 1 preview and later placed previews show the additions.
-- `follow-through-review.js` exposes outstanding issues and earlier discovery, behavior, diagram, and requirement questions. It never creates issues, answers questions, or changes a status. Questions must be answered at their source or linked to the canonical issue, not copied into a second backlog. Linking routes a question; it does not prove that the answer covers every clause of the original prose.
-- `record-review.js` supplies shared SRS/figure reference checks, including previously missed goal, perspective, term, relationship, and figure IDs. External evidence locators remain valid prose; this helper only checks embedded SRS/FIG references.
+- `requirement-fields.ts` owns the common statement, source, acceptance, verification, priority, status, and question fields for all three requirement kinds. Kind/ID/filter ownership stays in `requirement-records.ts`.
+- `issue-follow-up.ts` adds affected IDs, resolution phase, next action, and resolution evidence/authority to existing `records.evidenceIssues`. The existing owner, resolution, status, IDs, and old answers remain intact. Both the explicit Phase 1 preview and later placed previews show the additions.
+- `follow-through-review.ts` exposes outstanding issues and earlier discovery, behavior, diagram, and requirement questions. It never creates issues, answers questions, or changes a status. Questions must be answered at their source or linked to the canonical issue, not copied into a second backlog. Linking routes a question; it does not prove that the answer covers every clause of the original prose.
+- `record-review.ts` supplies shared SRS/figure reference checks, including previously missed goal, perspective, term, relationship, and figure IDs. External evidence locators remain valid prose; this helper only checks embedded SRS/FIG references.
 - Phase 4 carries the Phase 3 consistency findings and ID catalogs forward. Its evidence context includes the discovery handoff, carried casual questions, detailed descriptions, and diagram metadata. The candidate catalog is not repeated in discovery evidence when the shared catalog already carries it.
 - Detailed descriptions carry casual questions read-only and provide `workflowEvidenceNotes`. A use-case map is not accepted as activity-workflow evidence. A supported walkthrough explanation is allowed; the check does not require invented diagrams.
 - Functional checks now include verification method and source-path alignment. Phase 4 also checks interface contracts/failure behavior, constraint evidence, unvalidated dependencies, and contradictory category outcomes.
@@ -44,7 +44,7 @@ Free-text reviews cannot be exhaustively interpreted by structural checks. A hum
 
 ## Phase 5 implementation entry points
 
-Start with `workflow/phases.js`, this guide, `srs-construction-workflow.md`, and the specific model stage. Do not scan every feature schema.
+Start with `workflow/phases.ts`, this guide, `srs-construction-workflow.md`, and the specific model stage. Do not scan every feature schema.
 
 | Stage | Read existing evidence | Return discoveries to |
 |---|---|---|
@@ -65,7 +65,7 @@ Extend the one artifact registry with explicit groups and schema filters. Keep p
 
 ## Phase 7 assembly contract
 
-- Assemble by `document-outline.js` destinations, never workflow numbering.
+- Assemble by `document-outline.ts` destinations, never workflow numbering.
 - Partial previews repeat context on purpose. Do not concatenate them: select each canonical record/field once for its intended final destination. In particular, consolidate the issue register, requirement register, and shared preconditions/guarantees rather than duplicating phase snapshots.
 - Define explicit final inclusion rules for reviewed/draft/deferred/rejected content; do not inherit partial-preview visibility as approval. Retain exclusions and dispositions in saved data and document their audit trail as appropriate.
 - Resolve figure/reference labels and numbering from stable IDs; verify captions, readable diagrams, selected DrawIO pages, and offline rendering. Diagram metadata alone cannot certify visual content.

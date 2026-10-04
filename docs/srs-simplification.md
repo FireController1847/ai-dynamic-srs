@@ -6,16 +6,16 @@ This supersedes the earlier form-depth, review-questionnaire, AI-handoff and com
 
 | Concern | Owner |
 |---|---|
-| Active authoring fields, essentials and legacy qualifications | `src/features/software-requirements/simplification/field-policy.js` |
-| Stage composition, short forms, category applicability, optional controls | `simplification/stages.js` |
-| Name-based record links | `simplification/references.js`, generic `components/fields/RecordLinksField.js` |
-| Interview prerequisites | `simplification/evidence.js` |
-| Each tab's finish line | `workflow/prompt-tasks.js` |
-| Human tab guides and section tips | `simplification/help-content.js` |
-| AI interview definitions | `workflow/prompt-definitions.js` |
-| Shared questions | `simplification/SupportingWork.js` |
-| Phase 1 explicit preview reduction | `simplification/preview.js` |
-| Guidance/field prompt separation | `core/ai/prompt-builder.js`, `prompt-contract.js`, `evidence-context.js` |
+| Active authoring fields, essentials and legacy qualifications | `src/features/software-requirements/simplification/field-policy.ts` |
+| Stage composition, short forms, category applicability, optional controls | `simplification/stages.ts` |
+| Name-based record links | `simplification/references.ts`, generic `components/fields/RecordLinksField.ts` |
+| Interview prerequisites | `simplification/evidence.ts` |
+| Each tab's finish line | `workflow/prompt-tasks.ts` |
+| Human tab guides and section tips | `simplification/help-content.ts` |
+| AI interview definitions | `workflow/prompt-definitions.ts` |
+| Shared questions | `simplification/SupportingWork.ts` |
+| Phase 1 explicit preview reduction | `simplification/preview.ts` |
+| Guidance/field prompt separation | `core/ai/prompt-builder.ts`, `prompt-contract.ts`, `evidence-context.ts` |
 
 Paths in the table without `src/` are relative to `src/features/software-requirements/`, except the explicitly named core/components/app paths, which are relative to `src/`.
 
@@ -70,6 +70,6 @@ Optional inputs show their title once in the disclosure summary. The inner input
 9. Expand optional fields: the title should appear once, while the control retains an accessible label. Try a fresh workspace: no recovery archive, no phantom canonical records, no repeated-use-case catalog, and no approval inferred from defaults.
 10. Open the human guide on all 16 implemented stages, including completed tabs. Inspect section tips and the quality/interface applicability tips by mouse and keyboard: meaningful prose, no empty sections or undefined values. Copy the separate AI interview and section prompts; confirm their instructions, definitions, exact references and saved context remain present without copying the on-page help.
 
-Category/overview contradictions are surfaced by `simplification/authoring-findings.js`; these are specific findings, not a replacement checklist of optional fields.
+Category/overview contradictions are surfaced by `simplification/authoring-findings.ts`; these are specific findings, not a replacement checklist of optional fields.
 
 No builds, tests, browser checks or automated verification were run for this refactor, per the user's instruction. Existing automated tests that encode the former questionnaire/one-third-completion contracts will require revision before being treated as release validation.

@@ -4,8 +4,8 @@
 
 The SRS workspace has two deliberately separate structures:
 
-1. `features/software-requirements/workflow/phases.js` defines the order in which an analyst builds and checks the specification.
-2. `features/software-requirements/document-outline.js` defines the order in which accepted results appear in the finished document.
+1. `features/software-requirements/workflow/phases.ts` defines the order in which an analyst builds and checks the specification.
+2. `features/software-requirements/document-outline.ts` defines the order in which accepted results appear in the finished document.
 
 Workflow order must never be used as finished-document numbering. A workflow stage can contribute to more than one document section through `documentTargets`, and several stages can refine the same target.
 
@@ -45,10 +45,10 @@ All paths here are under `src/features/software-requirements/` unless otherwise 
 | Concern | Owner |
 |---|---|
 | Questions, help, completion flags, AI guidance | Matching stage schema in `phase-one/` |
-| Source sections available to each stage | `phase-one/evidence.js` |
-| Form answers and source records placed into preview sections | `phase-one/preview-model.js` |
-| Numbering, source lookup, populated-record filtering, scope disposition helpers | `phase-one/preview-support.js` |
-| Partial-document metadata and renderer props | `phase-one/BaselineStagePreview.js` |
+| Source sections available to each stage | `phase-one/evidence.ts` |
+| Form answers and source records placed into preview sections | `phase-one/preview-model.ts` |
+| Numbering, source lookup, populated-record filtering, scope disposition helpers | `phase-one/preview-support.ts` |
+| Partial-document metadata and renderer props | `phase-one/BaselineStagePreview.ts` |
 
 The preview uses its own explicit field mapping; adding a form field does **not** automatically add it to the preview. Every substantive SRS answer must appear in its stage preview unless the form explicitly identifies it as workflow-only. Keep user wording intact. Include review notes, decision authorities, and populated evidence issues (including resolved issues and their resolutions). Filter untouched or retired records, not incomplete authored records. Prior-document references may remain concise.
 
@@ -63,7 +63,7 @@ Stage scalar answers live in the nested stage `dataModel`; shared collections li
 
 ## Phase 2 implementation and handoff
 
-Phase 2 is implemented under `phase-two/`: `stakeholder-perspectives.js`, `actors-goals.js`, and `candidate-processes.js`. It follows Chapter 4's sequence: review the subject boundary, identify external roles and goals, identify major processes, then check coverage and sizing. The template's user classes and Sunland's role/outcome descriptions inform the level of detail; their project-specific facts are examples, not defaults.
+Phase 2 is implemented under `phase-two/`: `stakeholder-perspectives.ts`, `actors-goals.ts`, and `candidate-processes.ts`. It follows Chapter 4's sequence: review the subject boundary, identify external roles and goals, identify major processes, then check coverage and sizing. The template's user classes and Sunland's role/outcome descriptions inform the level of detail; their project-specific facts are examples, not defaults.
 
 | Stage | Canonical records | Document placement |
 |---|---|---|
@@ -73,17 +73,17 @@ Phase 2 is implemented under `phase-two/`: `stakeholder-perspectives.js`, `actor
 
 Collections are under `softwareRequirementsSpecification`; scalar reviews remain in the existing `actorGoalDiscovery` stage states. Normalization supplies the new collections without dropping undeclared saved keys. Phase 3 must enrich `records.useCases` and retain its IDs, not copy candidates into a second catalog. Deferred/excluded records retain their disposition; removal retires records through the existing stable-ID behavior.
 
-Phase 2 uses the generic `components/forms/EvidenceForm.js` (also re-exported as the Phase 1 form) and `components/preview/PlacedStagePreview.js`. Each section declares `documentTarget`, optional `documentSubsection`, and optional `previewTitle`. `core/schema/placed-preview.js` carries every field into a temporary preview model and filters only untouched/retired records. No second field whitelist is needed. Existing Phase 1 explicit previews remain separate.
+Phase 2 uses the generic `components/forms/EvidenceForm.ts` (also re-exported as the Phase 1 form) and `components/preview/PlacedStagePreview.ts`. Each section declares `documentTarget`, optional `documentSubsection`, and optional `previewTitle`. `core/schema/placed-preview.ts` carries every field into a temporary preview model and filters only untouched/retired records. No second field whitelist is needed. Existing Phase 1 explicit previews remain separate.
 
-Actor selectors use declarative `field.reference` descriptors (`dataPath`, `displayId`, `labelField`). They save an ID, show its current label, and retain unavailable references until corrected. Multi-record references remain comma-separated IDs. `DiscoveryStageForm.js` provides a compact ID index and advisory checks from `discovery-review.js`: missing/retired links, unrepresented interacting perspectives, actor/goal mismatches, unresolved scope, and uncovered in-scope goals. These checks do not modify data, certify approval, or affect the existing one-third array completion rule.
+Actor selectors use declarative `field.reference` descriptors (`dataPath`, `displayId`, `labelField`). They save an ID, show its current label, and retain unavailable references until corrected. Multi-record references remain comma-separated IDs. `DiscoveryStageForm.ts` provides a compact ID index and advisory checks from `discovery-review.ts`: missing/retired links, unrepresented interacting perspectives, actor/goal mismatches, unresolved scope, and uncovered in-scope goals. These checks do not modify data, certify approval, or affect the existing one-third array completion rule.
 
-`phase-two/evidence.js` supplies both source navigation and clipboard evidence. Phase 2 opts into generic `ai.includeSiblingContext`, so section prompts receive populated neighboring records (e.g. actors when completing goals). The interview already includes the whole stage. The UI evidence collapse state never limits clipboard context.
+`phase-two/evidence.ts` supplies both source navigation and clipboard evidence. Phase 2 opts into generic `ai.includeSiblingContext`, so section prompts receive populated neighboring records (e.g. actors when completing goals). The interview already includes the whole stage. The UI evidence collapse state never limits clipboard context.
 
 Phase 2 records review findings and links; it does not silently approve scope changes.
 
 ### Actors & Goals editing
 
-`phase-two/ActorsGoalsForm.js` is the specialized form for this tab only. It renders each actor with its goals underneath; `ActorGoalEditor.js` renders goal answers and an optional move-to-actor control. Generic components remain feature-neutral, and other tabs retain their existing forms.
+`phase-two/ActorsGoalsForm.ts` is the specialized form for this tab only. It renders each actor with its goals underneath; `ActorGoalEditor.ts` renders goal answers and an optional move-to-actor control. Generic components remain feature-neutral, and other tabs retain their existing forms.
 
 The form writes directly to `records.actors` and `records.goals`. Adding a goal assigns its parent actor's stable display ID to `goal.actorId`; renaming the actor does not alter that link. Goals remain canonical records with their own stable IDs, so later use-case references, normalization, and document placement continue to use the existing catalogs. No nested saved goal copies or format migration are introduced.
 
@@ -105,7 +105,7 @@ Manual verification (not run):
 
 ## Phase 3 implementation and handoff
 
-`phase-three/stages.js` registers all six stages in the existing workflow order. `shared.js` builds declarative section descriptors; generic components own rendering and state interaction. The scope is guided by Chapter 4's use-case/activity modeling sequence, the Sunland casual/detailed descriptions, and the course template's requirement for labeled diagrams within the document.
+`phase-three/stages.ts` registers all six stages in the existing workflow order. `shared.ts` builds declarative section descriptors; generic components own rendering and state interaction. The scope is guided by Chapter 4's use-case/activity modeling sequence, the Sunland casual/detailed descriptions, and the course template's requirement for labeled diagrams within the document.
 
 | Stage | Shared content | Document placement |
 |---|---|---|
@@ -120,13 +120,13 @@ Catalog edits remain visible in Phase 2. Description stages cannot add or remove
 
 Figures use one `FIG-0001` sequence across the two diagram stages. Each artifact stores the file once in its `file` field, plus title, caption, covered IDs, and review findings. Batch uploads accept DrawIO/XML and PNG/JPEG; replacement preserves the record ID, and retirement preserves the payload and ID. Existing limits remain 2 MB per file and 3 MB across the shared register (including retired files). The official online diagrams.net viewer renders XML. Multi-page DrawIO files print the currently selected preview page; use separate figures when every page must be included. Printing waits for media and copies the rendered SVG rather than the interactive viewer/source XML.
 
-`behavior-review.js` checks recorded links, include/specialization cycles, missing stories/flows, figure references, and use-case/requirement coverage. It does not read meaning from a diagram or certify semantic correctness. `evidence.js` provides prior-stage context; file metadata is summarized centrally and binary/XML contents are excluded from prompts.
+`behavior-review.ts` checks recorded links, include/specialization cycles, missing stories/flows, figure references, and use-case/requirement coverage. It does not read meaning from a diagram or certify semantic correctness. `evidence.ts` provides prior-stage context; file metadata is summarized centrally and binary/XML contents are excluded from prompts.
 
 Phase 4 must extend the shared records and traceability rather than copy these catalogs. Full SRS assembly remains Phase 7. The original Phase 3 implementation left runtime/browser/print verification to the user. Current handoff checks and remaining-phase contracts are documented in `srs-phase-three-four-review.md`.
 
 ## Phase 4 implementation and handoff
 
-`phase-four/stages.js` implements all four existing stage IDs/state keys. `context.js` owns operating conditions and assumption/dependency follow-through; `attributes.js` owns the course's four quality categories; `interfaces.js` follows the template's four external interface categories. Chapter 3 supplies quality classification, Chapter 10 supplies use-case-driven navigation/input/output thinking, and Sunland illustrates role-specific access and availability expectations—not default requirements, thresholds, technologies, or legal applicability.
+`phase-four/stages.ts` implements all four existing stage IDs/state keys. `context.ts` owns operating conditions and assumption/dependency follow-through; `attributes.ts` owns the course's four quality categories; `interfaces.ts` follows the template's four external interface categories. Chapter 3 supplies quality classification, Chapter 10 supplies use-case-driven navigation/input/output thinking, and Sunland illustrates role-specific access and availability expectations—not default requirements, thresholds, technologies, or legal applicability.
 
 | Stage | Shared content | Document placement |
 |---|---|---|
@@ -137,7 +137,7 @@ Phase 4 must extend the shared records and traceability rather than copy these c
 
 ### One requirement register
 
-`requirement-records.js` owns kind fields, ID namespaces, and filter descriptors. `records.requirements` uses one numeric ID sequence across Functional (`SRS-FR-*`), Quality (`SRS-QR-*`), and Interface (`SRS-IR-*`) records. Gaps within a namespace are expected. Kind and `specificationGroup` are internal immutable classification fields; no UI operation silently changes a record's published prefix. Never format every record as an FR or treat all records as behavioral requirements.
+`requirement-records.ts` owns kind fields, ID namespaces, and filter descriptors. `records.requirements` uses one numeric ID sequence across Functional (`SRS-FR-*`), Quality (`SRS-QR-*`), and Interface (`SRS-IR-*`) records. Gaps within a namespace are expected. Kind and `specificationGroup` are internal immutable classification fields; no UI operation silently changes a record's published prefix. Never format every record as an FR or treat all records as behavioral requirements.
 
 Phase 3 normalization runs first and supplies `requirementKind: Functional` to legacy requirements while preserving explicitly classified records and existing numeric IDs. Its form, preview, prompts, completion, and coverage review all use the Functional filter. It now uses `completionMinimum: 1` instead of creating an initial blank requirement, avoiding phantom rows in a shared filtered collection. Phase 4 creates a record only through the appropriate category form; normalization preserves its explicit kind/group and undeclared fields. No separate quality or interface catalogs or phase-local requirement copies exist.
 
@@ -147,15 +147,15 @@ All requirement kinds share statement, source/use-case references, rationale, pr
 
 Constraints and assumptions keep their SRS-SCP IDs and editable source fields. Constraints add affected IDs and compliance evidence. Assumptions add dependency classification/provider, affected IDs, validation plan/state/evidence, and failure impact. A confirmed scope decision is distinct from a validated factual assumption. Later changes remain visible in Scope Baseline. Invalidated assumptions and superseded decisions stay stored. Phase 1's explicit preview still displays its original scope decision fields; Phase 4's placed previews include these new substantive details.
 
-`evidence.js` supplies collapsed source references/navigation and clipboard context from the baseline, actors/goals, catalog, detailed behavior, functional requirements, feasibility findings, and preceding Phase 4 stages. Category review outcomes are included even when no requirement was added. `QualityStageForm.js` combines generic EvidenceForm/RecordReviewPanel; `quality-review.js` gives advisory ID, acceptance, agreement, and validation-gap checks, never automatic approval or completion changes. Schema-based previews represent all authored stage fields under the finished-document outline, not workflow numbering.
+`evidence.ts` supplies collapsed source references/navigation and clipboard context from the baseline, actors/goals, catalog, detailed behavior, functional requirements, feasibility findings, and preceding Phase 4 stages. Category review outcomes are included even when no requirement was added. `QualityStageForm.ts` combines generic EvidenceForm/RecordReviewPanel; `quality-review.ts` gives advisory ID, acceptance, agreement, and validation-gap checks, never automatic approval or completion changes. Schema-based previews represent all authored stage fields under the finished-document outline, not workflow numbering.
 
 Phase 5 should use these same requirements, scope decisions, actors, cases, issues, and artifact records when models reveal omissions. DrawIO upload/preview remains available in Phase 3; interface mockups and additional model uploads belong to Phase 5, not this implementation. The original implementation left verification to the user; the maintenance review adds focused regression checks (see `srs-phase-three-four-review.md`). Final assembly/print validation is still a later-phase responsibility.
 
 ## Cross-phase follow-through
 
-`issue-follow-up.js` supplies additive fields on the shared issue register. `follow-through-review.js` keeps unresolved questions visible, checks ownership/actions/resolution phase and closure evidence, and is consumed by both Phase 3 and Phase 4. Phase 4 also carries Phase 3 consistency findings forward. `record-review.js` owns common SRS/figure reference checks; `requirement-fields.js` owns the common requirement answer contract.
+`issue-follow-up.ts` supplies additive fields on the shared issue register. `follow-through-review.ts` keeps unresolved questions visible, checks ownership/actions/resolution phase and closure evidence, and is consumed by both Phase 3 and Phase 4. Phase 4 also carries Phase 3 consistency findings forward. `record-review.ts` owns common SRS/figure reference checks; `requirement-fields.ts` owns the common requirement answer contract.
 
-Detailed descriptions carry casual questions and offer `workflowEvidenceNotes` for justified walkthrough evidence. Phase 4 `review-outcomes.js` compares review outcomes with actual category records and assumption validation. These checks are advisory, read-only, and distinct from completion or approval.
+Detailed descriptions carry casual questions and offer `workflowEvidenceNotes` for justified walkthrough evidence. Phase 4 `review-outcomes.ts` compares review outcomes with actual category records and assumption validation. These checks are advisory, read-only, and distinct from completion or approval.
 
 For course rationale, answer lifecycle, Phase 5–7 entry points, final assembly inclusion/deduplication rules, and focused verification, read `srs-phase-three-four-review.md`.
 

@@ -125,8 +125,8 @@ Resolved shared questions and accepted exceptions are hidden from the shared que
 
 Dynamic SRS deliberately keeps its runtime simple:
 
-- `webpack.config.mjs` owns the development server, production build, generated HTML, extracted CSS and deployment base path.
-- `src/html/index.html` is the HTML template, and `src/app/app.js` is the JavaScript bundle entry. Source remains JavaScript ES modules with plain Vue components.
+- `webpack.config.mts` owns the development server, production build, generated HTML, extracted CSS and deployment base path.
+- `src/html/index.html` is the HTML template, and `src/app/app.ts` is the JavaScript bundle entry. Source uses strict TypeScript ES modules with plain Vue components.
 - Vue, Bootstrap and Paged.js are pinned npm dependencies. Vue includes the template compiler for existing inline templates; Paged.js and supporting print styles are emitted for the separate print document.
 - Vue owns application state, forms, navigation, and previews. Bootstrap JavaScript supplies isolated tooltips and popovers.
 - Features and document schemas live under `src/features`; shared application coordination lives under `src/app`.

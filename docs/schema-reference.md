@@ -6,7 +6,7 @@ Schemas are plain objects consumed by the generic form, prompt, completion, stat
 
 Common keys include `id`, `stateKey`, `code`, `label`, `title`, `description`, `form`, `guide`, `ai`, `document`, `sections`, and `subpages`.
 
-Specialized pages may name `formComponent`, `summaryComponent`, or `previewComponent`. The corresponding component must be registered in `features/feature-registry.js`.
+Specialized pages may name `formComponent`, `summaryComponent`, or `previewComponent`. The corresponding component must be registered in `features/feature-registry.ts`.
 
 `stateDefaults` may define shared page-level records that do not belong to one navigation leaf. Defaults are merged recursively during workspace normalization.
 
@@ -61,9 +61,9 @@ Sections using `PlacedStagePreview` declare `documentTarget` and optional `docum
 
 ## AI tab and reference contracts
 
-`core/ai/prompt-contract.js` supplies brief field-update and strict reference rules to section prompts. `prompt-builder.js` uses the tab's `ai.task`, `ai.definitions`, existing answers and schema-specific AI guidance. Interviews ask for consequential gaps and finish with an inventory and handoff to section prompts. Field prompts then supply exact references and usable updates. Omitted fields mean unchanged, not deleted. Optional empty findings require no prose. Human guide and tooltip content is not prompt input.
+`core/ai/prompt-contract.ts` supplies brief field-update and strict reference rules to section prompts. `prompt-builder.ts` uses the tab's `ai.task`, `ai.definitions`, existing answers and schema-specific AI guidance. Interviews ask for consequential gaps and finish with an inventory and handoff to section prompts. Field prompts then supply exact references and usable updates. Omitted fields mean unchanged, not deleted. Optional empty findings require no prose. Human guide and tooltip content is not prompt input.
 
-- `page.ai.task`: the current tab's concrete deliverable and boundary. SRS task descriptions live in `features/software-requirements/workflow/prompt-tasks.js` and are attached in `workflow/phases.js`. Other feature tabs use their description, guide, and existing AI guidance.
+- `page.ai.task`: the current tab's concrete deliverable and boundary. SRS task descriptions live in `features/software-requirements/workflow/prompt-tasks.ts` and are attached in `workflow/phases.ts`. Other feature tabs use their description, guide, and existing AI guidance.
 - `section.ai.draftingGuidance`: optional section-specific expected output, taking precedence over general help expectations in the prompt.
 - `field.reference`: existing live selector descriptor. Copied prompts enumerate its currently available IDs and labels, while requiring a single ID as the answer. Unavailable saved links are not added to that list.
 - `field.referenceFormat`: `ids` (comma-separated exact IDs), `source-locators` (exact source IDs or supplied external document/section/date locators), or `paths` (existing use-case ID and recorded path/step). The prompt builder recognizes existing `*References` fields as a compatibility fallback; declare the format explicitly for new fields with different names or semantics.
@@ -77,7 +77,7 @@ Manual review: copy a tab prompt and a section prompt; confirm their different s
 
 ### Guided interview orientation
 
-`core/ai/interview-orientation.js` guides a natural opening: two or three sentences weaving together purpose, essential definitions, and the work ahead, followed by a useful question. These are internal cues, not response headings. Topic changes receive a short explanation only when needed. Ask about concrete work before recommending technical classifications. Final field updates and section-completion prompts retain the concise output contract.
+`core/ai/interview-orientation.ts` guides a natural opening: two or three sentences weaving together purpose, essential definitions, and the work ahead, followed by a useful question. These are internal cues, not response headings. Topic changes receive a short explanation only when needed. Ask about concrete work before recommending technical classifications. Final field updates and section-completion prompts retain the concise output contract.
 
 Use `page.ai.orientation.focus` for a tailored starting cue and optional `example` for an illustration used only when helpful. Definitions come from `ai.definitions`, falling back to `orientation.what` when no definitions are supplied. The earlier `orientation.plan` is no longer copied: the tab task and domain guidance already describe the work. Actors & Goals supplies an explicit actor/goal explanation, boundary check, and hypothetical example. Examples must never become assumed project facts. New tabs can reuse the generic orientation and their own AI metadata without duplicating the interview rules.
 
@@ -129,12 +129,12 @@ Optional field disclosure summaries provide the visible title; their inner contr
 
 Document metadata date fields declare `dateDocument` with their owning top-level state key. An empty manual value displays that document’s `_lastModified` date in local time; entering a date or selecting **Today** stores an override. **Auto** clears the override. Other date fields (such as evidence dates) offer Today but do not assume the document date.
 
-`app/document-date-tracker.js` stamps changed document content and carried shared sections, excluding its own timestamps. A feature may declare `dateDependencies` for other documents whose calculated content it displays (FSA depends on CBA). Opening a workspace retains its saved timestamps; missing timestamps start from the workspace’s saved modification time. Navigation and downloads do not themselves change dates.
+`app/document-date-tracker.ts` stamps changed document content and carried shared sections, excluding its own timestamps. A feature may declare `dateDependencies` for other documents whose calculated content it displays (FSA depends on CBA). Opening a workspace retains its saved timestamps; missing timestamps start from the workspace’s saved modification time. Navigation and downloads do not themselves change dates.
 
 Manual verification: edit SR and confirm its automatic date; enter an older manual date and edit again; try Today and Auto; save/reopen; inspect CBA/FSA Analysis Date and EB/SRS preview dates. Source dates should remain blank until supplied.
 
 ### Basic narrative Markdown
 
-Textarea fields accept plain-text Markdown: paragraphs, line breaks, bullet/numbered lists (including indented lists), bold, italics, inline code and HTTP(S)/mailto links. Generic document previews and CBA narrative output render it, including print/PDF. Raw HTML is escaped. Dates, numbers, choices and reference inputs do not use Markdown; `markdown: false` opts a textarea out. No stored-data conversion or rich clipboard handling is involved. The small renderer lives in `core/formatting/markdown.js`; shared output uses `components/preview/MarkdownText.js` and `styles/markdown.css`.
+Textarea fields accept plain-text Markdown: paragraphs, line breaks, bullet/numbered lists (including indented lists), bold, italics, inline code and HTTP(S)/mailto links. Generic document previews and CBA narrative output render it, including print/PDF. Raw HTML is escaped. Dates, numbers, choices and reference inputs do not use Markdown; `markdown: false` opts a textarea out. No stored-data conversion or rich clipboard handling is involved. The small renderer lives in `core/formatting/markdown.ts`; shared output uses `components/preview/MarkdownText.ts` and `styles/markdown.css`.
 
 Manual check: enter paragraphs and nested bullets in CR Excluded or deferred; inspect preview and print/PDF, save/reopen, and try literal HTML text. Also inspect repeated narrative entries and CBA notes. No automated checks run.
