@@ -12,12 +12,19 @@ export interface DiagramEvidenceSource {
   /** Include records linked from the already selected source records. */
   linkedFrom?: { source: string; fields: string[]; requireAll?: boolean };
 }
+export interface DiagramBatchMetadataField {
+  field: string;
+  required?: boolean;
+  source?: string;
+  nodeKind?: string;
+}
 export interface DiagramConfig {
   type: string;
   sources: DiagramEvidenceSource[];
   scope?: { source: string; field: string };
   recordFields?: string[];
   labels?: { id: string; paths: DataPath[]; fallback: string }[];
+  batch?: { metadata: DiagramBatchMetadataField[] };
 }
 export interface DiagramContext { labels: Map<string, string>; prefixes: string[]; evidence: DataModel; }
 export interface DiagramBox { x: number; y: number; width: number; height: number; }
