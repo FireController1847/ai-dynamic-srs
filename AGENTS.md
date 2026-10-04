@@ -4,6 +4,8 @@ This is a Vue 3 application using strict TypeScript ES modules and webpack. Inst
 
 Before changing code, use `docs/change-routing.md` to identify the smallest relevant file set. Do not scan every schema for a feature-local request.
 
+The canonical application semantic version lives in `src/core/application-version.ts`. Read `docs/app-version.md` whenever a change alters supported functionality, saved-data compatibility, or user-visible presentation, and apply the required version bump in the same change. While the application remains unfinished, retain the `-alpha` prerelease suffix unless the user explicitly promotes it. Documentation-only changes, internal refactors, TypeScript/build/deployment work, and other behavior-preserving infrastructure changes do not bump the application version by themselves. Workspace `FORMAT_VERSION` is independent and must be evaluated separately when the `.dsrs` file contract changes.
+
 For SRS work, consult `docs/srs-construction-workflow.md` for the state and preview contracts. Phase 1 previews have explicit mappings separate from form schemas; keep substantive form answers represented when editing either side. Other guides are on-demand references, not required reading for every change.
 
 Phase 2 uses schema-based preview placement and shared perspective, actor, goal, and use-case records. Extend those records in later phases instead of creating duplicate catalogs; see the workflow guide for exact paths.

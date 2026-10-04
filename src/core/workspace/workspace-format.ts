@@ -1,8 +1,8 @@
+import { APPLICATION_VERSION } from '../application-version.ts';
 import type { SnapshotInput, WorkspaceSnapshot } from './workspace-types.ts';
 export const FORMAT_NAME = "dynamic-srs-workspace";
 export const FORMAT_VERSION = 2;
 export const APPLICATION_NAME = "Dynamic SRS Builder";
-export const APPLICATION_VERSION = "0.3.0";
 
 export function createWorkspaceSnapshot({
   activePage,

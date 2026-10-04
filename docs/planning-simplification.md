@@ -1,4 +1,4 @@
-# Planning documents — 0.3.0
+# Planning documents — 0.3.0-alpha
 
 CR, SR, CBA and FSA are authored as concise documents. There is no compatibility transform, archive, migration, or alternate legacy schema. Keep each fact in the document where it originates and reuse it downstream.
 
@@ -30,7 +30,7 @@ All cited records retain stable IDs. Removing a financial item retires it; calcu
 
 The shared interview asks only missing decisions, ends with a numbered inventory and counts, then hands off to field prompts. Optional detail uses a disclosure rather than a second required essay. Completion percentages, bars and completed-tab indicators are available alongside the AI guidance button. Progress uses the current scalar completion flags and declared record completion fields; optional detail, hidden metadata and read-only context do not block completion. Document previews omit empty optional fields.
 
-Application version is 0.3.0. Workspace format remains 2; it is an independent file-format version.
+Application version is 0.3.0-alpha. Workspace format remains 2; it is an independent file-format version.
 
 ## Manual handoff — not run
 

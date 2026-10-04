@@ -16,6 +16,12 @@ Generated HTML and bundled CSS/JavaScript
     → core/workspace/* and core/printing/*
 ```
 
+## Application version
+
+`src/core/application-version.ts` owns the single canonical application semantic version. The root Vue app exposes it to the HTML shell, which renders a fixed, noninteractive `vMAJOR.MINOR.PATCH-prerelease` label in the bottom-right corner. `core/workspace/workspace-format.ts` imports the same constant when stamping newly saved workspace metadata, so display and saved application metadata cannot drift.
+
+The application semantic version is release metadata and is independent of the `.dsrs` workspace `FORMAT_VERSION` and npm package metadata. See [app-version.md](app-version.md) for the bump policy and history-derived alpha baseline.
+
 ## Bundled and print assets
 
 Runtime dependencies come from npm and are pinned in `package.json` and `package-lock.json`. The previous checked-in `lib/` copies and `server.mjs` have been removed. The subsequent TypeScript migration retained the same runtime architecture and plain Vue component model while converting application and build source to strict TypeScript.
@@ -51,6 +57,7 @@ app ───────────────────────→ cor
 ## Directory responsibilities
 
 - `src/app`: root Vue state and browser workflow coordination.
+- `src/core/application-version.ts`: canonical application semantic version.
 - `src/core/ai`: schema-driven Markdown prompt generation.
 - `src/core/bootstrap`: narrow adapters around Bootstrap JavaScript.
 - `src/core/formatting`: shared display formatting.

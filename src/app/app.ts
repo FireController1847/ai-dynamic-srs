@@ -1,5 +1,6 @@
 import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../core/schema/schema-types.ts';
 import type { DataModel, DocumentModel, SchemaNode, CopyRequest, NavigationRequest, PrintRequest } from '../core/schema/schema-types.ts';
+import { APPLICATION_VERSION } from "../core/application-version.ts";
 import { errorMessage } from "../core/formatting/errors.ts";
 import { createApp } from "vue";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -63,6 +64,7 @@ const app = createApp({
     const sections = createDocumentState(pages);
     documentDates.reset(sections);
     return {
+      applicationVersion: APPLICATION_VERSION,
       activePage: defaultPageId,
       activeSubpages: {} as Record<string, string>,
       pages,

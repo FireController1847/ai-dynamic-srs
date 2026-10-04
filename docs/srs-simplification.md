@@ -1,4 +1,4 @@
-# SRS authoring 0.3.0
+# SRS authoring 0.3.0-alpha
 
 This supersedes the earlier form-depth, review-questionnaire, AI-handoff and completion contracts in `srs-construction-workflow.md` and `srs-phase-three-four-review.md`. The course template's brief scope, feature list, user characteristics, role/outcome descriptions and progressively detailed use cases set the normal depth. A useful SRS does not require a separate explanation of every classification or a repeated declaration that nothing was found.
 
@@ -53,7 +53,7 @@ The handoff gives numbered items and counts, including child counts. It directs 
 
 ## Saved workspaces
 
-Application version remains 0.3.0 and new saves use workspace envelope version 2. Imports and local storage validate the envelope and normalize current fields; there is no version migration, answer conversion, archive creation, recovery UI or legacy navigation remapping. Accepted older envelopes are read as supplied. Undeclared saved values are preserved without rewriting or deleting them, including data previously produced by migration.
+Application version is 0.3.0-alpha and new saves use workspace envelope version 2. Imports and local storage validate the envelope and normalize current fields; there is no version migration, answer conversion, archive creation, recovery UI or legacy navigation remapping. Accepted older envelopes are read as supplied. Undeclared saved values are preserved without rewriting or deleting them, including data previously produced by migration.
 
 Optional inputs show their title once in the disclosure summary. The inner input retains a visually hidden label for accessibility.
 

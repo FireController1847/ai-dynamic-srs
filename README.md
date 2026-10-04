@@ -113,7 +113,7 @@ Dynamic SRS autosaves the current workspace locally in the browser and restores 
 
 The header includes **New WIP**, **Import WIP**, and **Download WIP** controls. Downloading produces a gzip-compressed `.dsrs` file containing the workspace answers and uploaded diagrams. Importing replaces the active workspace; download a backup first when you want to keep the current work separately.
 
-The current application version is **0.3.0**, and new workspace files use **format version 2**. Imported data passes through validation and schema normalization. Undeclared saved values are preserved without rewriting their meaning.
+The current application version is **0.3.0-alpha**, and new workspace files use **format version 2**. Imported data passes through validation and schema normalization. Undeclared saved values are preserved without rewriting their meaning.
 
 If the browser's site data is cleared without a downloaded backup, locally saved project content may be lost. Workspace downloads are excluded from Git because they can contain client answers and uploaded project material.
 

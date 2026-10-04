@@ -4,10 +4,11 @@ Read the smallest matching file set first.
 
 For CR/SR/CBA/FSA authoring, start with `docs/planning-simplification.md` and the specific feature schema or section. CBA input sections live in `features/cost-benefit-analysis/sections/`; financial prompt context lives in `financial-evidence.ts`.
 
-For SRS authoring 0.3.0, start with `docs/srs-simplification.md` and `features/software-requirements/simplification/{field-policy,stages}.ts`. These define the active reduced forms; original phase schemas retain legacy descriptors.
+For SRS authoring 0.3.0-alpha, start with `docs/srs-simplification.md` and `features/software-requirements/simplification/{field-policy,stages}.ts`. These define the active reduced forms; original phase schemas retain legacy descriptors.
 
 | Request | Primary files | Read shared code only if needed |
 |---|---|---|
+| Change application semantic version or its fixed label | `core/application-version.ts`, `src/html/index.html`, `styles/shell.css`, `docs/app-version.md` | `core/workspace/workspace-format.ts` consumes the canonical version for saved metadata; update `AGENTS.md` only when policy changes |
 | Change webpack, npm scripts, deployment base, or emitted assets | `webpack.config.mts`, `package.json`, `package-lock.json`, `src/html/index.html` | `src/app/app.ts` for CSS/runtime imports; `core/printing/print-document.ts` for copied iframe assets; `docs/architecture.md` |
 | Add, remove, or rename a field | Relevant `src/features/*/schema.ts` or feasibility section | `core/schema/state-factory.ts` |
 | Add a new page/feature | New `src/features/<feature>` and `features/feature-registry.ts` | Generic components if existing field types are insufficient |
