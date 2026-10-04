@@ -4,6 +4,7 @@ import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../../core/schema/schema-types.ts';
 
 type GoalSection = Section & { repeatable: Repeater };
+export interface ActorChoice { referenceId: string; name: unknown; }
 import { SchemaField } from "../../../components/fields/SchemaField.ts";
 import { fieldVisible } from "../../../core/schema/field-visibility.ts";
 import { resolveReferenceField } from "../../../core/records/reference-fields.ts";
@@ -15,7 +16,7 @@ export const ActorGoalEditor = defineComponent({
   emits: ["move", "remove"],
   props: {
     goal: { type: Object as PropType<DataModel>, required: true }, section: { type: Object as PropType<GoalSection>, required: true },
-    documentModel: { type: Object as PropType<DocumentModel>, required: true }, actors: { type: Array as PropType<ParentChoice[]>, required: true },
+    documentModel: { type: Object as PropType<DocumentModel>, required: true }, actors: { type: Array as PropType<ActorChoice[]>, required: true },
     unassigned: { type: Boolean, default: false }
   },
   computed: {

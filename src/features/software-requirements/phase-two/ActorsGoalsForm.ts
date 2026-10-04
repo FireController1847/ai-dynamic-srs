@@ -1,26 +1,41 @@
-interface ActorChoice { referenceId: string; name: unknown; }
 import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../../core/schema/schema-types.ts';
 import { SupportingWork } from "../simplification/SupportingWork.ts";
-import { DynamicForm } from "../../../components/forms/FormWorkspace.ts";
+import { DynamicForm, dynamicFormProps } from "../../../components/forms/FormWorkspace.ts";
+import type { RepeatableSection } from "../../../components/forms/FormWorkspace.ts";
 import { SchemaField } from "../../../components/fields/SchemaField.ts";
 import { SectionInfo } from "../../../components/controls/FormControls.ts";
 import { WorkspaceEvidencePanel } from "../../../components/references/WorkspaceEvidencePanel.ts";
 import { createRepeaterItem } from "../../../core/schema/state-factory.ts";
+import { dataModelForSection, mutableRecords } from "../../../core/schema/data-models.ts";
+import { fieldVisible } from "../../../core/schema/field-visibility.ts";
+import { resolveReferenceField } from "../../../core/records/reference-fields.ts";
+import { sectionRecords } from "../../../core/schema/section-records.ts";
+import { buildSectionPrompt } from "../../../core/ai/prompt-builder.ts";
+import { addEvidenceContextToPrompt } from "../../../core/ai/evidence-context.ts";
 import { formatRecordDisplayId, nextNumericId, hasNonDefaultValue } from "../../../core/records/record-values.ts";
 import { ActorGoalEditor } from "./ActorGoalEditor.ts";
+import type { ActorChoice } from "./ActorGoalEditor.ts";
 
 export const ActorsGoalsForm = defineComponent({
   name: "ActorsGoalsForm",
   components: { SupportingWork, DynamicForm, SchemaField, SectionInfo, WorkspaceEvidencePanel, ActorGoalEditor },
-  props: DynamicForm.props,
+  props: dynamicFormProps,
   emits: ["copy-markdown", "navigate-workspace"],
   computed: {
-    actorSection(): Section & { repeatable: Repeater } { return this.pageSchema.sections.find(section => section.id === "actor-catalog"); },
-    goalSection(): Section & { repeatable: Repeater } { return this.pageSchema.sections.find(section => section.id === "goal-catalog"); },
-    boundaryPage(): SchemaNode { return { ...this.pageSchema, sections: this.pageSchema.sections.filter(section => !section.repeatable) }; },
+    actorSection(): RepeatableSection {
+      const section = (this.pageSchema.sections || []).find(section => section.id === "actor-catalog");
+      if (!section?.repeatable) throw new Error("Actors & Goals schema is missing the actor catalog.");
+      return section as RepeatableSection;
+    },
+    goalSection(): RepeatableSection {
+      const section = (this.pageSchema.sections || []).find(section => section.id === "goal-catalog");
+      if (!section?.repeatable) throw new Error("Actors & Goals schema is missing the goal catalog.");
+      return section as RepeatableSection;
+    },
+    boundaryPage(): SchemaNode { return { ...this.pageSchema, sections: (this.pageSchema.sections || []).filter(section => !section.repeatable) }; },
     actors(): DataModel[] { return this.itemsFor(this.actorSection); },
     goals(): DataModel[] { return this.itemsFor(this.goalSection); },
     actorChoices(): ActorChoice[] {
@@ -29,18 +44,52 @@ export const ActorsGoalsForm = defineComponent({
     },
     unassignedGoals(): DataModel[] {
       const ids = new Set(this.actors.map(actor => this.actorId(actor)));
-      return this.goals.filter(goal => !ids.has(goal.actorId) && this.goalSection.repeatable.fields
+      return this.goals.filter(goal => !ids.has(String(goal.actorId || "")) && this.goalSection.repeatable.fields
         .some(field => hasNonDefaultValue(goal[field.key], field.default)));
     },
 
   },
   methods: {
-    ...DynamicForm.methods,
-    actorId(actor: DataModel) { return formatRecordDisplayId(this.actorSection.repeatable.displayId, actor); },
-    goalsFor(actor: DataModel) { return this.goals.filter(goal => goal.actorId === this.actorId(actor)); },
+    sectionModel(section: Section): DataModel {
+      return dataModelForSection(section, this.dataModel, this.documentModel);
+    },
+    itemsFor(section: RepeatableSection): DataModel[] {
+      return sectionRecords(section.repeatable, this.sectionModel(section));
+    },
+    addItem(section: RepeatableSection) {
+      const records = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
+      records.push(createRepeaterItem(section.repeatable, nextNumericId(records)));
+    },
+    removeItem(section: RepeatableSection, item: DataModel) {
+      if (section.repeatable.stableIds) {
+        item._retired = true;
+        return;
+      }
+      const records = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
+      const index = records.indexOf(item);
+      if (index >= 0) records.splice(index, 1);
+    },
+    copyKey(section: Section): string {
+      return `${this.pageSchema.id}:${section.key}`;
+    },
+    fieldId(section: Section, field: Field, item: DataModel | null = null): string {
+      return [this.pageSchema.id, section.id, item?.id, field.key].filter(Boolean).join("-");
+    },
+    fieldsFor(section: Section, item: DataModel | null = null): Field[] {
+      const fields = section.repeatable?.fields || section.fields || [];
+      const model = item || this.sectionModel(section);
+      return fields.filter(field => !field.hidden && fieldVisible(field, model))
+        .map(field => resolveReferenceField(field, this.documentModel, model[field.key]));
+    },
+    promptFor(section: Section): string {
+      const prompt = buildSectionPrompt(this.pageSchema, section, this.dataModel, this.documentModel);
+      return addEvidenceContextToPrompt(prompt, this.pageSchema.evidence, this.documentModel, this.documentSchemas);
+    },
+    actorId(actor: DataModel): string { return formatRecordDisplayId(this.actorSection.repeatable.displayId, actor); },
+    goalsFor(actor: DataModel): DataModel[] { return this.goals.filter(goal => String(goal.actorId || "") === this.actorId(actor)); },
     addGoal(actor: DataModel) {
       if (actor.status === "Not an actor") return;
-      const records = this.sectionModel(this.goalSection).goals;
+      const records = mutableRecords(this.sectionModel(this.goalSection), this.goalSection.repeatable.dataKey);
       const empty = this.goals.find(goal => this.goalSection.repeatable.fields
         .every(field => !hasNonDefaultValue(goal[field.key], field.default)));
       if (empty) {
@@ -52,7 +101,7 @@ export const ActorsGoalsForm = defineComponent({
     moveGoal({ goal, actorId }: { goal: DataModel; actorId: string }) {
       if (this.actorChoices.some(actor => actor.referenceId === actorId)) goal.actorId = actorId;
     },
-    goalPromptSection(actor: DataModel) {
+    goalPromptSection(actor: DataModel): RepeatableSection {
       return { ...this.goalSection, key: `goals-for-${actor.id}`, title: `Goals for ${actor.name || 'unnamed actor'} (${this.actorId(actor)})`,
         description: "Add or refine goals beneath this actor. The form assigns their actor automatically.",
         ai: { draftingGuidance: "Return only this actor's goal updates. Do not output an Actor ID field; the form supplies that link. Keep goal IDs stable and let the application allocate IDs for new goals." },
