@@ -1,3 +1,5 @@
+import type { DataModel, DocumentModel, Field, SchemaNode } from "../../../core/schema/schema-types.ts";
+import type { BaselinePreviewModel } from "../simplification/preview.ts";
 import { simplifyBaselinePreview } from "../simplification/preview.ts";
 import { issueFollowUpFields } from "../issue-follow-up.ts";
 import { formatRecordDisplayId } from "../../../core/records/record-values.ts";
@@ -20,7 +22,22 @@ import {
   stageSection
 } from "./preview-support.ts";
 
-function sourceReferences(documentModel, documentSchemas) {
+function optionLabel(field: Field | undefined, value: unknown): string | undefined {
+  const option = field?.options?.find((candidate) => (
+    typeof candidate === "object" ? candidate.value === value : candidate === value
+  ));
+  if (option === undefined) return undefined;
+  return typeof option === "object" ? option.label : String(option);
+}
+
+type BaselineBuilder = (
+  stage: SchemaNode,
+  localData: DataModel,
+  documentModel: DocumentModel,
+  documentSchemas: readonly SchemaNode[]
+) => BaselinePreviewModel;
+
+function sourceReferences(documentModel: DocumentModel, documentSchemas: readonly SchemaNode[]): DataModel[] {
   return evidenceIntakeSources.map((definition, index) => {
     const { data, schema } = sourceData(documentModel, documentSchemas, definition.pageId);
     if (!schema || !sourceHasMeaningfulEvidence(definition, schema, data, documentModel)) {
@@ -42,7 +59,7 @@ function sourceReferences(documentModel, documentSchemas) {
   }).filter(Boolean);
 }
 
-function buildEvidenceIntake(stage, localData, documentModel, documentSchemas) {
+function buildEvidenceIntake(stage: SchemaNode, localData: DataModel, documentModel: DocumentModel, documentSchemas: readonly SchemaNode[]): BaselinePreviewModel {
   const issueFields = stageSection(stage, "baseline-exceptions")?.repeatable?.fields || [];
   const evidenceIssues = populatedRecords(rootRecords(documentModel).evidenceIssues, issueFields);
   const references = sourceReferences(documentModel, documentSchemas);
@@ -50,8 +67,8 @@ function buildEvidenceIntake(stage, localData, documentModel, documentSchemas) {
     ...localData,
     evidenceIssues: evidenceIssues.map((issue) => ({
       ...issue,
-      sourceTitle: issueFields.find(({ key }) => key === "sourcePageId")?.options
-        ?.find((option) => option.value === issue.sourcePageId)?.label || issue.sourcePageId
+      sourceTitle: optionLabel(issueFields.find(({ key }) => key === "sourcePageId"), issue.sourcePageId)
+        || String(issue.sourcePageId || "")
     })),
     sourceReferences: references,
     priorAnalysisDisposition: `${references.length} connected project ${references.length === 1 ? "record is" : "records are"} controlled in the workspace and cited from the SRS reference baseline. Their source contents remain at their canonical locations instead of being duplicated in this partial specification.`
@@ -128,7 +145,7 @@ function buildEvidenceIntake(stage, localData, documentModel, documentSchemas) {
   };
 }
 
-function buildSpecificationFrame(stage, localData, documentModel, documentSchemas) {
+function buildSpecificationFrame(stage: SchemaNode, localData: DataModel, documentModel: DocumentModel, documentSchemas: readonly SchemaNode[]): BaselinePreviewModel {
   const client = sourceData(documentModel, documentSchemas, "client-requirements").data;
   const request = sourceData(documentModel, documentSchemas, "system-request").data;
   const feasibility = sourceData(documentModel, documentSchemas, "feasibility-stakeholder-analysis").data;
@@ -192,7 +209,7 @@ function buildSpecificationFrame(stage, localData, documentModel, documentSchema
   };
 }
 
-function buildScopeBaseline(stage, localData, documentModel, documentSchemas) {
+function buildScopeBaseline(stage: SchemaNode, localData: DataModel, documentModel: DocumentModel, documentSchemas: readonly SchemaNode[]): BaselinePreviewModel {
   const client = sourceData(documentModel, documentSchemas, "client-requirements").data;
   const requestSource = sourceData(documentModel, documentSchemas, "system-request");
   const request = requestSource.data;
@@ -210,7 +227,7 @@ function buildScopeBaseline(stage, localData, documentModel, documentSchemas) {
       ? formatRecordDisplayId(decisionSection?.repeatable?.displayId, decision, decisionIndex)
       : "";
 
-    if (["Exclude", "Defer"].includes(decision?.decisionType)) {
+    if (["Exclude", "Defer"].includes(String(decision?.decisionType || ""))) {
       return null;
     }
 
@@ -307,7 +324,7 @@ function buildScopeBaseline(stage, localData, documentModel, documentSchemas) {
   };
 }
 
-function buildVocabularyBaseline(stage, localData, documentModel) {
+function buildVocabularyBaseline(stage: SchemaNode, localData: DataModel, documentModel: DocumentModel): BaselinePreviewModel {
   const records = rootRecords(documentModel);
   const termFields = stageSection(stage, "controlled-terms")?.repeatable?.fields || [];
   const data = {
@@ -353,14 +370,14 @@ function buildVocabularyBaseline(stage, localData, documentModel) {
   };
 }
 
-const builders = {
+const builders: Record<string, BaselineBuilder> = {
   "srs-baseline-evidence-intake": buildEvidenceIntake,
   "srs-baseline-specification-frame": buildSpecificationFrame,
   "srs-baseline-scope": buildScopeBaseline,
   "srs-baseline-vocabulary": buildVocabularyBaseline
 };
 
-export function baselinePreviewModel(stage, localData, documentModel, documentSchemas) {
+export function baselinePreviewModel(stage: SchemaNode, localData: DataModel, documentModel: DocumentModel, documentSchemas: readonly SchemaNode[]): BaselinePreviewModel {
   const builder = builders[stage.id];
   return builder
     ? simplifyBaselinePreview(builder(stage, localData, documentModel, documentSchemas))

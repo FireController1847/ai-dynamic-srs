@@ -1,7 +1,7 @@
 import type { Field, FieldOption, Section, Repeater, SchemaNode, Reference, EvidenceSource, EvidenceGroup, GuideStep, Guide, AiGuidance, AiDefinition, DocumentConfig, Evidence } from '../../../core/schema/schema-types.ts';
 // The interview needs immediate prerequisites, not the complete source history.
 // Field prompts still receive the full, schema-filtered evidence contract.
-const prerequisites = {
+const prerequisites: Record<string, readonly string[]> = {
   'srs-baseline-evidence-intake': ['client-requirements', 'system-request'],
   'srs-baseline-specification-frame': ['client-requirements', 'system-request'],
   'srs-baseline-scope': ['client-requirements', 'system-request'],
@@ -20,7 +20,7 @@ const prerequisites = {
   'srs-quality-assumptions': ['srs-baseline-scope', 'srs-quality-interface-requirements']
 };
 export function simplifiedEvidence(stage: SchemaNode): Evidence {
-  const evidence = stage.evidence || {};
+  const evidence: Evidence = stage.evidence ?? { sources: [] };
   const desired = prerequisites[stage.id] || [];
   const interviewSources = (evidence.sources || []).filter(source => desired.includes(source.nodeId || source.pageId));
   return { ...evidence, interviewSources };

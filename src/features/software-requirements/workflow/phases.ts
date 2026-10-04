@@ -1,3 +1,4 @@
+import type { SchemaNode } from "../../../core/schema/schema-types.ts";
 import { simplifyStage } from "../simplification/stages.ts";
 import { useCaseCatalogStage } from "../phase-three/catalog.ts";
 import { phaseOneStages } from "../phase-one/stages.ts";
@@ -7,7 +8,21 @@ import { candidateProcessesStage } from "../phase-two/candidate-processes.ts";
 import { phaseThreeStages } from "../phase-three/stages.ts";
 import { phaseFourStages } from "../phase-four/stages.ts";
 
-function buildStage(phase, originalStage, index, previousId) {
+interface PhaseDefinition {
+  id: string;
+  stateKey: string;
+  label: string;
+  title?: string;
+  description?: string;
+  role?: string;
+  dependsOn: string[];
+  reviews?: string[];
+  stages: readonly SchemaNode[];
+}
+
+type CodedPhaseDefinition = PhaseDefinition & { code: string };
+
+function buildStage(phase: CodedPhaseDefinition, originalStage: SchemaNode, index: number, previousId?: string): SchemaNode {
   const stage = simplifyStage(originalStage);
   return {
     ...stage,
@@ -31,7 +46,7 @@ function buildStage(phase, originalStage, index, previousId) {
   };
 }
 
-function buildPhase(definition, index) {
+function buildPhase(definition: PhaseDefinition, index: number): SchemaNode {
   const phase = { ...definition, code: `SRS-${String(index + 1).padStart(2, "0")}` };
   const stages = definition.stages.map((stage, stageIndex) => (
     buildStage(phase, stage, stageIndex, definition.stages[stageIndex - 1]?.id)
@@ -57,7 +72,7 @@ function buildPhase(definition, index) {
   };
 }
 
-const phaseDefinitions = [
+const phaseDefinitions: PhaseDefinition[] = [
   {
     id: "srs-establish-baseline",
     stateKey: "baselineConstruction",
