@@ -51,7 +51,7 @@ A whole repeatable section uses `records` instead of `fields`:
 }
 ```
 
-Existing records keep their stable ID. New records omit `id`; the application assigns the lowest reference-safe ID through the normal record lifecycle. The importer does not accept an invented ID for a new record.
+Existing records keep their stable ID. New records omit `id` or use `id: null`; the application assigns the lowest reference-safe ID through the normal record lifecycle. The importer does not accept an invented ID for a new record.
 
 For a grouped repeater whose parent relationship is app-managed, a new record supplies `parent` beside `fields`. The value must be an available parent ID. Existing records do not use `parent` in version 1, so importing an answer cannot silently move them between groups.
 
