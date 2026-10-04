@@ -35,11 +35,29 @@
         </div>
       </header>
 
-      <div class="app-workspace-layout">
-        <aside class="workspace-nav-rail">
-          <div class="workspace-nav-heading" aria-hidden="true">
-            <span>Workspace</span>
-            <strong>Documents</strong>
+      <div
+        class="app-workspace-layout"
+        :class="{ 'document-navigation-hidden': !documentNavigationVisible }"
+      >
+        <aside v-if="documentNavigationVisible" id="document-navigation" class="workspace-nav-rail">
+          <div class="workspace-nav-heading">
+            <div class="workspace-nav-heading-copy">
+              <span>Workspace</span>
+              <strong>Documents</strong>
+            </div>
+            <button
+              class="navigation-rail-toggle"
+              type="button"
+              aria-controls="document-navigation"
+              :aria-expanded="documentNavigationVisible"
+              aria-label="Hide document navigation"
+              title="Hide document navigation"
+              @click="setDocumentNavigationVisible(false)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m14.5 6-6 6 6 6"></path>
+              </svg>
+            </button>
           </div>
           <nav class="workspace-nav-list" aria-label="Document workspaces">
             <button
@@ -64,6 +82,20 @@
         </aside>
 
         <main class="app-main">
+          <button
+            v-if="!documentNavigationVisible"
+            class="navigation-restore-button document-navigation-restore"
+            type="button"
+            aria-controls="document-navigation"
+            :aria-expanded="documentNavigationVisible"
+            @click="setDocumentNavigationVisible(true)"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m9.5 6 6 6-6 6"></path>
+            </svg>
+            <span>Documents</span>
+          </button>
+
         <section
           v-for="page in pages"
           v-show="activePage === page.id"
@@ -86,11 +118,13 @@
             :is-printing="printingPageId === page.id"
             :copied-section="copiedSection"
             :form-sidebar-visible="formSidebarVisible"
+            :phase-navigation-visible="phaseNavigationVisible"
             @copy-markdown="copyMarkdown"
             @navigate-workspace="navigateWorkspace"
             @print="printCurrentDocument"
             @select-subpage="selectSubpage"
             @set-form-sidebar-visible="setFormSidebarVisible"
+            @set-phase-navigation-visible="setPhaseNavigationVisible"
           ></subpage-workspace>
 
           <template v-else-if="page.sections.length">

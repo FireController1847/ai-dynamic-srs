@@ -28,7 +28,7 @@ Dynamic SRS uses a Fluent 2-inspired native CSS layer rather than a Fluent compo
 
 ## Workspace navigation hierarchy
 
-The application shell separates navigation levels structurally. `src/html/index.html` owns the top-level document rail and page panels. `components/navigation/SubpageWorkspace.ts` owns nested schema navigation: SRS phase children render as a vertical phase stepper, while the selected phase's stage children remain a horizontal tablist. `styles/workspace-layout.css` owns this spatial hierarchy and its responsive collapse; selection state still comes from the existing `activePage` / `activeSubpages` contracts and no navigation-only state is saved. Form section links remain tertiary navigation inside the current stage.
+The application shell separates navigation levels structurally. `src/html/index.html` owns the top-level document rail and page panels. `components/navigation/SubpageWorkspace.ts` owns nested schema navigation: SRS phase children render as a vertical phase stepper, while the selected phase's stage children remain a horizontal tablist. `styles/workspace-layout.css` owns this spatial hierarchy and its responsive collapse; selection state still comes from the existing `activePage` / `activeSubpages` contracts and no navigation-only state is saved. Form section links remain tertiary navigation inside the current stage. Document/phase rail visibility is browser-local presentation state stored separately from workspace data; hiding a rail removes its layout column and leaves a compact restore control.
 
 ## Bundled and print assets
 

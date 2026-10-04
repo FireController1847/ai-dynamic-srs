@@ -30,6 +30,8 @@ import { printPage } from "./print-controller.ts";
 import { workspaceStateFrom } from "./workspace-controller.ts";
 
 const FORM_SIDEBAR_PREFERENCE_KEY = "dynamic-srs:form-sidebar-visible";
+const DOCUMENT_NAV_PREFERENCE_KEY = "dynamic-srs:document-navigation-visible";
+const PHASE_NAV_PREFERENCE_KEY = "dynamic-srs:phase-navigation-visible";
 
 function loadFormSidebarPreference() {
   try {
@@ -42,6 +44,22 @@ function loadFormSidebarPreference() {
 function saveFormSidebarPreference(visible: boolean) {
   try {
     window.localStorage.setItem(FORM_SIDEBAR_PREFERENCE_KEY, String(visible));
+  } catch {
+    // The in-memory preference still works when browser storage is unavailable.
+  }
+}
+
+function loadNavigationPreference(key: string) {
+  try {
+    return window.localStorage.getItem(key) !== "false";
+  } catch {
+    return true;
+  }
+}
+
+function saveNavigationPreference(key: string, visible: boolean) {
+  try {
+    window.localStorage.setItem(key, String(visible));
   } catch {
     // The in-memory preference still works when browser storage is unavailable.
   }
@@ -79,7 +97,9 @@ const app = createApp({
       saveTimerId: null as number | null,
       copyResetTimerId: undefined as ReturnType<typeof setTimeout> | undefined,
       copiedSection: "",
+      documentNavigationVisible: loadNavigationPreference(DOCUMENT_NAV_PREFERENCE_KEY),
       formSidebarVisible: loadFormSidebarPreference(),
+      phaseNavigationVisible: loadNavigationPreference(PHASE_NAV_PREFERENCE_KEY),
       printingPageId: ""
     };
   },
@@ -241,9 +261,17 @@ const app = createApp({
       this.activeSubpages[nodeId] = childId;
       this.scheduleAutosave();
     },
+    setDocumentNavigationVisible(visible: boolean) {
+      this.documentNavigationVisible = Boolean(visible);
+      saveNavigationPreference(DOCUMENT_NAV_PREFERENCE_KEY, this.documentNavigationVisible);
+    },
     setFormSidebarVisible(visible: boolean) {
       this.formSidebarVisible = Boolean(visible);
       saveFormSidebarPreference(this.formSidebarVisible);
+    },
+    setPhaseNavigationVisible(visible: boolean) {
+      this.phaseNavigationVisible = Boolean(visible);
+      saveNavigationPreference(PHASE_NAV_PREFERENCE_KEY, this.phaseNavigationVisible);
     },
     async printCurrentDocument(request: PrintRequest | string | undefined) {
       if (this.printingPageId) {

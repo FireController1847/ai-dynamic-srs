@@ -72,9 +72,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.6.1-alpha` restructures the Fluent shell so navigation hierarchy is expressed spatially instead of as stacked horizontal tab rows. Top-level CR/SR/CBA/FSA/SRS/EB/Notes workspaces move to a persistent document rail on wide screens; the SRS construction phases become a vertical stepper; only the active phase's stages remain horizontal tabs. Workspace guidance becomes a compact disclosure, the active phase becomes the primary page header, and ordinary planning pages gain the same page-header hierarchy. Responsive layouts collapse the rails to horizontal selectors when space requires it. This is presentation/navigation work only: saved data, prompt contracts, calculations, exports, IDs, and workspace format 2 are unchanged.
 
+## Collapsible navigation rails
+
+`0.6.2-alpha` makes the document rail and SRS phase rail independently collapsible so the spatial hierarchy does not permanently consume authoring width. Each rail has a compact hide control and an always-available restore control; visibility preferences are remembered in browser local storage only and are not written into `.dsrs` workspaces. Stage tabs and form navigation are unchanged. Workspace format remains 2.
+
 ## Manual review
 
-Open the application and confirm `v0.6.1-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.6.1-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.6.2-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.6.2-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 

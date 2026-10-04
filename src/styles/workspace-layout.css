@@ -575,3 +575,134 @@
     min-height: var(--fluent-touch-target);
   }
 }
+
+
+/* Collapsible persistent navigation. These preferences are browser-local UI state. */
+.app-workspace-layout.document-navigation-hidden {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace-nav-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.workspace-nav-heading-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.navigation-rail-toggle {
+  display: inline-grid;
+  width: var(--fluent-icon-button-size);
+  min-width: var(--fluent-icon-button-size);
+  height: var(--fluent-icon-button-size);
+  padding: 0;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--fluent-radius-medium);
+  background: transparent;
+  color: var(--fluent-color-neutral-foreground-2);
+}
+
+.navigation-rail-toggle:hover,
+.navigation-rail-toggle:focus-visible {
+  border-color: var(--fluent-color-neutral-stroke-2);
+  background: var(--fluent-color-neutral-background-hover);
+  color: var(--fluent-color-neutral-foreground-1);
+}
+
+.navigation-rail-toggle svg,
+.navigation-restore-button svg {
+  width: var(--fluent-icon-size);
+  height: var(--fluent-icon-size);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.75;
+}
+
+.navigation-restore-button {
+  display: inline-flex;
+  gap: var(--fluent-space-80);
+  align-items: center;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid var(--fluent-color-neutral-stroke-1);
+  border-radius: var(--fluent-radius-medium);
+  background: var(--fluent-color-neutral-background-1);
+  color: var(--fluent-color-neutral-foreground-2);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  box-shadow: var(--fluent-shadow-2);
+}
+
+.navigation-restore-button:hover,
+.navigation-restore-button:focus-visible {
+  background: var(--fluent-color-neutral-background-hover);
+  color: var(--fluent-color-neutral-foreground-1);
+}
+
+.document-navigation-restore {
+  margin-bottom: var(--fluent-space-160);
+}
+
+.workflow-phase-navigation-header {
+  display: flex;
+  gap: var(--fluent-space-80);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+  margin-bottom: var(--fluent-space-40);
+  padding: 0 6px;
+  color: var(--fluent-color-neutral-foreground-2);
+}
+
+.workflow-phase-navigation-header > span {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.subpage-depth-0.has-phase-navigation.is-phase-navigation-hidden {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.subpage-depth-0.has-phase-navigation.is-phase-navigation-hidden > .phase-navigation-restore {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  margin-bottom: var(--fluent-space-120);
+}
+
+.subpage-depth-0.has-phase-navigation.is-phase-navigation-hidden > .subpage-panel {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+@media (max-width: 1180px) {
+  .app-workspace-layout.document-navigation-hidden {
+    gap: 0;
+  }
+
+  .document-navigation-restore {
+    margin-bottom: var(--fluent-space-120);
+  }
+}
+
+@media (pointer: coarse) {
+  .navigation-rail-toggle,
+  .navigation-restore-button {
+    min-height: var(--fluent-touch-target);
+  }
+
+  .navigation-rail-toggle {
+    width: var(--fluent-touch-target);
+    min-width: var(--fluent-touch-target);
+  }
+}

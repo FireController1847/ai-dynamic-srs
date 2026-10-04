@@ -17,7 +17,7 @@ import { WorkflowStageOverview } from "./WorkflowStageOverview.ts";
 export const SubpageNode = defineComponent({
   name: "SubpageNode",
   components: { DocumentPreview, DynamicForm, FormProgress, FormSidebarToggle, PageGuide, PreviewNavigationControl, TabCompletionCheck, WorkflowStageOverview },
-  emits: ["copy-markdown", "navigate-workspace", "print", "select-subpage", "set-form-sidebar-visible"],
+  emits: ["copy-markdown", "navigate-workspace", "print", "select-subpage", "set-form-sidebar-visible", "set-phase-navigation-visible"],
   props: {
     activeSubpages: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
     copiedSection: { type: String, default: "" },
@@ -26,6 +26,7 @@ export const SubpageNode = defineComponent({
     documentModel: { type: Object as PropType<DocumentModel>, required: true },
     documentSchemas: { type: Array as PropType<SchemaNode[]>, required: true },
     formSidebarVisible: { type: Boolean, default: true },
+    phaseNavigationVisible: { type: Boolean, default: true },
     nodeSchema: { type: Object as PropType<SchemaNode>, required: true },
     parentSchema: { type: Object as PropType<SchemaNode | null>, default: null },
     isPrinting: { type: Boolean, default: false },
@@ -167,7 +168,8 @@ export const SubpageNode = defineComponent({
         'subpage-depth-' + depth,
         {
           'has-phase-navigation': childNavigationKind === 'phase',
-          'has-stage-navigation': childNavigationKind === 'stage'
+          'has-stage-navigation': childNavigationKind === 'stage',
+          'is-phase-navigation-hidden': childNavigationKind === 'phase' && !phaseNavigationVisible
         }
       ]"
     >
@@ -191,7 +193,23 @@ export const SubpageNode = defineComponent({
           </div>
         </header>
 
+        <button
+          v-if="childNavigationKind === 'phase' && !phaseNavigationVisible"
+          class="navigation-restore-button phase-navigation-restore"
+          type="button"
+          :aria-controls="nodeSchema.id + '-phase-navigation'"
+          :aria-expanded="phaseNavigationVisible"
+          @click="$emit('set-phase-navigation-visible', true)"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m9.5 6 6 6-6 6"></path>
+          </svg>
+          <span>Phases</span>
+        </button>
+
         <nav
+          v-if="childNavigationKind !== 'phase' || phaseNavigationVisible"
+          :id="childNavigationKind === 'phase' ? nodeSchema.id + '-phase-navigation' : undefined"
           class="subpage-tabs-shell"
           :class="{
             'workflow-phase-navigation': childNavigationKind === 'phase',
@@ -200,6 +218,22 @@ export const SubpageNode = defineComponent({
           :aria-label="nodeSchema.title + ' sections'"
           tabindex="0"
         >
+          <div v-if="childNavigationKind === 'phase'" class="workflow-phase-navigation-header">
+            <span>Phases</span>
+            <button
+              class="navigation-rail-toggle"
+              type="button"
+              :aria-controls="nodeSchema.id + '-phase-navigation'"
+              :aria-expanded="phaseNavigationVisible"
+              aria-label="Hide phase navigation"
+              title="Hide phase navigation"
+              @click="$emit('set-phase-navigation-visible', false)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m14.5 6-6 6 6 6"></path>
+              </svg>
+            </button>
+          </div>
           <div class="nav nav-tabs subpage-tabs" role="tablist">
             <button
               v-for="child in nodeSchema.subpages"
@@ -259,12 +293,14 @@ export const SubpageNode = defineComponent({
             :is-printing="isPrinting"
             :copied-section="copiedSection"
             :form-sidebar-visible="formSidebarVisible"
+            :phase-navigation-visible="phaseNavigationVisible"
             :depth="depth + 1"
             @copy-markdown="$emit('copy-markdown', $event)"
             @navigate-workspace="$emit('navigate-workspace', $event)"
             @print="$emit('print', $event)"
             @select-subpage="$emit('select-subpage', $event)"
             @set-form-sidebar-visible="$emit('set-form-sidebar-visible', $event)"
+            @set-phase-navigation-visible="$emit('set-phase-navigation-visible', $event)"
           ></subpage-node>
         </section>
       </template>
@@ -385,7 +421,7 @@ export const SubpageNode = defineComponent({
 
 export const SubpageWorkspace = defineComponent({
   components: { SubpageNode },
-  emits: ["copy-markdown", "navigate-workspace", "print", "select-subpage", "set-form-sidebar-visible"],
+  emits: ["copy-markdown", "navigate-workspace", "print", "select-subpage", "set-form-sidebar-visible", "set-phase-navigation-visible"],
   props: {
     activeSubpages: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
     copiedSection: { type: String, default: "" },
@@ -393,6 +429,7 @@ export const SubpageWorkspace = defineComponent({
     documentModel: { type: Object as PropType<DocumentModel>, required: true },
     documentSchemas: { type: Array as PropType<SchemaNode[]>, required: true },
     formSidebarVisible: { type: Boolean, default: true },
+    phaseNavigationVisible: { type: Boolean, default: true },
     pageSchema: { type: Object as PropType<SchemaNode>, required: true },
     isPrinting: { type: Boolean, default: false },
     printDateLabel: { type: String, required: true },
@@ -425,11 +462,13 @@ export const SubpageWorkspace = defineComponent({
         :is-printing="isPrinting"
         :copied-section="copiedSection"
         :form-sidebar-visible="formSidebarVisible"
+        :phase-navigation-visible="phaseNavigationVisible"
         @copy-markdown="$emit('copy-markdown', $event)"
         @navigate-workspace="$emit('navigate-workspace', $event)"
         @print="$emit('print', $event)"
         @select-subpage="$emit('select-subpage', $event)"
         @set-form-sidebar-visible="$emit('set-form-sidebar-visible', $event)"
+        @set-phase-navigation-visible="$emit('set-phase-navigation-visible', $event)"
       ></subpage-node>
     </div>
   `
