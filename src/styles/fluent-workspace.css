@@ -1,0 +1,943 @@
+/*
+ * Fluent workspace layer.
+ * Loaded after feature styles so legacy Bootstrap-era surfaces resolve through
+ * the shared Fluent token system without changing feature behavior.
+ */
+@media screen {
+  .page-panel,
+  .subpage-workspace,
+  .subpage-node {
+    color: var(--fluent-color-neutral-foreground-1);
+  }
+
+  .page-panel:focus,
+  .subpage-panel:focus {
+    outline: none;
+  }
+
+  .subpage-workspace-heading {
+    max-width: 960px;
+    margin-bottom: var(--fluent-space-240);
+  }
+
+  .subpage-workspace-heading .section-kicker,
+  .section-kicker {
+    margin-bottom: var(--fluent-space-40);
+    color: var(--fluent-color-brand-foreground-2);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .subpage-workspace-heading h2 {
+    margin-bottom: var(--fluent-space-40) !important;
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .subpage-workspace-heading > .text-body-secondary {
+    max-width: 760px;
+  }
+
+  .subpage-workspace-note {
+    max-width: 760px;
+    margin-top: var(--fluent-space-120);
+    padding: var(--fluent-space-120) var(--fluent-space-160);
+    border: 1px solid var(--fluent-color-brand-stroke-2);
+    border-left: 3px solid var(--fluent-color-brand-background);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-brand-background-2);
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  /* Secondary workflow tabs follow Fluent's low-emphasis tab appearance. */
+  .subpage-tabs-shell {
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-bottom: var(--fluent-space-160);
+    padding: 0 0 2px;
+    border: 0;
+    border-bottom: 1px solid var(--fluent-color-neutral-stroke-2);
+    scrollbar-color: var(--fluent-color-neutral-stroke-1) transparent;
+    scrollbar-width: thin;
+  }
+
+  .subpage-tabs {
+    width: max-content;
+    min-width: 100%;
+    min-height: 40px;
+    flex-wrap: nowrap;
+    gap: var(--fluent-space-40);
+    border: 0;
+  }
+
+  .subpage-tabs .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    min-height: 40px;
+    margin: 0;
+    padding: 8px 12px;
+    border: 0 !important;
+    border-radius: var(--fluent-radius-medium);
+    background: transparent !important;
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    white-space: nowrap;
+  }
+
+  .subpage-tabs .nav-link:hover,
+  .subpage-tabs .nav-link:focus-visible {
+    background: var(--fluent-color-neutral-background-hover) !important;
+    color: var(--fluent-color-neutral-foreground-1);
+  }
+
+  .subpage-tabs .nav-link.active {
+    color: var(--fluent-color-neutral-foreground-1);
+    font-weight: 600;
+  }
+
+  .subpage-tabs .nav-link.active::after {
+    position: absolute;
+    right: 8px;
+    bottom: 0;
+    left: 8px;
+    height: 2px;
+    border-radius: var(--fluent-radius-circular);
+    background: var(--fluent-color-brand-background);
+    content: "";
+  }
+
+  .workflow-tab-index {
+    margin-right: var(--fluent-space-40);
+    color: var(--fluent-color-neutral-foreground-3);
+    font: 600 11px/16px var(--fluent-font-monospace);
+    letter-spacing: 0;
+  }
+
+  .tab-label-complete {
+    color: var(--fluent-color-neutral-foreground-2);
+  }
+
+  .tab-completion-check {
+    width: 12px;
+    height: 12px;
+    stroke: var(--fluent-color-success-foreground-1);
+    stroke-width: 2.2;
+  }
+
+  .subpage-panel {
+    padding-top: var(--fluent-space-160);
+  }
+
+  .subpage-level-heading {
+    display: flex;
+    gap: var(--fluent-space-160);
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--fluent-space-160);
+    padding: var(--fluent-space-160);
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-1);
+  }
+
+  .subpage-level-progress {
+    display: grid;
+    min-width: 64px;
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 12px;
+    line-height: 16px;
+    text-align: right;
+  }
+
+  .subpage-level-progress strong {
+    color: var(--fluent-color-brand-foreground-1);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Inline progress/sidebar surface: flat, structured, and deliberately unelevated. */
+  .section-summary {
+    overflow: hidden;
+    border: 1px solid var(--fluent-color-neutral-stroke-2) !important;
+    border-radius: var(--fluent-radius-large) !important;
+    background: var(--fluent-color-neutral-background-1);
+    box-shadow: none !important;
+  }
+
+  .section-summary .card-body {
+    padding: var(--fluent-space-160);
+  }
+
+  .form-sidebar-heading {
+    display: flex;
+    gap: var(--fluent-space-80);
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .section-summary h2,
+  .section-summary h3 {
+    margin-bottom: var(--fluent-space-40);
+  }
+
+  .form-completion-box {
+    margin-top: var(--fluent-space-160);
+    padding: var(--fluent-space-120);
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-2);
+  }
+
+  .form-completion-heading {
+    margin-bottom: var(--fluent-space-80);
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+
+  .form-completion-box .progress {
+    height: 4px;
+    margin-bottom: var(--fluent-space-80);
+  }
+
+  .section-links {
+    display: grid;
+    gap: 2px;
+    margin-top: var(--fluent-space-160) !important;
+  }
+
+  .section-links a {
+    display: block;
+    min-height: 32px;
+    padding: 6px 8px;
+    border-radius: var(--fluent-radius-medium);
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 13px;
+    line-height: 20px;
+    text-decoration: none;
+    transition: background-color var(--fluent-motion-fast), color var(--fluent-motion-fast);
+  }
+
+  .section-links a:hover,
+  .section-links a:focus-visible {
+    background: var(--fluent-color-neutral-background-hover);
+    color: var(--fluent-color-neutral-foreground-1);
+  }
+
+  .workspace-utility-button {
+    display: inline-flex;
+    gap: var(--fluent-space-80);
+    align-items: center;
+    min-height: 32px;
+    padding: 5px 10px;
+    border: 1px solid var(--fluent-color-neutral-stroke-1);
+    border-radius: var(--fluent-radius-medium);
+    background: var(--fluent-color-neutral-background-1);
+    color: var(--fluent-color-neutral-foreground-2);
+    box-shadow: var(--fluent-shadow-2);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  .workspace-utility-button:hover,
+  .workspace-utility-button:focus-visible {
+    border-color: var(--fluent-color-neutral-stroke-1);
+    background: var(--fluent-color-neutral-background-hover);
+    color: var(--fluent-color-neutral-foreground-1);
+  }
+
+  .workspace-utility-button:focus-visible {
+    outline: 2px solid var(--fluent-color-neutral-foreground-1);
+    outline-offset: 2px;
+    box-shadow: var(--fluent-shadow-2);
+  }
+
+  .preview-navigation-control {
+    top: calc(var(--dsrs-workspace-tabs-height) + var(--fluent-space-80));
+    margin-bottom: var(--fluent-space-80);
+  }
+
+  /* Forms: one calm surface per logical section instead of stacked Bootstrap cards. */
+  .form-section,
+  .repeatable-item,
+  .nested-records-field,
+  .nested-record-card {
+    border: 1px solid var(--fluent-color-neutral-stroke-2) !important;
+    border-radius: var(--fluent-radius-large) !important;
+    background: var(--fluent-color-neutral-background-1) !important;
+    box-shadow: none !important;
+  }
+
+  .form-section {
+    margin-bottom: var(--fluent-space-160);
+    padding: var(--fluent-space-200);
+  }
+
+  .repeatable-item {
+    padding: var(--fluent-space-160);
+  }
+
+  .nested-records-field {
+    padding: var(--fluent-space-160);
+    background: var(--fluent-color-neutral-background-2) !important;
+  }
+
+  .nested-record-card {
+    padding: var(--fluent-space-160);
+  }
+
+  .section-heading,
+  .nested-records-heading,
+  .nested-record-card-heading,
+  .notes-summary-heading {
+    gap: var(--fluent-space-120);
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    margin-bottom: var(--fluent-space-160);
+    padding-bottom: var(--fluent-space-120);
+    border-bottom: 1px solid var(--fluent-color-neutral-stroke-subtle);
+  }
+
+  .section-title-row {
+    gap: var(--fluent-space-80);
+  }
+
+  .section-title-row .h5,
+  .section-title-row h3,
+  .section-title-row h4 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .section-number {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--fluent-color-brand-stroke-2);
+    border-radius: var(--fluent-radius-circular);
+    background: var(--fluent-color-brand-background-2);
+    color: var(--fluent-color-brand-foreground-2);
+    font: 600 12px/16px var(--fluent-font-monospace);
+  }
+
+  .section-copy-trigger,
+  .section-help-trigger {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--fluent-radius-medium);
+    background: transparent;
+    color: var(--fluent-color-neutral-foreground-2);
+    transition: background-color var(--fluent-motion-fast), color var(--fluent-motion-fast);
+  }
+
+  .section-copy-trigger:hover,
+  .section-copy-trigger:focus-visible,
+  .section-help-trigger:hover,
+  .section-help-trigger:focus-visible {
+    border-color: transparent;
+    background: var(--fluent-color-neutral-background-hover);
+    color: var(--fluent-color-neutral-foreground-1);
+    box-shadow: none;
+  }
+
+  .section-copy-trigger.copied {
+    background: var(--fluent-color-success-background-2);
+    color: var(--fluent-color-success-foreground-1);
+  }
+
+  .field-help-text,
+  .nested-records-description,
+  .nested-records-empty,
+  .notes-add-row small,
+  .notes-entry-meta {
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .period-value-grid {
+    gap: var(--fluent-space-120);
+  }
+
+  .period-value-field {
+    border-radius: var(--fluent-radius-medium);
+  }
+
+  .markdown-field-badge,
+  .optional-label {
+    border-radius: var(--fluent-radius-circular);
+    background: var(--fluent-color-neutral-background-4);
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* Teaching surface behaves like a Fluent info card/accordion. */
+  .page-guide {
+    overflow: clip;
+    margin-bottom: var(--fluent-space-160) !important;
+    border: 1px solid var(--fluent-color-brand-stroke-2) !important;
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-brand-background-2);
+    box-shadow: none !important;
+  }
+
+  .page-guide-summary {
+    display: flex;
+    gap: var(--fluent-space-120);
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+
+  .page-guide-summary:hover {
+    background: color-mix(in srgb, var(--fluent-color-brand-background-2) 70%, white);
+  }
+
+  .page-guide-summary > span:not(.page-guide-icon) {
+    display: grid;
+    gap: 1px;
+  }
+
+  .page-guide-summary strong {
+    color: var(--fluent-color-neutral-foreground-1);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .page-guide-summary small {
+    color: var(--fluent-color-neutral-foreground-2);
+  }
+
+  .page-guide-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--fluent-color-brand-background);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .page-guide-body {
+    padding: 4px 16px 16px 52px;
+    border-top: 1px solid color-mix(in srgb, var(--fluent-color-brand-stroke-2) 70%, transparent);
+  }
+
+  .page-guide-steps,
+  .page-guide-glossary {
+    border-color: var(--fluent-color-brand-stroke-2);
+  }
+
+  /* Evidence is an inline drawer-like information surface, not a separate visual app. */
+  .workspace-evidence-panel {
+    margin-block: var(--fluent-space-160);
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-1);
+    box-shadow: none;
+  }
+
+  .workspace-evidence-heading {
+    min-height: 48px;
+    padding: var(--fluent-space-120) var(--fluent-space-160);
+    border-bottom: 1px solid var(--fluent-color-neutral-stroke-subtle);
+  }
+
+  .workspace-evidence-count,
+  .workspace-evidence-status {
+    border-radius: var(--fluent-radius-circular);
+    background: var(--fluent-color-neutral-background-4);
+    color: var(--fluent-color-neutral-foreground-2);
+  }
+
+  .workspace-evidence-toggle {
+    border-radius: var(--fluent-radius-medium);
+    color: var(--fluent-color-brand-foreground-1);
+  }
+
+  .workspace-evidence-toggle:hover,
+  .workspace-evidence-toggle:focus-visible {
+    background: var(--fluent-color-neutral-background-hover);
+    color: var(--fluent-color-brand-foreground-2);
+  }
+
+  .workspace-evidence-sources {
+    gap: var(--fluent-space-120);
+    padding: var(--fluent-space-160);
+  }
+
+  .workspace-evidence-source,
+  .workspace-evidence-group,
+  .workspace-evidence-record {
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-2);
+    box-shadow: none;
+  }
+
+  .workspace-evidence-source-heading,
+  .workspace-evidence-group-heading {
+    padding: var(--fluent-space-120);
+  }
+
+  .workspace-evidence-code {
+    color: var(--fluent-color-brand-foreground-2);
+    font-family: var(--fluent-font-monospace);
+  }
+
+  .workspace-evidence-link {
+    border-radius: var(--fluent-radius-medium);
+    color: var(--fluent-color-brand-foreground-1);
+  }
+
+  .workspace-evidence-link:hover,
+  .workspace-evidence-link:focus-visible {
+    background: var(--fluent-color-brand-background-2);
+    color: var(--fluent-color-brand-foreground-2);
+  }
+
+  .workspace-evidence-answers > summary {
+    border-radius: var(--fluent-radius-medium);
+  }
+
+  /* Diagrams: media cards with a distinct neutral canvas. */
+  .diagram-empty-state,
+  .diagram-artifact-card {
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-1);
+    box-shadow: none;
+  }
+
+  .diagram-empty-state {
+    padding: var(--fluent-space-240);
+    color: var(--fluent-color-neutral-foreground-2);
+  }
+
+  .diagram-artifact-card {
+    overflow: hidden;
+  }
+
+  .diagram-artifact-heading {
+    padding: var(--fluent-space-120) var(--fluent-space-160);
+    border-bottom: 1px solid var(--fluent-color-neutral-stroke-subtle);
+  }
+
+  .diagram-figure-id,
+  .diagram-source-meta {
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 12px;
+  }
+
+  .diagram-preview-shell,
+  .drawio-preview-frame,
+  .drawio-viewer-canvas {
+    border-color: var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-medium);
+    background: var(--fluent-color-neutral-background-2);
+  }
+
+  .diagram-preview-status {
+    color: var(--fluent-color-neutral-foreground-2);
+  }
+
+  .diagram-preview-error {
+    border: 1px solid var(--fluent-color-danger-stroke-1);
+    border-radius: var(--fluent-radius-medium);
+    background: var(--fluent-color-danger-background-2);
+    color: var(--fluent-color-danger-foreground-1);
+  }
+
+  /* CBA and Notes use the same metric tile grammar. */
+  .cba-live-model,
+  .notes-live-summary {
+    margin-block: var(--fluent-space-160);
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-1);
+    box-shadow: none;
+  }
+
+  .cba-kpi-grid,
+  .cba-document-kpis,
+  .notes-kpi-grid {
+    gap: var(--fluent-space-80);
+  }
+
+  .cba-kpi-grid div,
+  .notes-kpi-grid div,
+  .cba-document-kpis div {
+    padding: var(--fluent-space-120);
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-2);
+    box-shadow: none;
+  }
+
+  .cba-kpi-grid dt,
+  .notes-kpi-grid dt,
+  .cba-document-kpis dt {
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+
+  .cba-kpi-grid dd,
+  .notes-kpi-grid dd,
+  .cba-document-kpis dd {
+    color: var(--fluent-color-neutral-foreground-1);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 26px;
+  }
+
+  .cba-chart-card,
+  .notes-entry-card {
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-1);
+    box-shadow: none;
+  }
+
+  .cba-chart-card {
+    padding: var(--fluent-space-160);
+  }
+
+  .cba-chart-grid line {
+    stroke: var(--fluent-color-neutral-stroke-2);
+  }
+
+  .cba-chart-grid text {
+    fill: var(--fluent-color-neutral-foreground-2);
+    font-family: var(--fluent-font-family);
+  }
+
+  .notes-optional-details,
+  .nested-record-advanced,
+  .notes-notebook-settings {
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-medium);
+    background: var(--fluent-color-neutral-background-2);
+  }
+
+  .notes-optional-details > summary,
+  .nested-record-advanced > summary,
+  .notes-notebook-settings > summary {
+    min-height: 36px;
+    padding: 8px 10px;
+    color: var(--fluent-color-neutral-foreground-2);
+    font-weight: 600;
+  }
+
+  .notes-entry-card {
+    padding: var(--fluent-space-160);
+  }
+
+  .notes-follow-up-badge {
+    border: 1px solid var(--fluent-color-warning-stroke-1);
+    border-radius: var(--fluent-radius-circular);
+    background: var(--fluent-color-warning-background-2);
+    color: var(--fluent-color-warning-foreground-1);
+  }
+
+  .notes-empty-state {
+    border: 1px dashed var(--fluent-color-neutral-stroke-1);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-2);
+    color: var(--fluent-color-neutral-foreground-2);
+  }
+
+  /* Workflow overview cards are restrained informational cards. */
+  .workflow-stage-overview,
+  .subpage-placeholder {
+    overflow: hidden;
+    border: 1px solid var(--fluent-color-neutral-stroke-2) !important;
+    border-top: 1px solid var(--fluent-color-neutral-stroke-2) !important;
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-1);
+    box-shadow: none !important;
+  }
+
+  .workflow-stage-header {
+    gap: var(--fluent-space-160);
+  }
+
+  .workflow-stage-meta {
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+
+  .workflow-stage-role::before {
+    color: var(--fluent-color-neutral-stroke-1);
+  }
+
+  .workflow-structure-badge {
+    padding: 3px 8px;
+    border: 1px solid var(--fluent-color-brand-stroke-2);
+    border-radius: var(--fluent-radius-circular);
+    background: var(--fluent-color-brand-background-2);
+    color: var(--fluent-color-brand-foreground-2);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0;
+  }
+
+  .workflow-stage-relationships {
+    gap: var(--fluent-space-160);
+    margin-top: var(--fluent-space-160);
+    padding: var(--fluent-space-160);
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: var(--fluent-color-neutral-background-2);
+  }
+
+  .workflow-stage-relationships h4 {
+    margin-bottom: var(--fluent-space-40);
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .workflow-stage-relationships ul {
+    color: var(--fluent-color-neutral-foreground-2);
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .workflow-stage-relationships li::before {
+    background: var(--fluent-color-brand-background);
+  }
+
+  .workflow-stage-empty-note,
+  .subpage-placeholder-note {
+    border-color: var(--fluent-color-neutral-stroke-subtle);
+    color: var(--fluent-color-neutral-foreground-2);
+  }
+
+  /* Live document preview: a low-elevation paper surface on the workspace canvas. */
+  .document-preview-section {
+    margin-top: var(--fluent-space-320);
+    padding-top: var(--fluent-space-240);
+    border-top: 1px solid var(--fluent-color-neutral-stroke-2);
+  }
+
+  .preview-toolbar {
+    gap: var(--fluent-space-120);
+    margin-bottom: var(--fluent-space-120);
+  }
+
+  .preview-toolbar h2,
+  .preview-toolbar h3 {
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .print-document-button {
+    box-shadow: none;
+  }
+
+  .document-preview {
+    max-width: 960px;
+    margin-inline: auto;
+    padding: clamp(28px, 5vw, 56px);
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    background: #fff;
+    color: #242424;
+    box-shadow: var(--fluent-shadow-8);
+  }
+
+  .document-content {
+    color: #242424;
+  }
+
+  .document-preview .document-cover-page {
+    min-height: min(62vh, 640px);
+  }
+
+  .document-cover-code,
+  .document-type,
+  .document-record-id,
+  .notes-document-id,
+  .notes-document-status {
+    color: #616161;
+    font-family: var(--fluent-font-monospace);
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  .document-preview h1,
+  .document-preview h2,
+  .document-preview h3,
+  .document-preview h4,
+  .document-preview h5,
+  .document-preview h6 {
+    color: #242424;
+    font-family: var(--fluent-font-family);
+    font-weight: 600;
+  }
+
+  .document-preview section,
+  .document-record,
+  .notes-document-entry,
+  .notes-document-item {
+    border-color: #e0e0e0;
+  }
+
+  .document-preview table {
+    border-color: #d1d1d1;
+  }
+
+  .document-preview th {
+    background: #f5f5f5;
+    color: #424242;
+    font-weight: 600;
+  }
+
+  .document-preview tbody tr:nth-child(even) td,
+  .document-preview tbody tr:nth-child(even) th {
+    background: #fafafa;
+  }
+
+  .document-record-id,
+  .notes-document-id {
+    border-radius: var(--fluent-radius-medium);
+    background: #f5f5f5;
+  }
+
+  .document-watermark {
+    color: #bdbdbd;
+  }
+
+  /* Destructive and warning states stay semantic, not brand-colored. */
+  .text-danger {
+    color: var(--fluent-color-danger-foreground-1) !important;
+  }
+
+  .alert-danger,
+  .diagram-preview-error {
+    border-color: var(--fluent-color-danger-stroke-1);
+    background: var(--fluent-color-danger-background-2);
+    color: var(--fluent-color-danger-foreground-1);
+  }
+
+  /* Keep dense tables usable rather than shrinking type below the Fluent body ramp. */
+  .cba-table-scroll,
+  .document-table-wrap {
+    border: 1px solid var(--fluent-color-neutral-stroke-2);
+    border-radius: var(--fluent-radius-large);
+    scrollbar-color: var(--fluent-color-neutral-stroke-1) transparent;
+  }
+
+  .cba-table-scroll table,
+  .document-table-wrap table {
+    margin: 0;
+  }
+
+  @media (max-width: 991.98px) {
+    .form-workspace-row {
+      row-gap: var(--fluent-space-160) !important;
+    }
+
+    .section-summary {
+      position: static !important;
+    }
+
+    .form-sidebar-column {
+      width: 100%;
+    }
+
+    .section-links {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .document-preview {
+      padding: var(--fluent-space-240);
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .subpage-level-heading,
+    .workflow-stage-header {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .subpage-level-progress {
+      text-align: left;
+    }
+
+    .form-section,
+    .repeatable-item,
+    .nested-records-field,
+    .nested-record-card,
+    .section-summary .card-body {
+      padding: var(--fluent-space-160);
+    }
+
+    .page-guide-body {
+      padding-left: var(--fluent-space-160);
+    }
+
+    .page-guide-summary {
+      align-items: flex-start;
+    }
+
+    .section-links {
+      grid-template-columns: 1fr;
+    }
+
+    .document-preview {
+      margin-inline: calc(var(--fluent-space-160) * -1);
+      padding: var(--fluent-space-160);
+      border-right: 0;
+      border-left: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+
+  @media (pointer: coarse) {
+    .subpage-tabs .nav-link,
+    .section-links a,
+    .workspace-utility-button,
+    .page-guide-summary {
+      min-height: var(--fluent-touch-target);
+    }
+  }
+}
