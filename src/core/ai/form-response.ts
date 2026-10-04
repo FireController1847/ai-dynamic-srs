@@ -51,6 +51,8 @@ function onlyKeys(value: DataModel, allowed: readonly string[], path: string) {
   if (unknown.length) responseError(`${path} contains unsupported key(s): ${unknown.join(', ')}.`);
 }
 
+function recordId(value: unknown, path: string): AiFormRecordId;
+function recordId(value: unknown, path: string, nullable: true): AiFormRecordId | null;
 function recordId(value: unknown, path: string, nullable = false): AiFormRecordId | null {
   if (nullable && value === null) return null;
   if (typeof value === 'number' && Number.isSafeInteger(value) && value > 0) return value;
@@ -132,6 +134,8 @@ export function parseAiFormResponse(input: string | unknown): AiFormResponse {
     if (new Set(existingIds).size !== existingIds.length) responseError('records contains a duplicate existing record ID.');
   }
 
+  const needsInformation = parseNeeds(value.needsInformation);
+
   return {
     format: AI_FORM_RESPONSE_FORMAT,
     version: AI_FORM_RESPONSE_VERSION,
@@ -142,7 +146,7 @@ export function parseAiFormResponse(input: string | unknown): AiFormResponse {
     ...(path ? { path } : {}),
     ...(hasFields ? { fields: value.fields as DataModel } : {}),
     ...(records ? { records } : {}),
-    ...(parseNeeds(value.needsInformation) ? { needsInformation: parseNeeds(value.needsInformation) } : {})
+    ...(needsInformation ? { needsInformation } : {})
   };
 }
 
