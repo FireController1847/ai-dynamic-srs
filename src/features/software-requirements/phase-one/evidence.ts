@@ -1,268 +1,83 @@
-import type { Field, FieldOption, Section, Repeater, SchemaNode, Reference, EvidenceSource, EvidenceGroup, GuideStep, Guide, AiGuidance, AiDefinition, DocumentConfig, Evidence } from '../../../core/schema/schema-types.ts';
-const clientIdentity = {
-  sectionId: "project-details",
-  fieldKeys: ["projectName", "clientOrganization", "primaryContact", "preparationDate", "version"]
+import type { EvidenceGroup, EvidenceSource } from '../../../core/schema/schema-types.ts';
+
+// Select sections once. Their active schemas own field labels and available answers.
+const groups = (...sectionIds: string[]): EvidenceGroup[] => sectionIds.map(sectionId => ({ sectionId }));
+const clientContext = { sectionId: 'business-context' };
+const clientNeeds = { sectionId: 'client-needs' };
+const clientScope = { sectionId: 'scope-constraints' };
+const requestNeed = { sectionId: 'business-need' };
+const requestCapabilities = { sectionId: 'business-requirements' };
+const requestIssues = { sectionId: 'special-issues' };
+const feasibilityStakeholders = { sectionId: 'stakeholder-analysis' };
+const feasibilityRecommendation = { sectionId: 'overall-recommendation' };
+const feasibilityRisks = { sectionId: 'feasibility-risks' };
+const notebookEntries: EvidenceGroup = { sectionId: 'notebook-entries', recordFieldKeys: ['body', 'references'] };
+
+const evidenceBaselineSource: EvidenceSource = {
+  pageId: 'software-requirements-specification', nodeId: 'srs-baseline-evidence-intake',
+  reason: 'Shared source questions, conflicts, and recorded resolutions.',
+  groups: groups('baseline-exceptions')
+};
+const specificationFrameSource: EvidenceSource = {
+  pageId: 'software-requirements-specification', nodeId: 'srs-baseline-specification-frame',
+  reason: 'The document purpose, product context, and intended audiences.',
+  groups: groups('specification-purpose', 'intended-audiences')
+};
+const scopeBaselineSource: EvidenceSource = {
+  pageId: 'software-requirements-specification', nodeId: 'srs-baseline-scope',
+  reason: 'The existing boundary and explicit scope changes or qualifications.',
+  groups: groups('carried-scope', 'scope-decisions')
 };
 
-const clientContext = {
-  sectionId: "business-context",
-  fieldKeys: ["businessProblem", "desiredOutcome"]
-};
-
-const clientNeeds = {
-  sectionId: "client-needs",
-  recordFieldKeys: ["statement", "priority", "source"]
-};
-
-const clientScope = {
-  sectionId: "scope-constraints",
-  fieldKeys: ["inScope", "outOfScope", "constraints", "assumptions"]
-};
-
-const requestNeed = {
-  sectionId: "business-need",
-  fieldKeys: ["businessProblem", "desiredOutcome"]
-};
-
-const requestCapabilities = {
-  sectionId: "business-requirements",
-  recordFieldKeys: ["statement", "priority", "source"]
-};
-
-const requestIssues = {
-  sectionId: "special-issues",
-  recordFieldKeys: ["issueStatement", "status", "responseAndSource"]
-};
-
-const feasibilityStakeholders = {
-  sectionId: "stakeholder-analysis",
-  recordFieldKeys: ["name", "role", "interest"]
-};
-
-const feasibilityRecommendation = {
-  sectionId: "overall-recommendation",
-  fieldKeys: ["overallRecommendation", "recommendationRationale", "conditionsToProceed"]
-};
-
-const feasibilityRisks = {
-  sectionId: "feasibility-risks",
-  recordFieldKeys: ["riskStatement", "mitigationOrCondition", "riskStatus"]
-};
-
-const notebookEntries = {
-  sectionId: "notebook-entries",
-  recordFieldKeys: ["body"]
-};
-
-function priorStageSource(stageId: string, stateKey: string, reason: string, groups: EvidenceGroup[]): EvidenceSource {
-  return {
-    pageId: "software-requirements-specification",
-    nodeId: stageId,
-    dataPath: ["softwareRequirementsSpecification", "baselineConstruction", stateKey],
-    subpageSelections: {
-      "software-requirements-specification": "srs-establish-baseline",
-      "srs-establish-baseline": stageId
-    },
-    reason,
-    groups
-  };
-}
-
-const evidenceBaselineSource = priorStageSource(
-  "srs-baseline-evidence-intake",
-  "evidenceIntake",
-  "Carries forward the accepted evidence boundary and every visible source exception.",
-  [
-    {
-      sectionId: "baseline-decision",
-      fieldKeys: ["evidenceReviewStatus", "evidenceCutoffDate", "baselineSummary"]
-    },
-    {
-      sectionId: "baseline-exceptions",
-      recordFieldKeys: ["description", "sourcePageId", "status", "affectedDecision", "resolution", "sourceReferences"]
-    }
-  ]
-);
-
-const specificationFrameSource = priorStageSource(
-  "srs-baseline-specification-frame",
-  "specificationFrame",
-  "Keeps the agreed document purpose, product perspective, and intended review audiences visible.",
-  [
-    {
-      sectionId: "specification-purpose",
-      fieldKeys: ["purposeStatement", "productPerspective"]
-    },
-    {
-      sectionId: "intended-audiences",
-      recordFieldKeys: ["nameOrGroup", "relationshipToProduct", "usesSpecificationFor", "reviewAuthority", "sourceReferences"]
-    }
-  ]
-);
-
-const scopeBaselineSource = priorStageSource(
-  "srs-baseline-scope",
-  "scopeBaseline",
-  "Carries the reconciled boundary, coverage review, and explicit scope decisions into terminology review.",
-  [
-    {
-      sectionId: "boundary-review",
-      fieldKeys: ["scopeDisposition", "scopeReconciliation", "capabilityAlignment", "capabilityAlignmentNotes"]
-    },
-    {
-      sectionId: "scope-decisions",
-      recordFieldKeys: ["statement", "decisionType", "status", "rationale", "sourceReferences"]
-    }
-  ]
-);
-
-export const evidenceIntakeSources = [
+export const evidenceIntakeSources: EvidenceSource[] = [
   {
-    pageId: "client-requirements",
-    reason: "Original client language, discovery boundary, and unresolved questions.",
-    referenceRole: "Discovery record and original statement of client need",
-    groups: [
-      clientIdentity,
-      {
-        sectionId: "discovery-record",
-        fieldKeys: ["discoverySources", "openQuestions"]
-      }
-    ]
+    pageId: 'client-requirements',
+    reason: 'Original client language, needs, boundary, and unanswered questions.',
+    referenceRole: 'Discovery record and original statement of client need',
+    groups: groups('project-details', 'business-context', 'stakeholders', 'client-needs', 'scope-constraints', 'discovery-record')
   },
   {
-    pageId: "system-request",
-    reason: "Approved business framing, sponsor, high-level capabilities, and special issues.",
-    referenceRole: "Business case and authorized high-level capability request",
-    groups: [
-      {
-        sectionId: "request-details",
-        fieldKeys: ["projectName", "requestingOrganization", "requestDate", "version"]
-      },
-      {
-        sectionId: "project-sponsor",
-        fieldKeys: ["sponsorName", "sponsorTitle", "sponsorOrganization", "sponsorCommitment"]
-      }
-    ]
+    pageId: 'system-request',
+    reason: 'The sponsor, proposed capabilities, expected benefits, and issues affecting the request.',
+    referenceRole: 'Business case and high-level capability request',
+    groups: groups('request-details', 'project-sponsor', 'business-requirements', 'business-value', 'special-issues')
   },
   {
-    pageId: "cost-benefit-analysis",
-    reason: "Economic assumptions, decision interpretation, and the supporting source register.",
-    referenceRole: "Financial source of truth and economic evidence",
-    groups: [
-      {
-        sectionId: "model-setup",
-        fieldKeys: ["analysisDate", "version", "analysisYears", "discountRate", "modelAssumptions"]
-      },
-      {
-        sectionId: "financial-summary",
-        fieldKeys: ["financialInterpretation", "economicRecommendation", "intangibleCosts"]
-      },
-      {
-        sectionId: "evidence-sources",
-        recordFieldKeys: ["item", "sourceType", "sourceName", "reference", "notes"]
-      }
-    ]
+    pageId: 'cost-benefit-analysis',
+    reason: 'Financial assumptions, decision interpretation, and supporting citations.',
+    referenceRole: 'Financial source of truth and economic evidence',
+    groups: groups('model-setup', 'financial-summary', 'evidence-sources')
   },
   {
-    pageId: "feasibility-stakeholder-analysis",
-    reason: "Feasibility conclusion, conditions, material risks, and evidence cutoff.",
-    referenceRole: "Feasibility decision evidence and conditions for continuation",
-    groups: [
-      {
-        sectionId: "analysis-details",
-        fieldKeys: ["analysisDate", "version"]
-      },
-      feasibilityRecommendation
-    ]
+    pageId: 'feasibility-stakeholder-analysis',
+    reason: 'Technical and organizational assessments, material risks, and recommendation conditions.',
+    referenceRole: 'Feasibility decision evidence and conditions for continuation',
+    groups: groups('analysis-details', 'technical-feasibility', 'organizational-feasibility', 'feasibility-risks', 'overall-recommendation')
   },
   {
-    pageId: "general-notes",
-    reason: "Traceable working knowledge that may explain decisions or expose unresolved context.",
-    referenceRole: "Supporting notebook; cited only when an entry materially informs the specification",
+    pageId: 'general-notes',
+    reason: 'Working knowledge and its cited sources when they materially inform the specification.',
+    referenceRole: 'Supporting notebook; cited only when an entry materially informs the specification',
     groups: [notebookEntries]
   }
 ];
 
-export const specificationFrameSources = [
+export const specificationFrameSources: EvidenceSource[] = [
   evidenceBaselineSource,
-  {
-    pageId: "client-requirements",
-    reason: "Defines the problem, current operation, desired outcome, and original stakeholder viewpoints.",
-    groups: [
-      clientContext,
-      {
-        sectionId: "stakeholders",
-        recordFieldKeys: ["name", "role", "interest"]
-      }
-    ]
-  },
-  {
-    pageId: "system-request",
-    reason: "Identifies the accountable sponsor and the business purpose authorized for further analysis.",
-    groups: [
-      {
-        sectionId: "project-sponsor",
-        fieldKeys: ["sponsorName", "sponsorTitle", "sponsorOrganization", "sponsorCommitment"]
-      },
-      requestNeed
-    ]
-  },
-  {
-    pageId: "feasibility-stakeholder-analysis",
-    reason: "Shows whose review matters and whether the proposed product perspective remains supportable.",
-    groups: [
-      feasibilityStakeholders,
-      {
-        sectionId: "organizational-feasibility",
-        fieldKeys: ["organizationalConclusion"]
-      },
-      feasibilityRecommendation
-    ]
-  }
+  { pageId: 'client-requirements', reason: 'The problem, desired outcome, and stakeholder viewpoints.', groups: [clientContext, { sectionId: 'stakeholders' }] },
+  { pageId: 'system-request', reason: 'The accountable sponsor and established business need.', groups: [{ sectionId: 'project-sponsor' }, requestNeed] },
+  { pageId: 'feasibility-stakeholder-analysis', reason: 'Relevant stakeholders and organizational conditions for the proposed product.', groups: [feasibilityStakeholders, { sectionId: 'organizational-feasibility' }, feasibilityRecommendation] }
 ];
-
-export const scopeBaselineSources = [
-  evidenceBaselineSource,
-  specificationFrameSource,
-  {
-    pageId: "client-requirements",
-    reason: "Carries forward the client boundary, constraints, assumptions, and individually identified needs.",
-    groups: [clientScope, clientNeeds]
-  },
-  {
-    pageId: "system-request",
-    reason: "Supplies the proposed product capabilities and the issues that qualify or challenge them.",
-    groups: [requestCapabilities, requestIssues]
-  },
-  {
-    pageId: "feasibility-stakeholder-analysis",
-    reason: "Applies feasibility conditions and open risks before the behavioral boundary is accepted.",
-    groups: [feasibilityRisks, feasibilityRecommendation]
-  }
+export const scopeBaselineSources: EvidenceSource[] = [
+  evidenceBaselineSource, specificationFrameSource,
+  { pageId: 'client-requirements', reason: 'The client boundary, binding limits, assumptions, and individually identified needs.', groups: [clientScope, clientNeeds] },
+  { pageId: 'system-request', reason: 'Proposed capabilities and the issues that qualify them.', groups: [requestCapabilities, requestIssues] },
+  { pageId: 'feasibility-stakeholder-analysis', reason: 'Feasibility conditions and risks affecting the boundary.', groups: [feasibilityRisks, feasibilityRecommendation] }
 ];
-
-export const vocabularyBaselineSources = [
-  evidenceBaselineSource,
-  specificationFrameSource,
-  scopeBaselineSource,
-  {
-    pageId: "client-requirements",
-    reason: "Preserves the client's names for people, outcomes, capabilities, data, and constraints.",
-    groups: [clientNeeds, clientScope]
-  },
-  {
-    pageId: "system-request",
-    reason: "Shows the business-domain wording already used in capability and issue statements.",
-    groups: [requestCapabilities, requestIssues]
-  },
-  {
-    pageId: "feasibility-stakeholder-analysis",
-    reason: "Provides established stakeholder-group names and terminology introduced by feasibility analysis.",
-    groups: [feasibilityStakeholders, feasibilityRisks]
-  },
-  {
-    pageId: "general-notes",
-    reason: "Surfaces alternate wording, definitions, and ambiguities recorded during project work.",
-    groups: [notebookEntries]
-  }
+export const vocabularyBaselineSources: EvidenceSource[] = [
+  evidenceBaselineSource, specificationFrameSource, scopeBaselineSource,
+  { pageId: 'client-requirements', reason: 'The client’s names for outcomes, capabilities, and project limits.', groups: [clientNeeds, clientScope] },
+  { pageId: 'system-request', reason: 'Business-domain wording in capabilities and issues.', groups: [requestCapabilities, requestIssues] },
+  { pageId: 'feasibility-stakeholder-analysis', reason: 'Stakeholder-group names and terminology introduced by feasibility analysis.', groups: [feasibilityStakeholders, feasibilityRisks] },
+  { pageId: 'general-notes', reason: 'Alternate wording, definitions, and ambiguities recorded during project work.', groups: [notebookEntries] }
 ];

@@ -4,7 +4,7 @@ import { benefitDriversSection } from './sections/benefit-drivers.ts';
 import { oneTimeCostsSection } from './sections/one-time-costs.ts';
 import { ongoingCostsSection } from './sections/ongoing-costs.ts';
 import { evidenceSourcesSection } from './sections/evidence-sources.ts';
-const task = 'Model supported benefits and costs over time, then decide whether the financial case supports proceeding. Reuse the System Request benefits. Gather only the quantities, money, timing and sources needed for the selected calculation. Keep nonfinancial benefits in their benefit records. Do not invent a rate or estimate, double count benefits, or ask the user to rewrite calculated totals.';
+const task = 'Establish supported model settings and every benefit, cost and source needed to assess whether the financial case supports proceeding.';
 export const costBenefitAnalysisSchema: SchemaNode = {
   id: 'cost-benefit-analysis', stateKey: 'costBenefitAnalysis', code: 'CBA', label: 'Cost-Benefit Analysis (CBA)', title: 'Cost-Benefit Analysis', description: 'Model supported benefits and costs over time, then assess the financial case.',
   engine: 'cba', summaryComponent: 'cba-model-summary', previewComponent: 'cba-preview', formComponent: 'evidence-form', compactPreview: true, omitEmptyFields: true,
@@ -19,7 +19,10 @@ export const costBenefitAnalysisSchema: SchemaNode = {
     { term: 'Discount rate', definition: 'The rate used to express future money in present value.' },
     { term: 'Net present value (NPV)', definition: 'Discounted benefits minus discounted costs.' },
     { term: 'Return on investment (ROI)', definition: 'Net present value divided by discounted costs, as a percentage.' }
-  ]),
+  ], {
+    interviewGuidance: 'Cover every current benefit, one-time cost, ongoing cost and supporting source. Reuse known System Request benefits and clarify the quantities, amounts, timing and sources needed by each selected calculation. Establish model settings and material uncertainty. Keep nonfinancial benefits without invented amounts; do not require re-entry of calculated totals.',
+    draftingGuidance: 'Format the requested model inputs and complete benefit, cost and source records using the selected calculation and schedule. Preserve supported rates, units, currency and timing; give every year for custom schedules. Use supplied live results for the financial decision without inventing estimates, double counting benefits or returning calculated totals as editable inputs.'
+  }),
   evidence: { title: 'Proposed benefits and known limits', sources: [source('system-request', ['business-requirements', 'business-value', 'special-issues']), source('client-requirements', ['scope-constraints'])] },
   document: { titleField: 'projectName', organizationField: 'clientOrganization', versionField: 'version', metadata: [
     { key: 'analysisDate', label: 'Analysis date', format: 'date' }, { key: 'preparedBy', label: 'Prepared by' }, { key: 'analysisYears', label: 'Years' }, { key: 'version', label: 'Version' }

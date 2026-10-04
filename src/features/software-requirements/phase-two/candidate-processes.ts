@@ -1,3 +1,4 @@
+import { promptGuidance } from "../workflow/prompt-guidance.ts";
 import { processSources } from "./evidence.ts";
 import { actorReference, primaryActorGrouping } from "./record-references.ts";
 
@@ -19,9 +20,7 @@ export const candidateProcessesStage = {
     ]
   },
   ai: {
-    includeSiblingContext: true,
-    draftingGuidance: "Derive major processes from existing actors and goals and compare them to source business capabilities and scope. Organize use cases under their primary actor; the form assigns that actor link. Use existing SRS-GOL IDs for goals served. Keep SRS-UC IDs stable; these candidates are the canonical use cases for later elaboration. Do not invent a second catalog, detailed flows, diagrams, or atomic FRs. Do not silently promote excluded or deferred goals. Keep sizing suggestions advisory. Record merges/splits and surviving IDs in review notes. Treat a candidate as ready only when its boundary, primary actor, goals, and meaningful outcome are supported.",
-    interviewGuidance: "Walk through recorded goals and group them into meaningful business processes. Work through one primary actor at a time; ask what starts each process and what outcome it produces, then review gaps and overlap. Use a small, comprehensible set of major cases, with packages where useful. Do not ask the user to supply detailed flows yet."
+    ...promptGuidance["srs-discovery-processes"]
   },
   sections: [
     {
@@ -47,13 +46,13 @@ export const candidateProcessesStage = {
         dataKey: "useCases", itemLabel: "Candidate use case", addLabel: "Add candidate use case", minimum: 0, completionMinimum: 1, stableIds: true, parent: primaryActorGrouping,
         displayId: { prefix: "SRS-UC-", padding: 3 }, primaryField: "name", previewStyle: "list", completionFields: ["name", "primaryActorId", "goalReferences", "briefDescription"],
         fields: [
-          { key: "name", label: "Process / use-case name", type: "text", default: "", columns: "col-md-7", placeholder: "Verb–noun phrase: Book Cruise, Manage Guest Groups…" },
-          { key: "disposition", label: "Candidate disposition", type: "select", default: "Candidate", columns: "col-md-5", options: ["Candidate", "Ready for elaboration", "Needs clarification", "Deferred", "Excluded"] },
+          { key: "name", label: "Process / use-case name", type: "text", default: "", columns: "col-md-7", placeholder: "Verb–noun phrase: Book Cruise, Manage Guest Groups…", aiHint: 'Name this actor-goal interaction with a concise verb–noun phrase, not a screen, button or implementation component.' },
+          { key: "disposition", label: "Candidate disposition", type: "select", default: "Candidate", columns: "col-md-5", options: ["Candidate", "Ready for elaboration", "Needs clarification", "Deferred", "Excluded"], aiHint: 'Use the established scope and clarification state for this case; the default Candidate is not approval. Preserve a known exclusion or deferral.' },
           { key: "primaryActorId", label: "Primary actor", completion: false, type: "select", options: [], reference: actorReference, default: "", columns: "col-md-6", aiHint: "The form assigns this link when a use case is added beneath an actor. Group proposed use cases by actor and omit this field from answers. A temporal trigger is not itself an actor." },
-          { key: "supportingActorReferences", label: "Supporting actor IDs", type: "text", default: "", columns: "col-md-6", placeholder: "SRS-ACT-002, SRS-ACT-003; leave empty when none apply." },
-          { key: "goalReferences", label: "Goals served (IDs)", type: "text", default: "", columns: "col-md-6", placeholder: "SRS-GOL-001, SRS-GOL-002" },
+          { key: "supportingActorReferences", label: "Supporting actor IDs", type: "text", default: "", columns: "col-md-6", placeholder: "SRS-ACT-002, SRS-ACT-003; leave empty when none apply.", aiHint: 'Return the exact IDs of established actors supplying services or information to this case. Leave blank when none participate.' },
+          { key: "goalReferences", label: "Goals served (IDs)", type: "text", default: "", columns: "col-md-6", placeholder: "SRS-GOL-001, SRS-GOL-002", aiHint: 'Return the exact existing goal IDs satisfied by this interaction. Do not invent goals or replace references with a rationale paragraph.' },
           { key: "sourceReferences", label: "Supporting capability or scope IDs", type: "text", default: "", columns: "col-md-6", placeholder: "SR-BR-001, SRS-SCP-002…" },
-          { key: "briefDescription", label: "Process purpose and expected result", type: "textarea", default: "", rows: 3, placeholder: "One or two sentences describing what the process accomplishes for its actor." },
+          { key: "briefDescription", label: "Process purpose and expected result", type: "textarea", default: "", rows: 3, placeholder: "One or two sentences describing what the process accomplishes for its actor.", aiHint: 'Give a short connected paragraph explaining the actor intention, essential system interaction and meaningful successful result. Detailed flows are authored later.' },
           { key: "trigger", label: "Initiating event", type: "text", default: "", placeholder: "An actor request or a time/event condition, without prescribing a screen." },
           { key: "packageName", label: "Business area or package (optional)", type: "text", default: "", columns: "col-md-5" },
           { key: "reviewNotes", label: "Boundary, overlap, or unresolved questions", type: "textarea", default: "", rows: 2, columns: "col-md-7" }

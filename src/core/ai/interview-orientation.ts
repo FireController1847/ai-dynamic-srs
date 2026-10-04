@@ -1,4 +1,4 @@
-import type { DataModel, DocumentModel, DataPath, RecordItem, Field, FieldOption, Section, Repeater, SchemaNode, Condition, DisplayId, Reference, DocumentConfig, OutlineSection, Evidence, EvidenceGroup, EvidenceSource } from '../schema/schema-types.ts';
+import type { SchemaNode } from '../schema/schema-types.ts';
 // Internal teaching cues, not a script or headings for the client's response.
 export function interviewOrientation(page: SchemaNode) {
   const orientation = page.ai?.orientation || {};

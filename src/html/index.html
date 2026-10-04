@@ -119,7 +119,7 @@
                     <p class="small text-body-secondary">{{ page.form?.intro || page.description }}</p>
 
                     <form-progress
-                      v-if="page.form?.showCompletion !== false || page.ai?.compactInterview"
+                      v-if="page.form?.showCompletion !== false || page.ai?.showInterview"
                       :page-schema="page"
                       :data-model="documentSections[page.stateKey]"
                       :document-model="documentSections"
@@ -140,6 +140,15 @@
                 :class="page.form?.fullWidth || !formSidebarVisible ? 'col-12' : 'col-lg-9'"
               >
                 <page-guide :page-schema="page"></page-guide>
+                <form-progress
+                  v-if="page.form?.fullWidth && (page.form?.showCompletion !== false || page.ai?.showInterview)"
+                  :page-schema="page"
+                  :data-model="documentSections[page.stateKey]"
+                  :document-model="documentSections"
+                  :document-schemas="pages"
+                  :copied-section="copiedSection"
+                  @copy-markdown="copyMarkdown"
+                ></form-progress>
                 <component
                   :is="page.formComponent || 'dynamic-form'"
                   :page-schema="page"

@@ -16,5 +16,5 @@ export function simplifyReference(field: Field): Field {
   if (!links[field.key]) return field;
   return { ...field, type: 'record-links', reference: links[field.key], referenceFormat: 'ids',
     label: field.label.replace(/\s*\(IDs\)| IDs/g, ''), completion: false,
-    aiHint: 'Choose existing records by name in the form; return their exact IDs when filling from AI. Reuse established links.' };
+    aiHint: `${field.aiHint || ''} Choose existing records by name in the form; return their exact IDs when filling from AI. Reuse established links.`.trim() };
 }

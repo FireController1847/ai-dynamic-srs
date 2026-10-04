@@ -18,9 +18,9 @@ export const useCaseCatalogStage = stage(
     ], { minimum: 0, completionMinimum: 1, parent: primaryActorGrouping, itemLabel: "Use case", addLabel: "Add use case" }),
     recordSection("use-case-relationships", "Use-Case Relationships", "functional-behavior.use-case-model", 2, "useCaseRelationships", "SRS-REL-", "rationale", [
       link("fromUseCaseId", "From use case", useCaseReference, { completion: false }),
-      choice("relationship", "Relationship", ["Includes", "Extends", "Specializes"]),
+      choice("relationship", "Relationship", ["Includes", "Extends", "Specializes"], { aiHint: 'Use Includes for required reused behavior, Extends from optional behavior to its base, or Specializes from child to parent. Do not use these links for temporal sequence.' }),
       link("toUseCaseId", "To use case", useCaseReference),
-      text("condition", "Condition or extension point (when applicable)"),
+      text("condition", "Condition or extension point (when applicable)", { aiHint: 'Supply the supported condition or named extension point when this relationship needs it; otherwise leave blank.' }),
       text("rationale", "Why this relationship is needed")
     ], { itemLabel: "Relationship", addLabel: "Add relationship", parent: {
       fieldKey: "fromUseCaseId", reference: useCaseReference, label: "Source use case",

@@ -31,12 +31,14 @@ export const notesSchema: SchemaNode = {
     ]
   },
   ai: {
+    task: 'Establish the current understanding of every requested project note and its useful supporting references.',
+    showInterview: true,
     definitions: [
       { term: "Reference", definition: "A source or precise locator supporting a note." },
       { term: "Edit history", definition: "A dated explanation of a meaningful revision that actually occurred." }
     ],
-    draftingGuidance: "Treat General Notes as a traceable living notebook, not as a formal requirements specification. Keep one coherent subject per note, preserve the user's wording where meaningful, distinguish facts from interpretations and open questions, and attach each source only to the note it supports. Do not fabricate reference details, dates, authors, related IDs, or edit history. An edit-history record is appropriate only for a meaningful revision that actually occurred; it must state what changed and why.",
-    interviewGuidance: "Review existing workspace content first and identify noteworthy facts, decisions, questions, risks, observations, and research that do not already have a better canonical home. Ask for the exact source locator for each claim when available. When reviewing an existing note, confirm its current status and ask whether a meaningful change needs a dated edit explanation. Avoid turning the notebook into a duplicate requirements catalog."
+    draftingGuidance: "Format the complete requested note bodies and supported reference records. Keep one coherent subject per note, preserve meaningful user wording and distinguish facts from interpretations and open questions. Attach each source only to the note it supports. Do not fabricate citations, dates or authors. Creation dates and edit-history records are managed by the app; the optional change explanation is entered separately when editing.",
+    interviewGuidance: "Review every current note and all its reference records using the supplied tab inventory and reliable earlier conversation or memory. Clarify missing meaning or source details that affect interpretation, then identify useful new notes that have no better canonical home. References are optional; do not turn missing optional citations into a blocker or duplicate the requirements catalog."
   },
   document: {
     titleField: "projectName",
@@ -59,6 +61,8 @@ export const notesSchema: SchemaNode = {
       fields: [
         {
           key: "maintainedBy",
+          editable: false,
+          includeInPrompt: false,
           label: "Maintained by",
           type: "text",
           default: "",
@@ -69,6 +73,8 @@ export const notesSchema: SchemaNode = {
         },
         {
           key: "version",
+          editable: false,
+          includeInPrompt: false,
           label: "Working version",
           type: "text",
           default: "0.1",
@@ -79,6 +85,8 @@ export const notesSchema: SchemaNode = {
         },
         {
           key: "lastReviewDate",
+          editable: false,
+          includeInPrompt: false,
           label: "Last reviewed",
           type: "date",
           default: "",
@@ -88,6 +96,8 @@ export const notesSchema: SchemaNode = {
         },
         {
           key: "notebookPurpose",
+          editable: false,
+          includeInPrompt: false,
           label: "Notebook purpose and scope",
           type: "textarea",
           rows: 3,
@@ -99,6 +109,8 @@ export const notesSchema: SchemaNode = {
         },
         {
           key: "maintenanceConvention",
+          editable: false,
+          includeInPrompt: false,
           label: "Maintenance convention",
           type: "textarea",
           rows: 2,
@@ -122,7 +134,7 @@ export const notesSchema: SchemaNode = {
         minimum: 1,
         displayId: { prefix: "GN-NOTE-", padding: 3 },
         completionFields: ["body"],
-        aiAddendum: "Create a separate note for each materially different subject. References and edit-history entries are nested beneath the note they belong to. It is valid for a note to have no reference or edit-history record when none exists; do not manufacture either.",
+        aiAddendum: "Provide a separate complete note for each requested subject, with all supported references nested beneath that note and each reference's declared sub-fields. A note may have zero references. The app manages creation dates and edit history; do not output invented history records.",
         fields: [
           {
             key: "body",
@@ -146,7 +158,7 @@ export const notesSchema: SchemaNode = {
             minimum: 0,
             emptyText: "No references added. Add one whenever a source, meeting, document, link, or precise locator supports this note.",
             description: "Attach any number of sources directly to this note.",
-            aiHint: "Keep each distinct source in its own record. Omit the collection when the note has no known source; never invent a citation.",
+            aiHint: "Keep each distinct supported source in its own record with its declared sub-fields. No known sources means zero reference records; never invent a citation.",
             fields: [
               {
                 key: "title",
@@ -208,9 +220,11 @@ export const notesSchema: SchemaNode = {
             itemLabel: "Edit",
             addLabel: "Record meaningful edit",
             minimum: 0,
+            editable: false,
+            includeInPrompt: false,
             emptyText: "No meaningful edits recorded. Minor spelling or formatting fixes do not need an entry.",
             description: "Append a dated explanation when the note's meaning, status, evidence, or conclusion changes.",
-            aiHint: "Create an edit record only for a real, meaningful revision. Never backfill invented dates, editors, changes, or reasons.",
+            aiHint: "The application creates edit history from actual changes and the user's optional explanation. This is not a form-entry task; preserve stored history.",
             fields: [
               {
                 key: "editedDate",

@@ -1,6 +1,7 @@
 import type { Field, FieldOption, Section, Repeater, SchemaNode, Reference, EvidenceSource, EvidenceGroup, GuideStep, Guide, AiGuidance, AiDefinition, DocumentConfig, Evidence } from '../../../core/schema/schema-types.ts';
 import { requirementFields } from "../requirement-fields.ts";
 import { followUpGuidance } from "../issue-follow-up.ts";
+import { promptGuidance } from '../workflow/prompt-guidance.ts';
 import { text, choice, recordSection } from "../phase-three/shared.ts";
 import { requirementKindField, requirementFilter, requirementDisplayId } from "../requirement-records.ts";
 
@@ -42,9 +43,9 @@ export function stage(id: string, stateKey: string, label: string, description: 
     evidence: { title: "Evidence already in this workspace", summary: "Review these short references and open the source when a correction is needed. Clipboard prompts include the connected evidence, not diagram payloads.", sources },
     guide: { title: `Build ${label.toLowerCase()}`, summary: description, steps: [...steps, { title: "Carry every question forward", text: followUpGuidance }] },
     ai: {
-      includeSiblingContext: true,
-      draftingGuidance: `${guidance} ${followUpGuidance} Reuse canonical IDs; do not rewrite earlier catalogs. Distinguish evidenced constraints, proposed targets, and unverified assumptions. Never invent thresholds, legal applicability, technology choices, or approval. Record conflicts in the shared SRS-ISS register. Diagram metadata is context, not proof of diagram contents.`,
-      interviewGuidance: `${guidance} ${followUpGuidance} Start from connected evidence and ask one missing decision at a time. Explain which earlier behavior or boundary raises the question. Allow justified non-applicability. Do not ask the user to re-enter known content; propose qualified wording for confirmation, not invented facts.`
+      ...promptGuidance[id],
+      draftingGuidance: promptGuidance[id]?.draftingGuidance || `${guidance} Format every requested record using canonical IDs and established facts. Distinguish evidenced constraints, proposed targets and unverified assumptions. Never invent thresholds, legal applicability, technology choices or approval. Diagram metadata does not prove omitted file contents.`,
+      interviewGuidance: promptGuidance[id]?.interviewGuidance || 'Cover every applicable category and current obligation using the supplied tab inventory and reliable prior conversation or memory. Clarify missing conditions, targets or boundary decisions before the handoff; non-applicability is a supported choice.'
     },
     sections
   };

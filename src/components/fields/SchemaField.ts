@@ -1,23 +1,32 @@
+import type { CopyRequest, DocumentModel, Field } from '../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
 import { narrativeMarkdown } from "../../core/formatting/markdown.ts";
 import { DateField } from "./DateField.ts";
 import { RecordLinksField } from "./RecordLinksField.ts";
 import { createNestedItem } from "../../core/schema/state-factory.ts";
 import { nextNumericId, displayValue } from "../../core/records/record-values.ts";
 import { DiagramFileField } from "../diagrams/DiagramFileField.ts";
+import { CopyPromptControl } from "../controls/FormControls.ts";
+import type { FieldPromptFactory } from "../controls/FormControls.ts";
+import { fieldVisible } from '../../core/schema/field-visibility.ts';
+import { isDataModel } from '../../core/schema/data-models.ts';
+import { resolveReferenceField } from '../../core/records/reference-fields.ts';
 
 export const SchemaField = defineComponent({
   name: "SchemaField",
-  components: { DiagramFileField, RecordLinksField, DateField },
-  emits: ["update:modelValue"],
+  components: { DiagramFileField, RecordLinksField, DateField, CopyPromptControl },
+  emits: ["update:modelValue", "copy-markdown"],
   props: {
     field: { type: Object as PropType<Field>, required: true },
     idBase: { type: String, required: true },
     modelValue: { type: null as unknown as PropType<unknown>, required: false },
     periods: { type: Number, default: 0 },
-    documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) }
+    documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) },
+    copyPrompt: { type: Function as unknown as PropType<FieldPromptFactory | null>, default: null },
+    promptPath: { type: Array as PropType<readonly (string | number)[]>, default: () => [] },
+    copiedSection: { type: String, default: '' },
+    inputClass: { type: String, default: '' }
   },
   methods: {
     narrativeMarkdown,
@@ -43,11 +52,13 @@ export const SchemaField = defineComponent({
     nestedItemTitle(index: number) {
       return `${this.field.itemLabel || "Item"} ${index + 1}`;
     },
-    nestedPrimaryFields() {
-      return (this.field.fields || []).filter((field) => !field.advanced);
+    requestForItem(index: number): CopyRequest | null {
+      return this.copyPrompt && this.field.includeInPrompt !== false ? this.copyPrompt([...this.promptPath, index]) : null;
     },
-    nestedAdvancedFields() {
-      return (this.field.fields || []).filter((field) => field.advanced);
+    nestedFields(record: unknown, advanced: boolean): Field[] {
+      const model = isDataModel(record) ? record : {};
+      return (this.field.fields || []).filter(field => !!field.advanced === advanced && !field.hidden && fieldVisible(field, model))
+        .map(field => resolveReferenceField(field, this.documentModel, model[field.key]));
     },
     removeNestedItem(index: number) {
       const records = Array.isArray(this.modelValue) ? [...this.modelValue] : [];
@@ -79,7 +90,10 @@ export const SchemaField = defineComponent({
     <div :class="field.columns || 'col-12'">
       <details v-if="field.optional && !field.dateDocument" :open="!!modelValue">
         <summary><span v-if="narrativeMarkdown(field) && field.editable !== false" class="markdown-field-badge" title="Markdown supported" aria-label="Markdown supported">M↓</span>{{ field.label }}</summary>
-        <schema-field :field="{ ...field, optional: false, hideLabel: true }" :id-base="idBase" :model-value="modelValue" :document-model="documentModel" :periods="periods" @update:model-value="$emit('update:modelValue', $event)"></schema-field>
+        <schema-field :field="{ ...field, optional: false, hideLabel: true }" :id-base="idBase" :model-value="modelValue" :document-model="documentModel" :periods="periods"
+          :input-class="inputClass"
+          :copy-prompt="copyPrompt" :prompt-path="promptPath" :copied-section="copiedSection"
+          @copy-markdown="$emit('copy-markdown', $event)" @update:model-value="$emit('update:modelValue', $event)"></schema-field>
       </details>
       <template v-else-if="field.editable === false">
         <p class="form-label mb-1" :class="{ 'visually-hidden': field.hideLabel }">{{ field.label }}</p>
@@ -101,6 +115,10 @@ export const SchemaField = defineComponent({
           <article v-for="(record, recordIndex) in modelValue" :key="record.id" class="nested-record-card">
             <header class="nested-record-card-heading">
               <h5 class="mb-0">{{ nestedItemTitle(recordIndex) }}</h5>
+              <copy-prompt-control persistent v-if="requestForItem(recordIndex)" :copied="copiedSection === requestForItem(recordIndex).key"
+                :label="'Copy formatted-answer prompt for ' + nestedItemTitle(recordIndex)"
+                tooltip="Copies the complete input structure for this nested item. The AI returns this item's formatted answers."
+                @copy="$emit('copy-markdown', requestForItem(recordIndex))"></copy-prompt-control>
               <button
                 v-if="modelValue.length > (field.minimum || 0)"
                 class="btn btn-link btn-sm text-danger p-0"
@@ -110,25 +128,31 @@ export const SchemaField = defineComponent({
             </header>
             <div class="row g-3">
               <schema-field
-                v-for="nestedField in nestedPrimaryFields()"
+                v-for="nestedField in nestedFields(record, false)"
                 :key="nestedField.key"
                 :field="nestedField"
                 :id-base="idBase + '-' + record.id + '-' + nestedField.key"
                 :model-value="record[nestedField.key]"
                 :periods="periods"
+                :document-model="documentModel"
+                :copy-prompt="field.includeInPrompt !== false ? copyPrompt : null" :prompt-path="[...promptPath, recordIndex, nestedField.key]" :copied-section="copiedSection"
+                @copy-markdown="$emit('copy-markdown', $event)"
                 @update:model-value="updateNestedValue(recordIndex, nestedField.key, $event)"
               ></schema-field>
-              <div v-if="nestedAdvancedFields().length" class="col-12">
+              <div v-if="nestedFields(record, true).length" class="col-12">
                 <details class="nested-record-advanced">
                   <summary>More citation details</summary>
                   <div class="row g-3 pt-3">
                     <schema-field
-                      v-for="nestedField in nestedAdvancedFields()"
+                      v-for="nestedField in nestedFields(record, true)"
                       :key="nestedField.key"
                       :field="nestedField"
                       :id-base="idBase + '-' + record.id + '-' + nestedField.key"
                       :model-value="record[nestedField.key]"
                       :periods="periods"
+                      :document-model="documentModel"
+                      :copy-prompt="field.includeInPrompt !== false ? copyPrompt : null" :prompt-path="[...promptPath, recordIndex, nestedField.key]" :copied-section="copiedSection"
+                      @copy-markdown="$emit('copy-markdown', $event)"
                       @update:model-value="updateNestedValue(recordIndex, nestedField.key, $event)"
                     ></schema-field>
                   </div>
@@ -180,6 +204,7 @@ export const SchemaField = defineComponent({
           v-if="field.type === 'textarea'"
           :id="idBase"
           class="form-control"
+          :class="inputClass"
           :rows="field.rows || 3"
           :placeholder="field.placeholder || ''"
           :value="modelValue"

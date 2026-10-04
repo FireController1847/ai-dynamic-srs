@@ -1,3 +1,4 @@
+import { promptGuidance } from "../workflow/prompt-guidance.ts";
 import { vocabularyBaselineSources } from "./evidence.ts";
 
 export const vocabularyBaselineStage = {
@@ -34,8 +35,7 @@ export const vocabularyBaselineStage = {
     ]
   },
   ai: {
-    draftingGuidance: "Extract candidate terms only from the connected workspace evidence. Prefer the client's domain language, define it in the context of this system, preserve conflicting usage, and do not invent data entities, actors, statuses, acronyms, or policies.",
-    interviewGuidance: "Show the user the source wording that creates ambiguity, then ask for the preferred term and intended meaning. Do not conduct a general requirements interview at this stage."
+    ...promptGuidance["srs-baseline-vocabulary"]
   },
   sections: [
     {

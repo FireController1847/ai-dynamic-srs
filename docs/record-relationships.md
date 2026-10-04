@@ -27,7 +27,7 @@ This review concerns repeated entry of an existing parent/context link, not crea
 - `src/components/forms/RelatedRecordGroups.ts`: add, move, retire, and scoped copy actions; used by `DynamicForm` only when a section opts in.
 - `src/components/forms/RelatedRecordItem.ts`: ordinary fields plus an optional name-based reassignment control. No repeated parent field in normal grouped editing.
 - `repeatable.parent` in the relevant feature schema: owns domain vocabulary, relationship field, parent source, eligibility, and ungrouped behavior.
-- `core/ai/prompt-contract.ts` and `prompt-builder.ts`: explain automatic links, provide available parent contexts, and keep existing links as context rather than asking for redundant field answers.
+- `core/ai/prompt-schema.ts`, `form-prompt.ts`, and `prompt-contract.ts`: render complete child contracts and scoped outputs, provide available parent contexts, and keep automatic links as context. [AI prompt contract](ai-prompts.md) defines the shared workflow.
 
 Generic components do not import feature modules. Parent grouping is a display projection, not a new saved structure. Previews and downstream catalogs retain canonical record placement and links. The existing Actors & Goals component remains specialized because it edits the parent itself alongside its children.
 
@@ -52,5 +52,5 @@ No builds, tests, browser checks, or other automated checks were run for this re
 4. In each interface category, add an actor-linked obligation and a qualified boundary obligation without an actor. Confirm category, requirement kind, ID namespace, and boundary answers remain intact when moved.
 5. In System Request, add a benefit beneath a capability. Also edit a cross-cutting benefit with several references. Save its relationship and confirm it remains cross-cutting rather than being reduced to one parent.
 6. Remove a parent that has children. Confirm children appear in recovery rather than disappearing. Reassign one, retire another, and verify saved/preview behavior. Also try old data with blank, invalid, or unavailable parent references.
-7. Copy a group-specific prompt. Confirm its editable records are limited to that group/category, the parent is context rather than a repeated input, and supporting evidence remains available. Check the tab interview's grouping instructions as well.
+7. Copy group, record, and nested-item prompts. Confirm their requested editable scope is exact, the automatic parent is context, supporting evidence remains available, and responses return complete supported answers without follow-up questions. Copy the tab interview and confirm all eligible groups and their child records appear in its coverage inventory.
 8. Compare form completion and document previews before/after moving records. Confirm automatic linking does not count as a user-entered answer, ungrouped records remain visible, and children are neither duplicated nor dropped.

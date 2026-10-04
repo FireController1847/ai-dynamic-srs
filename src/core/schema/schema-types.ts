@@ -41,8 +41,8 @@ export interface AiDefinition { term: string; definition: string; }
 export interface AiGuidance {
   [key: string]: unknown;
   task?: string; definitions?: AiDefinition[]; draftingGuidance?: string;
-  interviewGuidance?: string; includeSiblingContext?: boolean; compactInterview?: boolean;
-  orientation?: { focus?: string; example?: string; what?: string; plan?: string; requiredDefinitions?: string[] };
+  interviewGuidance?: string; showInterview?: boolean;
+  orientation?: { focus?: string; example?: string; what?: string; requiredDefinitions?: string[] };
 }
 export interface Section {
   [key: string]: unknown;
@@ -57,7 +57,7 @@ export interface EvidenceSource {
   pageId: string; nodeId?: string; dataPath?: DataPath; reason?: string; referenceRole?: string;
   groups?: EvidenceGroup[]; subpageSelections?: Record<string, string>;
 }
-export interface Evidence { kicker?: string; title?: string; summary?: string; sources: EvidenceSource[]; interviewSources?: EvidenceSource[]; }
+export interface Evidence { kicker?: string; title?: string; summary?: string; sources: EvidenceSource[]; }
 export interface GuideStep { title: string; text: string; }
 export interface Guide {
   [key: string]: unknown; title?: string; summary?: string; paragraphs?: string[]; steps?: GuideStep[]; terms?: AiDefinition[]; }

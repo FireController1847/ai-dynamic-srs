@@ -1,19 +1,19 @@
-import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../../core/schema/schema-types.ts';
+import type { CopyRequest, DataModel, Field, SchemaNode, Section } from '../../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../../core/schema/schema-types.ts';
 import { SupportingWork } from "../simplification/SupportingWork.ts";
 import { DynamicForm, dynamicFormProps } from "../../../components/forms/FormWorkspace.ts";
 import type { RepeatableSection } from "../../../components/forms/FormWorkspace.ts";
 import { SchemaField } from "../../../components/fields/SchemaField.ts";
-import { SectionInfo } from "../../../components/controls/FormControls.ts";
+import { CopyPromptControl, SectionInfo } from "../../../components/controls/FormControls.ts";
+import type { FieldPromptFactory } from '../../../components/controls/FormControls.ts';
 import { WorkspaceEvidencePanel } from "../../../components/references/WorkspaceEvidencePanel.ts";
 import { createRepeaterItem } from "../../../core/schema/state-factory.ts";
 import { dataModelForSection, mutableRecords } from "../../../core/schema/data-models.ts";
 import { fieldVisible } from "../../../core/schema/field-visibility.ts";
 import { resolveReferenceField } from "../../../core/records/reference-fields.ts";
 import { sectionRecords } from "../../../core/schema/section-records.ts";
-import { buildSectionPrompt } from "../../../core/ai/prompt-builder.ts";
+import { buildFormPrompt } from "../../../core/ai/prompt-builder.ts";
 import { addEvidenceContextToPrompt } from "../../../core/ai/evidence-context.ts";
 import { formatRecordDisplayId, nextNumericId, hasNonDefaultValue } from "../../../core/records/record-values.ts";
 import { ActorGoalEditor } from "./ActorGoalEditor.ts";
@@ -21,7 +21,7 @@ import type { ActorChoice } from "./ActorGoalEditor.ts";
 
 export const ActorsGoalsForm = defineComponent({
   name: "ActorsGoalsForm",
-  components: { SupportingWork, DynamicForm, SchemaField, SectionInfo, WorkspaceEvidencePanel, ActorGoalEditor },
+  components: { SupportingWork, DynamicForm, SchemaField, SectionInfo, CopyPromptControl, WorkspaceEvidencePanel, ActorGoalEditor },
   props: dynamicFormProps,
   emits: ["copy-markdown", "navigate-workspace"],
   computed: {
@@ -69,8 +69,8 @@ export const ActorsGoalsForm = defineComponent({
       const index = records.indexOf(item);
       if (index >= 0) records.splice(index, 1);
     },
-    copyKey(section: Section): string {
-      return `${this.pageSchema.id}:${section.key}`;
+    copyKey(section: Section, record?: DataModel, path: readonly (string | number)[] = []): string {
+      return `${this.pageSchema.id}:${section.key}:${record ? 'record-' + record.id : 'section'}:${JSON.stringify(path)}`;
     },
     fieldId(section: Section, field: Field, item: DataModel | null = null): string {
       return [this.pageSchema.id, section.id, item?.id, field.key].filter(Boolean).join("-");
@@ -81,9 +81,18 @@ export const ActorsGoalsForm = defineComponent({
       return fields.filter(field => !field.hidden && fieldVisible(field, model))
         .map(field => resolveReferenceField(field, this.documentModel, model[field.key]));
     },
-    promptFor(section: Section): string {
-      const prompt = buildSectionPrompt(this.pageSchema, section, this.dataModel, this.documentModel);
+    promptFor(section: Section, record?: DataModel, fieldPath?: readonly (string | number)[]): string {
+      const prompt = buildFormPrompt(this.pageSchema, section, this.dataModel, this.documentModel, { record, fieldPath });
       return addEvidenceContextToPrompt(prompt, this.pageSchema.evidence, this.documentModel, this.documentSchemas);
+    },
+    promptRequest(section: Section, record?: DataModel, path: readonly (string | number)[] = []): CopyRequest {
+      const recordLabel = record && section.repeatable ? formatRecordDisplayId(section.repeatable.displayId, record) : '';
+      const form = this;
+      return { get markdown() { return form.promptFor(section, record, path); }, title: [section.title, recordLabel, ...path].filter(value => value !== '').join(' — '),
+        key: this.copyKey(section, record, path) };
+    },
+    fieldPromptFactory(section: Section, record: DataModel): FieldPromptFactory {
+      return path => this.promptRequest(section, record, path);
     },
     actorId(actor: DataModel): string { return formatRecordDisplayId(this.actorSection.repeatable.displayId, actor); },
     goalsFor(actor: DataModel): DataModel[] { return this.goals.filter(goal => String(goal.actorId || "") === this.actorId(actor)); },
@@ -104,7 +113,7 @@ export const ActorsGoalsForm = defineComponent({
     goalPromptSection(actor: DataModel): RepeatableSection {
       return { ...this.goalSection, key: `goals-for-${actor.id}`, title: `Goals for ${actor.name || 'unnamed actor'} (${this.actorId(actor)})`,
         description: "Add or refine goals beneath this actor. The form assigns their actor automatically.",
-        ai: { draftingGuidance: "Return only this actor's goal updates. Do not output an Actor ID field; the form supplies that link. Keep goal IDs stable and let the application allocate IDs for new goals." },
+        ai: { draftingGuidance: "Return complete requested goal records for this actor, including every applicable editable value and valid unchanged answers. Do not output other actors' goals or an Actor ID field; the form supplies that link. Keep goal IDs stable and let the application allocate IDs for new goals." },
         repeatable: { ...this.goalSection.repeatable,
           fields: this.goalSection.repeatable.fields.map(field => field.key === "actorId" ? { ...field, includeInPrompt: false } : field),
           recordFilter: { key: "actorId", equals: this.actorId(actor) } }
@@ -128,16 +137,27 @@ export const ActorsGoalsForm = defineComponent({
               </div><p class="text-body-secondary mb-0">Describe a role, then add the outcomes it needs below. Goals are linked automatically.</p></div>
             <button type="button" class="btn btn-outline-primary btn-sm" @click="addItem(actorSection)">Add actor</button>
           </div>
-          <span :id="pageSchema.id + '-goal-catalog'"></span>
+          <div :id="pageSchema.id + '-goal-catalog'" class="section-title-row">
+            <span class="small text-body-secondary">All goals</span>
+            <section-info :title="goalSection.title" :help="goalSection.help" :copy-key="copyKey(goalSection)"
+              :copy-text="promptFor(goalSection)" :copied="copiedSection === copyKey(goalSection)"
+              @copy-markdown="$emit('copy-markdown', $event)"></section-info>
+          </div>
           <article v-for="actor in actors" :key="actor.id" class="repeatable-item mt-4">
             <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
               <h4 class="h6 mb-0">{{ actor.name || 'New actor' }} <small class="text-body-secondary">{{ actorId(actor) }}</small></h4>
+              <copy-prompt-control persistent :copied="copiedSection === copyKey(actorSection, actor)"
+                :label="'Copy formatted-answer prompt for ' + actorId(actor)"
+                tooltip="Copies every field for this actor. The AI returns ready-to-enter answers for this actor."
+                @copy="$emit('copy-markdown', promptRequest(actorSection, actor))"></copy-prompt-control>
               <button v-if="actors.length > actorSection.repeatable.minimum" type="button" class="btn btn-link btn-sm text-danger"
                 @click="removeItem(actorSection, actor)">Remove actor</button>
             </div>
             <div class="row g-3">
               <schema-field v-for="field in fieldsFor(actorSection, actor)" :key="field.key" :field="field" :document-model="documentModel"
-                :id-base="fieldId(actorSection, field, actor)" :model-value="actor[field.key]" @update:model-value="actor[field.key] = $event"></schema-field>
+                :id-base="fieldId(actorSection, field, actor)" :model-value="actor[field.key]"
+                :copy-prompt="fieldPromptFactory(actorSection, actor)" :prompt-path="[field.key]" :copied-section="copiedSection"
+                @copy-markdown="$emit('copy-markdown', $event)" @update:model-value="actor[field.key] = $event"></schema-field>
             </div>
             <div class="d-flex align-items-center justify-content-between gap-2 mt-4">
               <div class="section-title-row"><h4 class="h6 mb-0">Goals for {{ actor.name || 'this actor' }}</h4>
@@ -150,7 +170,9 @@ export const ActorsGoalsForm = defineComponent({
             <p v-if="actor.status === 'Not an actor'" class="small text-warning mt-2">This role is marked “Not an actor.” Review or move its existing goals before proceeding.</p>
             <p v-else-if="!goalsFor(actor).length" class="small text-body-secondary mt-2">Add an outcome this actor needs when one applies.</p>
             <actor-goal-editor v-for="goal in goalsFor(actor)" :key="goal.id" :goal="goal" :section="goalSection"
-              :document-model="documentModel" :actors="actorChoices" @move="moveGoal" @remove="removeItem(goalSection, $event)"></actor-goal-editor>
+              :document-model="documentModel" :actors="actorChoices" :copied-section="copiedSection"
+              :record-prompt="promptRequest(goalPromptSection(actor), goal)" :copy-prompt="fieldPromptFactory(goalPromptSection(actor), goal)"
+              @copy-markdown="$emit('copy-markdown', $event)" @move="moveGoal" @remove="removeItem(goalSection, $event)"></actor-goal-editor>
           </article>
         </div>
       </section>
@@ -158,7 +180,9 @@ export const ActorsGoalsForm = defineComponent({
         <h3 class="h5">Goals needing an actor</h3>
         <p class="text-body-secondary">These saved goals have no available actor. Assign them by name below. Removing an actor never deletes its goals.</p>
         <actor-goal-editor v-for="goal in unassignedGoals" :key="goal.id" :goal="goal" :section="goalSection"
-          :document-model="documentModel" :actors="actorChoices" :unassigned="true" @move="moveGoal" @remove="removeItem(goalSection, $event)"></actor-goal-editor>
+          :document-model="documentModel" :actors="actorChoices" :unassigned="true" :copied-section="copiedSection"
+          :record-prompt="promptRequest(goalSection, goal)" :copy-prompt="fieldPromptFactory(goalSection, goal)"
+          @copy-markdown="$emit('copy-markdown', $event)" @move="moveGoal" @remove="removeItem(goalSection, $event)"></actor-goal-editor>
       </section>
     </div>
   `

@@ -1,7 +1,7 @@
 import type { Field, FieldOption, Section, Repeater, SchemaNode, Reference, EvidenceSource, EvidenceGroup, GuideStep, Guide, AiGuidance, AiDefinition, DocumentConfig, Evidence } from '../../../core/schema/schema-types.ts';
-import { simplifiedEvidence } from "./evidence.ts";
 import { promptTasks } from "../workflow/prompt-tasks.ts";
 import { promptDefinitions } from "../workflow/prompt-definitions.ts";
+import { promptGuidance } from '../workflow/prompt-guidance.ts';
 import { humanSectionHelp, scalarSectionHelp, stageGuides } from './help-content.ts';
 import { simplifyReference } from "./references.ts";
 import { recordFields, essentialFields } from './field-policy.ts';
@@ -38,7 +38,7 @@ function compactSection(section: Section, stageId: string): Section | null {
   if (stageId === 'srs-behavior-detailed-descriptions') fields = fields.map(f => ['normalFlow', 'subflows', 'alternativeFlows'].includes(f.key)
     ? { ...f, showWhen: { key: 'detailLevel', notIn: ['Overview sufficient'] }, preserveWhenHidden: true } : f);
   fields = fields.map(simplifyReference).map(f => ['sourceReferences', 'priority', 'boundaryName', 'stakeholderInterests', 'descriptionStyle', 'specialConditions', 'subflows', 'failureGuarantee', 'preconditions'].includes(f.key)
-    ? { ...f, optional: true, aiHint: 'Supply only if necessary and not already established by the main answer or linked record.' } : f);
+    ? { ...f, optional: true, aiHint: `${f.aiHint || ''} Supply only if necessary and not already established by the main answer or linked record.`.trim() } : f);
   const completionFields = stageId === 'srs-behavior-detailed-descriptions' && r.dataKey === 'useCases'
     ? ['trigger', 'detailLevel', 'normalFlow']
     : essentialFields[r.dataKey] || [];
@@ -86,10 +86,9 @@ export function simplifyStage(stage: SchemaNode): SchemaNode {
   const guide = stageGuides[stage.id];
   return { ...stage, label: stage.id === 'srs-discovery-processes' ? 'Use Cases' : stage.id === 'srs-discovery-perspectives' ? 'User Classes' : stage.label,
     description: guide.summary, sections, omitEmptyFields: true,
-    evidence: simplifiedEvidence(stage),
     formComponent: stage.id === 'srs-discovery-actors-goals' ? 'actors-goals-form' : 'simplified-stage-form',
     form: { ...stage.form, intro: guide.summary, showCompletion: true },
     guide,
-    ai: { ...stage.ai, task, definitions: promptDefinitions[stage.id] || [], compactInterview: true, includeSiblingContext: false, draftingGuidance: task, interviewGuidance: task }
+    ai: { ...stage.ai, task, definitions: promptDefinitions[stage.id] || [], showInterview: true, ...promptGuidance[stage.id] }
   };
 }

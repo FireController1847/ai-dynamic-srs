@@ -1,6 +1,6 @@
-# SRS authoring 0.3.0-alpha
+# SRS authoring
 
-This supersedes the earlier form-depth, review-questionnaire, AI-handoff and completion contracts in `srs-construction-workflow.md` and `srs-phase-three-four-review.md`. The course template's brief scope, feature list, user characteristics, role/outcome descriptions and progressively detailed use cases set the normal depth. A useful SRS does not require a separate explanation of every classification or a repeated declaration that nothing was found.
+This defines the active concise forms and completion contracts, superseding the earlier form-depth and review questionnaires in `srs-construction-workflow.md` and `srs-phase-three-four-review.md`. [AI prompt contract](ai-prompts.md) is authoritative for all AI behavior. The course template's brief scope, feature list, user characteristics, role/outcome descriptions and progressively detailed use cases set the normal depth. A useful SRS does not require a separate explanation of every classification or a repeated declaration that nothing was found.
 
 ## Implementation map
 
@@ -9,13 +9,13 @@ This supersedes the earlier form-depth, review-questionnaire, AI-handoff and com
 | Active authoring fields, essentials and legacy qualifications | `src/features/software-requirements/simplification/field-policy.ts` |
 | Stage composition, short forms, category applicability, optional controls | `simplification/stages.ts` |
 | Name-based record links | `simplification/references.ts`, generic `components/fields/RecordLinksField.ts` |
-| Interview prerequisites | `simplification/evidence.ts` |
+| Connected sources for form evidence | `simplification/evidence.ts` |
 | Each tab's finish line | `workflow/prompt-tasks.ts` |
 | Human tab guides and section tips | `simplification/help-content.ts` |
 | AI interview definitions | `workflow/prompt-definitions.ts` |
 | Shared questions | `simplification/SupportingWork.ts` |
 | Phase 1 explicit preview reduction | `simplification/preview.ts` |
-| Guidance/field prompt separation | `core/ai/prompt-builder.ts`, `prompt-contract.ts`, `evidence-context.ts` |
+| Interview/form prompt separation and child contracts | `core/ai/{interview-prompt,form-prompt,prompt-schema,prompt-builder,prompt-contract,evidence-context}.ts`; `docs/ai-prompts.md` |
 
 Paths in the table without `src/` are relative to `src/features/software-requirements/`, except the explicitly named core/components/app paths, which are relative to `src/`.
 
@@ -47,13 +47,11 @@ Progress percentages, bars, phase totals and completed-tab indicators are availa
 
 Human guides and section tips are authored independently of AI instructions. Every implemented stage has an on-page guide with explanatory paragraphs, including completed stages. Section question marks show plain prose for the current form, without a fixed What/Why/What-to-enter format. The separate copy button generates the AI prompt from `ai` descriptors and supplied records; prompt builders never read the human guide or tooltip. Category applicability controls have their own helper text.
 
-The guidance interview explains essential terms naturally, asks one consequential question at a time and stops at the tab's finish line. It contains no field-by-field questionnaire, selector option dump or final form contract. Context comes from immediate prerequisites and saved answers; excerpts are explicitly labeled, and omission must not be treated as absence.
-
-The handoff gives numbered items and counts, including child counts. It directs the user to create entries and paste the relevant field/section prompts. Those prompts resume the same conversation, keep inventory order, supply precise references and request only needed field updates. No new-record IDs are invented; no generic no-findings paragraphs are requested. Long flows retain necessary detail despite otherwise brief output.
+The tab interview receives the complete active schema and current-tab inventory/answers, including every eligible use case, child field, choice, and conditional possibility. It gathers missing information naturally and tracks coverage of all applicable entries before handing off to the exact scoped copy controls. Earlier connected-source evidence is omitted; reliable available conversation history or project memory supplies those facts. Form prompts return complete supported answers for their selected scope, with no follow-up questions or update-only contract. The shared [AI prompt contract](ai-prompts.md) covers section, group, individual-record, field, and nested-field behavior; `guided-interviews.md` supplies manual cases.
 
 ## Saved workspaces
 
-Application version is 0.3.0-alpha and new saves use workspace envelope version 2. Imports and local storage validate the envelope and normalize current fields; there is no version migration, answer conversion, archive creation, recovery UI or legacy navigation remapping. Accepted older envelopes are read as supplied. Undeclared saved values are preserved without rewriting or deleting them, including data previously produced by migration.
+Application version is 0.4.0-alpha and new saves use workspace envelope version 2. Imports and local storage validate the envelope and normalize current fields; there is no version migration, answer conversion, archive creation, recovery UI or legacy navigation remapping. Accepted older envelopes are read as supplied. Undeclared saved values are preserved without rewriting or deleting them, including data previously produced by migration.
 
 Optional inputs show their title once in the disclosure summary. The inner input retains a visually hidden label for accessibility.
 
@@ -65,10 +63,10 @@ Optional inputs show their title once in the disclosure summary. The inner input
 4. Select several named links, retain an unavailable saved link, remove one explicitly, then save/reopen. Inspect preview labels and copied reference values.
 5. Inspect every implemented SRS stage: no retired review questionnaires, no archived-answer recovery UI, no blank optional field paragraphs in previews, and an accessible AI guidance button alongside the completion percentage and bar. Fill essential answers and inspect phase totals and completed-tab indicators; blank optional answers must not block completion. In Detailed Descriptions, switch between overview and detailed behavior and confirm only visible essential fields count. Phase 5–7 placeholders must remain incomplete.
 6. Add functional, quality and interface obligations. Confirm category/kind filters and namespaces remain distinct; optional acceptance detail is not required. Exercise Applicable / Not applicable / Needs clarification without creating placeholder requirements.
-7. Copy an Actors & Goals guide: verify natural definitions, compact prerequisite context, no field inventory, numbered actor/goal counts and the field-prompt handoff. Paste a scoped goal prompt afterwards: only the selected actor's fields should be returned, in order, without invented IDs.
+7. Copy Actors & Goals and Use Cases tab interviews: verify natural definitions, complete eligible inventories/current values/child contracts, reuse of available prior context, coverage of every applicable item, and the scoped-prompt handoff. Paste group, record, and field prompts afterwards: only the requested scope should be returned, in order, with complete supported answers and no invented IDs or follow-up questions.
 8. Inspect Phase 1 carried scope/features/references and all diagram previews/print output. Confirm payloads never enter text prompts.
 9. Expand optional fields: the title should appear once, while the control retains an accessible label. Try a fresh workspace: no recovery archive, no phantom canonical records, no repeated-use-case catalog, and no approval inferred from defaults.
-10. Open the human guide on all 16 implemented stages, including completed tabs. Inspect section tips and the quality/interface applicability tips by mouse and keyboard: meaningful prose, no empty sections or undefined values. Copy the separate AI interview and section prompts; confirm their instructions, definitions, exact references and saved context remain present without copying the on-page help.
+10. Open the human guide on all 16 implemented stages, including completed tabs. Inspect section tips and the quality/interface applicability tips by mouse and keyboard: meaningful prose, no empty sections or undefined values. Copy the separate AI interview and form prompts; confirm interviews include complete current-tab context while form prompts retain exact references and complete selected evidence. Neither should copy on-page help or diagram payloads. Use `guided-interviews.md` for the app-wide prompt review.
 
 Category/overview contradictions are surfaced by `simplification/authoring-findings.ts`; these are specific findings, not a replacement checklist of optional fields.
 

@@ -18,7 +18,7 @@ A section has a stable `id` and `key`, display text, help content, and either `f
 
 Set `dataPath` to an absolute path within the full document state when several workflow stages must edit one canonical record collection. Form rendering, completion, AI prompts, and generic previews resolve the section against that shared model instead of creating a tab-local copy.
 
-Pages may also declare an `evidence` descriptor containing source page IDs and curated source sections or fields. Generic evidence renderers use this descriptor for live cross-document context and navigation, while AI prompts receive the same populated source context.
+Pages may also declare an `evidence` descriptor containing source page IDs and curated source sections or fields. `core/evidence/evidence-model.ts` resolves this descriptor for the on-page earlier-answer views, copied AI evidence, and baseline source availability. Select current section IDs; omit field whitelists when the section’s active fields are the desired context. Retired sections and unknown field keys are omitted rather than displayed as unavailable. Navigation and nested state paths are derived from the active schema tree. See `connected-evidence.md`.
 
 Human help and AI prompts have separate contracts. `section.help` is prose (a string or `{ text }`); the question-mark control displays it as plain text, without fixed questions or headings. Older What/Why/Expectation descriptors render as paragraphs with missing values omitted. The independent copy control uses `section.ai.draftingGuidance`, page `ai` guidance and field `aiHint` values, never tooltip text. A page `guide` supplies a title, summary and `paragraphs`, optional steps and terms for the on-page guide; its visibility is independent of completion.
 
@@ -56,43 +56,24 @@ Optional repeater settings:
 - Repeaters with no editable completion fields are carried context and do not add incomplete entries to progress. Use `completionFields: []` when a section only displays records authored elsewhere.
 - `artifactField`: enables multi-file diagram upload, with a new stable record ID per accepted file.
 
-Sections using `PlacedStagePreview` declare `documentTarget` and optional `documentSubsection` and `previewTitle`. They keep all authored fields without a separate preview whitelist. `ai.includeSiblingContext: true` adds neighboring section values to section-copy prompts when those records are needed for the requested answer.
+Sections using `PlacedStagePreview` declare `documentTarget` and optional `documentSubsection` and `previewTitle`. They keep all authored fields without a separate preview whitelist. Scoped item prompts include their parent context; connected evidence comes from the page evidence descriptor.
 
 
-## AI tab and reference contracts
+## AI schema and reference descriptors
 
-`core/ai/prompt-contract.ts` supplies brief field-update and strict reference rules to section prompts. `prompt-builder.ts` uses the tab's `ai.task`, `ai.definitions`, existing answers and schema-specific AI guidance. Interviews ask for consequential gaps and finish with an inventory and handoff to section prompts. Field prompts then supply exact references and usable updates. Omitted fields mean unchanged, not deleted. Optional empty findings require no prose. Human guide and tooltip content is not prompt input.
+[AI prompt contract](ai-prompts.md) defines the conversation and output behavior. `core/ai/prompt-schema.ts` recursively renders the active fields, choices, conditions, child templates, and current records for both tab interviews and scoped form prompts. `interview-prompt.ts` gathers information across the whole current tab; `form-prompt.ts` requests complete supported answers for a section/group/record/nested-item scope. `prompt-builder.ts` exposes their entry points, and `prompt-contract.ts` supplies output/reference rules. Do not maintain separate field templates or update-only rules in feature guidance.
 
-- `page.ai.task`: the current tab's concrete deliverable and boundary. SRS task descriptions live in `features/software-requirements/workflow/prompt-tasks.ts` and are attached in `workflow/phases.ts`. Other feature tabs use their description, guide, and existing AI guidance.
-- `section.ai.draftingGuidance`: optional section-specific expected output, taking precedence over general help expectations in the prompt.
-- `field.reference`: existing live selector descriptor. Copied prompts enumerate its currently available IDs and labels, while requiring a single ID as the answer. Unavailable saved links are not added to that list.
-- `field.referenceFormat`: `ids` (comma-separated exact IDs), `source-locators` (exact source IDs or supplied external document/section/date locators), or `paths` (existing use-case ID and recorded path/step). The prompt builder recognizes existing `*References` fields as a compatibility fallback; declare the format explicitly for new fields with different names or semantics.
+- `page.ai.task`: the tab's concrete deliverable and boundary. The interview checks every applicable item against this finish line. SRS tasks live in `features/software-requirements/workflow/prompt-tasks.ts`; other tabs fall back to their description or label.
+- `page.ai.interviewGuidance`, `ai.definitions`, and `ai.orientation`: domain discovery cues and essential definitions. Orientation uses `focus`, an optional hypothetical `example`, and `requiredDefinitions`; examples never establish project facts. Explain central terms naturally rather than using scripted headings. Human guides are not copied.
+- `page.ai.draftingGuidance`, `section.ai.draftingGuidance`, and `field.aiHint`: domain information for formatting the declared form scope. They must not ask for a new interview, override the scope, require only changed fields, or introduce undeclared child fields.
+- `field.fields`: the complete recursive child contract for `nested-records`. Declare child labels, types, choices, references, and conditions; a collection label alone is not sufficient.
+- `field.reference`: the live selector descriptor. Copied prompts list available IDs and labels; a single-record selector takes exactly one ID, while `record-links` takes comma-separated IDs. Unavailable saved links are preserved as context, not advertised as valid choices.
+- `field.referenceFormat`: `ids` (comma-separated exact IDs), `source-locators` (exact source IDs or supplied external document/section/date locators), or `paths` (existing use-case ID and recorded path/step). The builder recognizes existing `*References` fields as a compatibility fallback; declare the format explicitly for new fields with different names or semantics.
+- `field.showWhen`: conditional possibilities appear with their conditions in the copied schema. Requested answers follow the applicable branch. `editable: false` and automatically managed parent links remain context, while `includeInPrompt: false` excludes internal fields.
 
-Reference rules constrain AI output, not stored data: there is no AI import parser or new input rejection in this change. Examples and saved links are not proof that a referenced target exists. Missing/invalid references become focused questions outside reference fields. Preserve user-authored data and use existing consistency reviews for corrections.
+The current-tab inventory includes every eligible record, including blank added entries, with full current answers and child inventories. It is not truncated to save tokens. Earlier connected-project evidence and calculated financial enrichment are omitted from interviews; form prompts retain complete selected evidence and CBA/FSA results. Neither tooltip text nor diagram payloads enter a prompt.
 
-Phase 3 review notes and Phase 4 category findings are optional for completion. Status records a no-change result; narrative is reserved for substantive findings or a justified boundary decision. Never treat missing evidence as a confirmed no-change result.
-
-Manual review: copy a tab prompt and a section prompt; confirm their different scopes, concise update instructions, available selector IDs, and reference formats. Try a populated tab, an empty optional category, a missing source ID, and a use case with a detailed exceptional path. Responses should reuse prior answers, leave optional no-op prose blank, ask about missing evidence, and retain necessary flow detail. Automated checks remain user-owned.
-
-
-### Guided interview orientation
-
-`core/ai/interview-orientation.ts` guides a natural opening: two or three sentences weaving together purpose, essential definitions, and the work ahead, followed by a useful question. These are internal cues, not response headings. Topic changes receive a short explanation only when needed. Ask about concrete work before recommending technical classifications. Final field updates and section-completion prompts retain the concise output contract.
-
-Use `page.ai.orientation.focus` for a tailored starting cue and optional `example` for an illustration used only when helpful. Definitions come from `ai.definitions`, falling back to `orientation.what` when no definitions are supplied. The earlier `orientation.plan` is no longer copied: the tab task and domain guidance already describe the work. Actors & Goals supplies an explicit actor/goal explanation, boundary check, and hypothetical example. Examples must never become assumed project facts. New tabs can reuse the generic orientation and their own AI metadata without duplicating the interview rules.
-
-Manual review: copy a fresh Actors & Goals interview prompt. Its first response should naturally explain actor and goal and ask a concrete, relevant question, without scripted headings or a glossary recital. With the boundary already answered, it should reuse that answer. Later transitions should explain the new focus briefly; final form updates should omit the teaching prose. No automated checks were run for this change.
-
-
-### Prompt compression boundary
-
-Tab prompts carry the task once, rather than repeating the on-page step list. Interview sections carry expected information rather than three overlapping help blocks. Generic per-field “ask for this information” sentences and repeated interview rules are omitted. These changes shorten instructions without summarizing or truncating authored source records, reference choices, unresolved questions, or detailed paths.
-
-The AI may reuse reliable context in the same conversation. Do not assume a separate chat can access the application's local workspace, hidden memory, or omitted facts. Fresh prompts still include their connected evidence and strict reference rules. No token reduction measurement or automated checks were run.
-
-Manual review: copy Actors & Goals into a fresh conversation, then continue an existing interview. Expect a short natural introduction only for the fresh start, a question about concrete differences between roles, and a reasoned modeling recommendation after the answer. Confirm that final field updates remain concise and exact IDs are still available.
-
-`page.ai.orientation.requiredDefinitions` names terms that must be explained before task questions (Actors & Goals declares Actor and Goal). Definitions remain conversational, without scripted headings. Existing records do not imply that the user knows the terminology; skip an explanation only when it was already given in the current conversation or the user requests that. Manual review: a fresh Actors & Goals interview should define both terms before its first substantive question, even with a populated workspace. No automated checks were run.
+Reference rules constrain proposed AI answers, not stored data: there is no AI import parser or new input rejection. Unsupported required form inputs stay blank with a separate Needs information note; only the guided interview asks questions. Preserve user-authored values and use existing consistency reviews for corrections. Optional findings require no invented prose, and missing evidence never establishes non-applicability or a no-change outcome. See [guided-interviews.md](guided-interviews.md) for manual cases.
 
 
 ## Grouped canonical record editing
@@ -114,10 +95,10 @@ parent: {
 
 Optional `description`, `emptyText`, `ungroupedDescription`, `ungroupedAddLabel`, and `unassignedOption` customize the guided UI. `allowUngrouped` permits adding records without a parent where the domain allows it. `preserveFreeform` retains the relationship's existing free-text/multi-record semantics in the ungrouped area; `relationshipLabel` names that explicit-save input. Unknown links are retained until the user deliberately replaces them.
 
-Grouped copy prompts combine the original category/kind filter with the parent constraint and omit the automatic parent input. Whole-section/tab prompts retain association context and instruct the AI to group answers instead of repeating that field. These descriptors do not infer approval, cascade deletion, or alter document placement. See `record-relationships.md` for the app-wide decisions and manual checklist.
+Grouped copy prompts combine the original category/kind filter with the parent constraint and treat the automatic parent input as context. Whole-section prompts return complete supported entries grouped by association; tab interviews track coverage for every eligible group's records. Neither requests redundant parent-field entry. These descriptors do not infer approval, cascade deletion, or alter document placement. See `record-relationships.md` for the app-wide decisions and manual checklist.
 
 
-## Authoring 0.3.0 controls
+## Authoring controls
 
 `field.optional` renders a small reveal control for genuinely optional supporting content. `showWhen: { key, notEmpty: true }` exposes preserved content only when populated. `page.omitEmptyFields` omits blank/conditional fields from list previews. `repeatable.completionMode: "all-required"` evaluates visible editable fields marked `completion: true` or listed in `completionFields`, excluding fields marked `completion: false`, optional fields and hidden metadata. Simplified planning documents and SRS stages display numeric progress alongside their guidance prompt.
 

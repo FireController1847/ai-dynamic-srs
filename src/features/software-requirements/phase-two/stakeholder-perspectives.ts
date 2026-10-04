@@ -1,3 +1,4 @@
+import { promptGuidance } from "../workflow/prompt-guidance.ts";
 import { stakeholderSources } from "./evidence.ts";
 
 export const stakeholderPerspectivesStage = {
@@ -22,9 +23,7 @@ export const stakeholderPerspectivesStage = {
     ]
   },
   ai: {
-    includeSiblingContext: true,
-    draftingGuidance: "Reuse connected stakeholder records and cite their stable IDs. Add system-relevant expectations and user characteristics, not a duplicate stakeholder analysis. Sponsors and document audiences are not automatically actors. Mark unsupported characteristics and missing viewpoints for clarification; do not invent people or accessibility needs.",
-    interviewGuidance: "Start from known stakeholder interests. Ask about missing expectations, characteristics that affect interaction, and whether each group exchanges information with the system. Reopen baseline conflicts explicitly. Do not ask for a complete functional-requirement list."
+    ...promptGuidance["srs-discovery-perspectives"]
   },
   sections: [
     {

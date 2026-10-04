@@ -32,6 +32,18 @@ From the import through `c8a9d031`, the repository changes are project documenta
 
 Because the SRS still has unfinished construction phases and is not yet a completed stable application, the formal semantic-version baseline is **`0.3.0-alpha`**.
 
+## Connected evidence correction
+
+`0.3.1-alpha` unifies connected evidence resolution, repairs references to retired source sections, and adds expandable read-only earlier answers to the shared evidence panel. This is a backward-compatible workflow and presentation correction. Workspace format remains 2; stored records and IDs are unchanged.
+
+## AI authoring workflow
+
+`0.4.0-alpha` separates full-tab discovery from scoped form formatting across the app. Interviews receive the complete current-tab schema, eligible record inventory, nested children, and untruncated current answers; earlier connected-project evidence remains omitted. Form copy controls support sections, groups, individual records and nested items, with complete input contracts and supported answers rather than update-only output. This is a meaningful workflow expansion; [AI prompt contract](ai-prompts.md) is authoritative. Workspace format remains 2; stored records and IDs are unchanged.
+
+## Copy-control simplification
+
+`0.4.1-alpha` removes individual-input copy buttons. Section, group, record and nested-item prompts still include all applicable fields and child contracts. Stored data and workspace format are unchanged.
+
 ## Manual review
 
-Open the application and confirm `v0.3.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.3.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.4.1-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.4.1-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.

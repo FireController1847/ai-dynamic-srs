@@ -7,7 +7,7 @@ import { organizationalFeasibilitySection } from './sections/organizational.ts';
 import { feasibilityRisksSection } from './sections/risks.ts';
 import { overallRecommendationSection } from './sections/recommendation.ts';
 import { guide, ai, source, section, text } from '../planning/schema-helpers.ts';
-const task = 'Decide whether the proposed project is technically achievable, economically justified and organizationally supportable. Reuse the stakeholder list, proposal and live CBA. Finish with concise technical and organizational assessments, material risks and a recommendation with necessary conditions. Do not rewrite financial results or require a separate rating and essay for every consideration.';
+const task = 'Establish technical and organizational feasibility, material risks, additional affordability considerations where needed and a recommendation with necessary conditions.';
 export const feasibilityAnalysisSchema: SchemaNode = {
   id: 'feasibility-stakeholder-analysis', stateKey: 'feasibilityStakeholderAnalysis', code: 'FSA', label: 'Feasibility & Stakeholder Analysis (FSA)', title: 'Feasibility & Stakeholder Analysis', description: 'Assess whether the proposal is technically achievable, economically justified and organizationally supportable.',
   dateDependencies: ['costBenefitAnalysis'],
@@ -21,7 +21,10 @@ export const feasibilityAnalysisSchema: SchemaNode = {
     { term: 'Technical feasibility', definition: 'Whether the project can be built and operated with available or obtainable skills and technology.' },
     { term: 'Economic feasibility', definition: 'Whether expected value justifies the costs and uncertainty.' },
     { term: 'Organizational feasibility', definition: 'Whether the organization can adopt and support the change.' }
-  ]),
+  ], {
+    interviewGuidance: 'Reuse the proposal, stakeholder knowledge and known financial case. Explore consequential technical and organizational gaps, then cover every current risk and missing response before settling the recommendation and necessary conditions. Do not restart the stakeholder catalog or require a separate rating and essay for every consideration.',
+    draftingGuidance: 'Format the requested concise technical and organizational assessments, applicable affordability considerations, complete risk records and recommendation from established facts. Use carried CBA results without rewriting calculated totals. Keep analyst recommendation distinct from a confirmed authorized decision.'
+  }),
   evidence: { title: 'Existing project evidence', sources: [
     source('client-requirements', ['business-context', 'stakeholders', 'scope-constraints']),
     source('system-request', ['project-sponsor', 'business-requirements', 'business-value', 'special-issues']),

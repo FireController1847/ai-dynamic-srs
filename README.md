@@ -64,7 +64,7 @@ The implemented construction workflow covers four phases:
 
 Later phases for model cross-checks, reconciliation, and complete SRS assembly are currently placeholders. Construction order is separate from finished-document order: a stage can contribute to several document sections while retaining the same underlying records.
 
-Human guides and section tips explain the forms directly. Separate copy buttons provide Markdown prompts for an external AI conversation: an interview prompt helps resolve missing decisions, and section prompts request scoped field updates. Using the forms does not require an AI conversation.
+Human guides and section tips explain the forms directly. Separate copy buttons provide Markdown prompts for an external AI conversation. The tab's guided interview covers every applicable item and gathers missing information naturally; section, group, record, and nested-item prompts then return complete formatted answers for their selected scope. Each item prompt includes all its child fields; individual inputs do not have copy buttons. See the [AI prompt contract](docs/ai-prompts.md). Using the forms does not require an AI conversation.
 
 Diagram uploads retain their actual files in the workspace. Copied text prompts include diagram metadata, rather than binary or XML payloads.
 
@@ -113,7 +113,7 @@ Dynamic SRS autosaves the current workspace locally in the browser and restores 
 
 The header includes **New WIP**, **Import WIP**, and **Download WIP** controls. Downloading produces a gzip-compressed `.dsrs` file containing the workspace answers and uploaded diagrams. Importing replaces the active workspace; download a backup first when you want to keep the current work separately.
 
-The current application version is **0.3.0-alpha**, and new workspace files use **format version 2**. Imported data passes through validation and schema normalization. Undeclared saved values are preserved without rewriting their meaning.
+The current application version is **0.4.1-alpha**, and new workspace files use **format version 2**. Imported data passes through validation and schema normalization. Undeclared saved values are preserved without rewriting their meaning.
 
 If the browser's site data is cleared without a downloaded backup, locally saved project content may be lost. Workspace downloads are excluded from Git because they can contain client answers and uploaded project material.
 

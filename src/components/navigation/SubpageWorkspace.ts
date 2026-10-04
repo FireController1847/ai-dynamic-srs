@@ -259,7 +259,7 @@ export const SubpageNode = defineComponent({
                 <h3 class="h5">{{ nodeSchema.title }}</h3>
                 <p class="small text-body-secondary">{{ nodeSchema.description }}</p>
                 <form-progress
-                  v-if="nodeSchema.form?.showCompletion !== false || nodeSchema.ai?.compactInterview"
+                  v-if="nodeSchema.form?.showCompletion !== false || nodeSchema.ai?.showInterview"
                   :page-schema="nodeSchema"
                   :data-model="dataModel"
                   :document-model="documentModel"
@@ -278,6 +278,15 @@ export const SubpageNode = defineComponent({
             :class="nodeSchema.form?.fullWidth || !formSidebarVisible ? 'col-12' : 'col-lg-9'"
           >
             <page-guide :page-schema="nodeSchema"></page-guide>
+            <form-progress
+              v-if="nodeSchema.form?.fullWidth && (nodeSchema.form?.showCompletion !== false || nodeSchema.ai?.showInterview)"
+              :page-schema="nodeSchema"
+              :data-model="dataModel"
+              :document-model="documentModel"
+              :document-schemas="documentSchemas"
+              :copied-section="copiedSection"
+              @copy-markdown="$emit('copy-markdown', $event)"
+            ></form-progress>
             <component
               :is="nodeSchema.formComponent || 'dynamic-form'"
               :page-schema="nodeSchema"

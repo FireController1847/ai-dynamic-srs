@@ -1,6 +1,6 @@
 import type { DataModel, DocumentModel } from '../../core/schema/schema-types.ts';
-import { recordItems } from '../../core/schema/data-models.ts';
 import { calculate } from './calculations.ts';
+import { isGuidedInterviewPrompt } from '../../core/ai/interview-prompt.ts';
 export function financialEvidence(data: DataModel = {}) {
   const model = calculate(data);
   const money = (value: number) => `${Number(value).toFixed(2)} ${data.currencyCode || 'USD'}`;
@@ -12,6 +12,7 @@ export function financialEvidence(data: DataModel = {}) {
   ].join('\n');
 }
 export function withFinancialEvidence(markdown: string, key: string, document: DocumentModel) {
+  if (isGuidedInterviewPrompt(markdown)) return markdown;
   if (!['cost-benefit-analysis:', 'feasibility-stakeholder-analysis:'].some(prefix => key?.startsWith(prefix))) return markdown;
   return `${markdown}\n\n## Live CBA results (calculated context, not fields to re-enter)\n\n${financialEvidence(document.costBenefitAnalysis)}\nThese results reflect the entered assumptions, not confirmation that the estimates are reliable. Do not invent missing inputs or recompute totals.\n`;
 }

@@ -1,6 +1,7 @@
 import type { Field, FieldOption, Section, Repeater, SchemaNode, Reference, EvidenceSource, EvidenceGroup, GuideStep, Guide, AiGuidance, AiDefinition, DocumentConfig, Evidence } from '../../../core/schema/schema-types.ts';
 import { followUpGuidance } from "../issue-follow-up.ts";
 import { candidateProcessesStage } from "../phase-two/candidate-processes.ts";
+import { promptGuidance } from '../workflow/prompt-guidance.ts';
 
 export const recordsPath = ["softwareRequirementsSpecification", "records"];
 export const useCaseFields = candidateProcessesStage.sections!.find(({ id }) => id === "candidate-use-cases")!.repeatable!.fields;
@@ -53,9 +54,9 @@ export function stage(id: string, stateKey: string, label: string, description: 
     evidence: { title: "Evidence and behavior already established", summary: "Open an earlier section to correct its source. These references also supply the AI clipboard context.", sources },
     guide: { title: `Build ${label.toLowerCase()}`, summary: description, steps: [...steps, { title: "Carry every question forward", text: followUpGuidance }] },
     ai: {
-      includeSiblingContext: true,
-      draftingGuidance: `${guidance} ${followUpGuidance} Preserve shared IDs. Read-only fields are carried context, not new answers. Do not infer approval, invent scope, or create duplicate use cases. Diagram file contents are not included; never claim to have inspected a diagram from its caption alone.`,
-      interviewGuidance: `${guidance} ${followUpGuidance} Work through the existing records one at a time. Ask only for missing detail and contradictions revealed at this stage. Revisit earlier source decisions when the boundary changes.`
+      ...promptGuidance[id],
+      draftingGuidance: promptGuidance[id]?.draftingGuidance || `${guidance} Preserve shared IDs and format all requested record fields. Read-only fields are carried context. Do not infer approval, invent scope or create duplicate use cases. Diagram metadata does not establish omitted file contents.`,
+      interviewGuidance: promptGuidance[id]?.interviewGuidance || 'Cover every current record and consequential missing field using the supplied tab inventory and reliable prior conversation or memory. Clarify contradictions and check for uncovered behavior before the handoff.'
     },
     sections
   };

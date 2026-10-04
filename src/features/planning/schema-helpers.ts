@@ -21,6 +21,6 @@ export const metadata = (dateKey: string, dateDocument: string): Field[] => [
   optional(short(dateKey, dateKey === 'analysisDate' ? 'Analysis date' : dateKey === 'requestDate' ? 'Request date' : 'Preparation date', { type: 'date', dateDocument })),
   optional(short('version', 'Document version', { default: '0.1' }))
 ];
-export const source = (pageId: string, sectionIds: string[]): EvidenceSource => ({ pageId, reason: 'Reuse the existing answers; ask only about gaps affecting this document.', groups: sectionIds.map(sectionId => ({ sectionId })) });
+export const source = (pageId: string, sectionIds: string[]): EvidenceSource => ({ pageId, reason: 'Established upstream answers supporting this document.', groups: sectionIds.map(sectionId => ({ sectionId })) });
 export const guide = (title: string, terms: AiDefinition[] = []): Guide => ({ ...planningGuides[title], terms });
-export const ai = (task: string, definitions: AiDefinition[] = []): AiGuidance => ({ task, compactInterview: true, draftingGuidance: task, definitions });
+export const ai = (task: string, definitions: AiDefinition[] = [], guidance: Pick<AiGuidance, 'interviewGuidance' | 'draftingGuidance'> = {}): AiGuidance => ({ task, showInterview: true, definitions, ...guidance });

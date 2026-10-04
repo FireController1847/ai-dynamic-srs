@@ -228,6 +228,7 @@
 
 .section-title-row:hover .section-copy-trigger,
 .section-title-row:hover .section-help-trigger,
+.section-copy-control.is-persistent .section-copy-trigger,
 .section-help:focus-within .section-copy-trigger,
 .section-help:focus-within .section-help-trigger {
   opacity: 1;

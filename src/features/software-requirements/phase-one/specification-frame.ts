@@ -1,3 +1,4 @@
+import { promptGuidance } from "../workflow/prompt-guidance.ts";
 import { specificationFrameSources } from "./evidence.ts";
 
 export const specificationFrameStage = {
@@ -34,8 +35,7 @@ export const specificationFrameStage = {
     ]
   },
   ai: {
-    draftingGuidance: "Derive the purpose, audience, and product perspective from connected evidence. Distinguish a stakeholder's interest in the project from a reader's intended use of the SRS. Do not introduce architecture, platforms, or users that the source record does not support.",
-    interviewGuidance: "Ask only for the SRS-specific framing decisions that are not already explicit: what agreement the document must establish, who must use or approve it, and whether the source evidence needs clarification."
+    ...promptGuidance["srs-baseline-specification-frame"]
   },
   sections: [
     {

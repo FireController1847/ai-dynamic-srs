@@ -1,6 +1,6 @@
 # SRS construction workflow
 
-> Authoring 0.3.0 update: [SRS simplification](srs-simplification.md) supersedes the review questionnaires, repeated catalog, required metadata, completion and AI handoff described below. The canonical record and document-placement contracts still apply.
+> [SRS simplification](srs-simplification.md) defines the active forms and completion rules, superseding the older review questionnaires, repeated catalog, and required metadata described below. [AI prompt contract](ai-prompts.md) defines all current AI behavior. The canonical record and document-placement contracts below still apply.
 
 The SRS workspace has two deliberately separate structures:
 
@@ -28,7 +28,7 @@ Dependencies communicate construction order; they do not lock tabs. Reviews iden
 
 Required workflow stages remain incomplete while they are structure-only placeholders, preventing a partially implemented phase from appearing finished.
 
-Phase 1 contains Evidence Intake, Specification Frame, Scope Baseline, and Vocabulary Baseline. Evidence panels start collapsed and show compact source references, availability counts, and links to the originating sections. They do not duplicate source forms or full source contents.
+Phase 1 contains Evidence Intake, Specification Frame, Scope Baseline, and Vocabulary Baseline. Evidence panels start collapsed and show current source sections, counts of recorded answers, and links to the originating forms. Each populated section can expand to read the earlier answers and stable record IDs. These are live read-only views, not copied saved records. UI, clipboard evidence, and baseline source availability share `core/evidence/evidence-model.ts`; see `connected-evidence.md`.
 
 Leaf stages may declare finished-document destinations separately:
 
@@ -77,7 +77,7 @@ Phase 2 uses the generic `components/forms/EvidenceForm.ts` (also re-exported as
 
 Actor selectors use declarative `field.reference` descriptors (`dataPath`, `displayId`, `labelField`). They save an ID, show its current label, and retain unavailable references until corrected. Multi-record references remain comma-separated IDs. `DiscoveryStageForm.ts` provides a compact ID index and advisory checks from `discovery-review.ts`: missing/retired links, unrepresented interacting perspectives, actor/goal mismatches, unresolved scope, and uncovered in-scope goals. These checks do not modify data, certify approval, or affect the existing one-third array completion rule.
 
-`phase-two/evidence.ts` supplies both source navigation and clipboard evidence. Phase 2 opts into generic `ai.includeSiblingContext`, so section prompts receive populated neighboring records (e.g. actors when completing goals). The interview already includes the whole stage. The UI evidence collapse state never limits clipboard context.
+`phase-two/evidence.ts` supplies source navigation and form-prompt evidence. `ai.includeSiblingContext` supplies populated neighboring records as form context (for example, actors when formatting goals). Tab interviews include the complete current-stage schema and eligible record inventory/current values so all applicable entries are covered; earlier connected-source evidence is omitted. UI evidence collapse state never limits clipboard context. The shared `ai-prompts.md` contract owns discovery, scope, and answer behavior.
 
 Phase 2 records review findings and links; it does not silently approve scope changes.
 
@@ -91,7 +91,7 @@ Removing an actor retires only that actor. Authored goals with missing/retired p
 
 The goal collection uses `minimum: 0` and `completionMinimum: 1`, avoiding a new unattached placeholder while preserving the stage's existing goal completion expectation. An untouched legacy placeholder is retained and reused on the next Add goal action. The automatically assigned actor field is not counted as a user-entered completion answer.
 
-The tab interview retains existing actor links as read-only context, but requests actor-first answers without repeated Actor ID inputs. Per-actor goal copy prompts filter to that actor and omit the automatically managed field. The placed preview retains the canonical actor/goal sections and relationship references.
+The tab interview retains existing actor links as read-only context and gathers missing information across every actor and goal without repeated Actor ID inputs. It hands off to the selected form copy control for final formatted answers. Per-actor goal copy prompts filter to that actor and treat its automatically managed link as context; individual goal/field prompts narrow further. The placed preview retains the canonical actor/goal sections and relationship references.
 
 Manual verification (not run):
 
@@ -99,7 +99,7 @@ Manual verification (not run):
 - Rename an actor and move a goal by the actor-name selector; confirm the goal ID and its answers stay intact.
 - Open an existing workspace with linked, unassigned, and retired-parent goals; confirm authored goals remain accessible and can be reassigned.
 - Remove an actor with goals; confirm its goals appear in the recovery section rather than being deleted. Confirm “Not an actor” retains existing goals and prevents new ones.
-- Copy the tab interview and one actor's goal prompt; confirm the latter requests only that actor's goals and neither asks for repeated actor-link entry.
+- Copy the tab interview and one actor's goal prompt; confirm the interview covers every eligible actor/goal, the form prompt returns complete supported answers only for that actor's goals without follow-up questions, and neither asks for repeated actor-link entry.
 - Save/reopen, inspect the preview, and open Candidate Processes; confirm stable goal references and saved relationships still resolve.
 
 

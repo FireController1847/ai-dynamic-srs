@@ -1,4 +1,4 @@
-# Planning documents — 0.3.0-alpha
+# Planning documents
 
 CR, SR, CBA and FSA are authored as concise documents. There is no compatibility transform, archive, migration, or alternate legacy schema. Keep each fact in the document where it originates and reuse it downstream.
 
@@ -28,9 +28,11 @@ CBA retains the mathematical inputs: baseline/target quantities and unit values,
 
 All cited records retain stable IDs. Removing a financial item retires it; calculations and previews exclude retired records. Financial preview IDs use record IDs rather than filtered row positions. Source selection uses names but saves exact CBA-SRC IDs. Neither selecting a source nor calculating a number establishes that the estimate is confirmed.
 
-The shared interview asks only missing decisions, ends with a numbered inventory and counts, then hands off to field prompts. Optional detail uses a disclosure rather than a second required essay. Completion percentages, bars and completed-tab indicators are available alongside the AI guidance button. Progress uses the current scalar completion flags and declared record completion fields; optional detail, hidden metadata and read-only context do not block completion. Document previews omit empty optional fields.
+The [AI prompt contract](ai-prompts.md) applies to all planning documents. Tab interviews receive the full current-tab schema and untruncated answers/record inventory, cover every applicable item, reuse reliable available conversation history or project memory for earlier facts, and hand off to scoped form prompts. Earlier connected-source and calculated financial excerpts are omitted from interviews. Form prompts return complete supported answers for the selected section/group/record/field, including child contracts and exact references, without questions or update-only output. CBA/FSA form prompts retain live calculated results.
 
-Application version is 0.3.0-alpha. Workspace format remains 2; it is an independent file-format version.
+Optional detail uses a disclosure rather than a second required essay. Completion percentages, bars and completed-tab indicators are available alongside the AI guidance button. Progress uses the current scalar completion flags and declared record completion fields; optional detail, hidden metadata and read-only context do not block completion. Document previews omit empty optional fields.
+
+Application version is 0.4.0-alpha. Workspace format remains 2; it is an independent file-format version.
 
 ## Manual handoff — not run
 
@@ -39,12 +41,12 @@ Application version is 0.3.0-alpha. Workspace format remains 2; it is an indepen
 3. In CBA exercise baseline/target and direct benefits, gradual/immediate/custom realization, one-time payments, and flat/growing/recurring/custom costs. Compare the displayed results with a trusted hand calculation.
 4. Add nonfinancial benefits and source records. Select sources by name, retire an estimate or source, then inspect totals, preserved unavailable links and printed IDs. Retired estimates must not contribute to cash flows.
 5. Inspect CBA preview: one financial decision narrative; assumptions, estimate basis and source notes retained; no removed category/confidence/value columns or repeated intangible summary.
-6. Copy CBA and FSA prompts. Confirm live calculated results and missing-input warnings appear, without a request to re-enter totals. Guidance should finish with counts and the field-prompt handoff.
+6. Copy CBA and FSA form prompts. Confirm live calculated results and missing-input warnings appear, without a request to re-enter totals. Interview prompts should include the full current-tab answers/inventory but no calculated financial or earlier-source excerpts, and should cover every applicable item before handing off.
 7. Confirm FSA has concise technical/organizational assessments, carried CBA results, optional affordability considerations, material risks and a recommendation. Print it and inspect the carried evidence.
-8. Open SRS baseline/discovery prompts and previews; confirm the condensed CR/SR/FSA context remains available. No missing old paragraph should become a new required task.
+8. Open SRS baseline/discovery form prompts and previews; confirm the complete selected CR/SR/FSA context remains available. Interviews should reuse reliable conversation history or available project memory for earlier source facts while carrying the full current-tab inventory. No missing old paragraph should become a new required task.
 9. Save/reopen a fresh workspace. Confirm no migration/recovery UI and no automatic claim of approval. Check the optional disclosure labels and accessible controls manually. Confirm completion percentages and bars update as essential answers and records are filled, completed tabs show their indicators, and blank optional fields do not block completion.
 10. With several CR stakeholders, fill the FSA technical assessment, organizational assessment, recommendation and decisive reason, plus the statement on each added risk. Confirm FSA reaches 100% with optional fields blank. Adding or removing CR stakeholders must not change FSA progress; clearing an essential FSA answer must lower it.
-11. Expand each planning document’s guide, including on a completed tab, and inspect its section tips with mouse and keyboard. Confirm the guide explains the actual workflow and tips contain no missing values or three-question headings. Copy the separate interview and section prompts; confirm the AI instructions, definitions, financial context and references are still supplied.
+11. Expand each planning document’s guide, including on a completed tab, and inspect its section tips with mouse and keyboard. Confirm the guide explains the actual workflow and tips contain no missing values or three-question headings. Review separate tab/section/record/field prompts using the cases in `guided-interviews.md`: discovery must cover all applicable entries; formatting must use the requested scope and precise inputs without follow-up questions.
 
 No builds, tests, browser checks or automated verification were run for this change, at the user's request.
 

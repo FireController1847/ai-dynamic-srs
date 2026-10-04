@@ -8,8 +8,8 @@ Install dependencies with `npm ci` using Node.js 24 or newer. `npm start` launch
 
 ```text
 Generated HTML and bundled CSS/JavaScript
-  → app/app.js
-    → features/feature-registry.js
+  → app/app.ts
+    → features/feature-registry.ts
       → feature schemas and specialized components
     → components/*
       → core schema/value/prompt helpers
@@ -88,3 +88,9 @@ Vue owns page selection, subpage selection, forms, previews, autosave status, an
 ## Planning documents
 
 CR, SR, CBA and FSA use concise declarative helpers from `features/planning/schema-helpers.ts`. Shared input sections reference canonical data through `dataPath`; they do not copy it. CBA financial input schemas are split under its `sections/` directory. `financial-evidence.ts` owns the calculated context used by feasibility views and clipboard prompts; `app.copyMarkdown` adds that feature-owned context for CBA/FSA. Generic components and core do not import financial logic. See `planning-simplification.md` for the field boundaries.
+
+## AI authoring
+
+[AI prompt contract](ai-prompts.md) defines two app-wide jobs: full-tab guided discovery and scoped form formatting. `core/ai/prompt-schema.ts` renders complete field/child contracts and current inventories for both, without truncating authored answers. `interview-prompt.ts` covers every applicable current-tab item and hands off to the copy controls; `form-prompt.ts` returns complete supported answers for a section/group/record/nested-item scope. Generic controls carry exact record and recursive child identity through the shared builder, including specialized feature editors.
+
+`core/evidence/evidence-model.ts` resolves selected earlier sources for the panel, baseline availability, and form prompts. Connected-source and calculated financial enrichers bypass interviews. Interview context includes the full current-tab inventory, with reliable available conversation/memory providing prior project facts. Prompt construction is read-only, honors canonical section paths and stage/retirement filters, and summarizes uploaded files as metadata. No AI output is automatically applied to saved data. Human help remains independent.

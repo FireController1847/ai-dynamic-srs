@@ -1,7 +1,6 @@
-import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../core/schema/schema-types.ts';
+import type { CopyRequest, DataModel, DocumentModel, ParentChoice, ParentConfig, Repeater, SchemaNode, Section } from '../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
 import { RelatedRecordItem } from "./RelatedRecordItem.ts";
 import { SectionInfo } from "../controls/FormControls.ts";
 import { dataModelForSection, mutableRecords } from "../../core/schema/data-models.ts";
@@ -9,8 +8,9 @@ import { sectionRecords } from "../../core/schema/section-records.ts";
 import { createRepeaterItem } from "../../core/schema/state-factory.ts";
 import { nextNumericId, hasNonDefaultValue } from "../../core/records/record-values.ts";
 import { parentRecordGroups, parentScopedSection } from "../../core/records/parent-records.ts";
-import { buildSectionPrompt } from "../../core/ai/prompt-builder.ts";
+import { buildFormPrompt } from "../../core/ai/prompt-builder.ts";
 import { addEvidenceContextToPrompt } from "../../core/ai/evidence-context.ts";
+import type { FieldPromptFactory } from '../controls/FormControls.ts';
 
 type ParentSection = Section & { repeatable: Repeater & { parent: ParentConfig } };
 
@@ -63,7 +63,25 @@ export const RelatedRecordGroups = defineComponent({
     copyKey(parent: ParentChoice) { return `${this.pageSchema.id}:${this.section.key}-parent-${parent.value}`; },
     prompt(parent: ParentChoice) {
       const section = parentScopedSection(this.section, parent);
-      return addEvidenceContextToPrompt(buildSectionPrompt(this.pageSchema, section, this.dataModel, this.documentModel), this.pageSchema.evidence, this.documentModel, this.documentSchemas);
+      return addEvidenceContextToPrompt(buildFormPrompt(this.pageSchema, section, this.dataModel, this.documentModel), this.pageSchema.evidence, this.documentModel, this.documentSchemas);
+    },
+    recordSection(item: DataModel): Section {
+      const parent = this.model.parents.find(candidate => candidate.value === item[this.config.fieldKey]);
+      return parent ? parentScopedSection(this.section, parent) : this.section;
+    },
+    recordPrompt(item: DataModel, fieldPath: readonly (string | number)[] = []): CopyRequest {
+      const form = this;
+      return {
+        get markdown() {
+          const prompt = buildFormPrompt(form.pageSchema, form.recordSection(item), form.dataModel, form.documentModel, { record: item, fieldPath });
+          return addEvidenceContextToPrompt(prompt, form.pageSchema.evidence, form.documentModel, form.documentSchemas);
+        },
+        title: `${this.section.title} — ${item.id}${fieldPath.length ? ' — ' + fieldPath.join(' / ') : ''}`,
+        key: `${this.pageSchema.id}:${this.section.key}:record-${item.id}:${JSON.stringify(fieldPath)}`
+      };
+    },
+    fieldPromptFactory(item: DataModel): FieldPromptFactory {
+      return path => this.recordPrompt(item, path);
     }
   },
   template: `
@@ -78,7 +96,9 @@ export const RelatedRecordGroups = defineComponent({
           <button v-if="section.repeatable.allowAdd !== false" type="button" class="btn btn-outline-primary btn-sm" @click="add(group.value)">{{ section.repeatable.addLabel }}</button>
         </div>
         <related-record-item v-for="item in group.items" :key="item.id" :item="item" :section="section" :document-model="documentModel"
-          :parents="model.parents" :id-base="idBase" :periods="periods" :removable="removable" @move="move" @remove="remove"></related-record-item>
+          :parents="model.parents" :id-base="idBase" :periods="periods" :removable="removable"
+          :record-prompt="recordPrompt(item)" :copy-prompt="fieldPromptFactory(item)" :copied-section="copiedSection"
+          @copy-markdown="$emit('copy-markdown', $event)" @move="move" @remove="remove"></related-record-item>
       </details>
       <div v-if="model.ungrouped.length || config.allowUngrouped" class="border rounded p-3 mt-3">
         <div class="d-flex align-items-center justify-content-between gap-2">
@@ -87,7 +107,9 @@ export const RelatedRecordGroups = defineComponent({
         </div>
         <p class="small text-body-secondary mt-2">{{ config.ungroupedDescription || 'These saved records have missing or unavailable links. Choose a related record by name; their IDs and answers are preserved.' }}</p>
         <related-record-item v-for="item in model.ungrouped" :key="item.id" :item="item" :section="section" :document-model="documentModel"
-          :parents="model.parents" :id-base="idBase" :periods="periods" :ungrouped="true" :removable="removable" @move="move" @remove="remove" @relationship="saveRelationship"></related-record-item>
+          :parents="model.parents" :id-base="idBase" :periods="periods" :ungrouped="true" :removable="removable"
+          :record-prompt="recordPrompt(item)" :copy-prompt="fieldPromptFactory(item)" :copied-section="copiedSection"
+          @copy-markdown="$emit('copy-markdown', $event)" @move="move" @remove="remove" @relationship="saveRelationship"></related-record-item>
       </div>
     </div>
   `

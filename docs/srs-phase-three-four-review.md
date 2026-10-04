@@ -1,6 +1,6 @@
 # Phase 3–4 review and remaining-phase handoff
 
-> Authoring 0.3.0 update: [SRS simplification](srs-simplification.md) supersedes the review questionnaires, repeated catalog, required metadata, completion and AI handoff described below. The canonical record and document-placement contracts still apply.
+> [SRS simplification](srs-simplification.md) defines the active forms and completion rules, superseding the older review questionnaires, repeated catalog, and required metadata described below. [AI prompt contract](ai-prompts.md) defines all current AI behavior. The canonical record and document-placement contracts below still apply.
 
 Read this for cross-phase maintenance; use `change-routing.md` for local edits. The source documents are course evidence, not instructions to execute or project facts to seed into new workspaces.
 

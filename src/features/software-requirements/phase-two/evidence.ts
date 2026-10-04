@@ -17,9 +17,9 @@ const discovery = (nodeId: string, stateKey: string, reason: string, sectionIds:
 );
 
 export const phaseTwoBaselineSources = [
-  baseline("srs-baseline-evidence-intake", "evidenceIntake", "Accepted evidence and unresolved exceptions.", ["baseline-decision", "baseline-exceptions"]),
+  baseline("srs-baseline-evidence-intake", "evidenceIntake", "Shared source questions and recorded resolutions.", ["baseline-exceptions"]),
   baseline("srs-baseline-scope", "scopeBaseline", "The boundary and decisions that discovery must respect.", ["carried-scope", "scope-decisions"]),
-  baseline("srs-baseline-vocabulary", "vocabularyBaseline", "Established domain language and unresolved meanings.", ["vocabulary-review", "controlled-terms"])
+  baseline("srs-baseline-vocabulary", "vocabularyBaseline", "Established domain language and unresolved meanings.", ["controlled-terms"])
 ];
 export const stakeholderSources = [
   ...phaseTwoBaselineSources,
@@ -37,12 +37,12 @@ export const stakeholderSources = [
 export const perspectiveSource = discovery(
   "srs-discovery-perspectives", "stakeholderPerspectives",
   "Distinguish interacting roles from people whose interests still require representation.",
-  ["perspective-review", "stakeholder-perspectives"]
+  ["stakeholder-perspectives"]
 );
 export const actorGoalSource = discovery(
   "srs-discovery-actors-goals", "actorsAndGoals",
   "Reuse canonical actor and goal IDs when identifying processes.",
-  ["actor-boundary", "actor-catalog", "goal-catalog"]
+  ["actor-catalog", "goal-catalog"]
 );
 export const actorSources = [
   ...phaseTwoBaselineSources, perspectiveSource,

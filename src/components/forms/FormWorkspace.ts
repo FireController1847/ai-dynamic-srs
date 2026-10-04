@@ -1,8 +1,7 @@
-import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../core/schema/schema-types.ts';
+import type { CopyRequest, DataModel, DocumentModel, Field, Repeater, SchemaNode, Section } from '../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
-import { buildInterviewPrompt, buildSectionPrompt } from "../../core/ai/prompt-builder.ts";
+import { buildInterviewPrompt, buildFormPrompt } from "../../core/ai/prompt-builder.ts";
 import { addEvidenceContextToPrompt } from "../../core/ai/evidence-context.ts";
 import { completion } from "../../core/schema/form-completion.ts";
 import { dataModelForSection, isDataModel, mutableRecords } from "../../core/schema/data-models.ts";
@@ -13,6 +12,7 @@ import { resolveReferenceField } from "../../core/records/reference-fields.ts";
 import { sectionRecords } from "../../core/schema/section-records.ts";
 import { DiagramUploadControl } from "../diagrams/DiagramUploadControl.ts";
 import { CopyPromptControl, SectionInfo } from "../controls/FormControls.ts";
+import type { FieldPromptFactory } from '../controls/FormControls.ts';
 import { SchemaField } from "../fields/SchemaField.ts";
 import { RelatedRecordGroups } from "./RelatedRecordGroups.ts";
 
@@ -27,7 +27,7 @@ export const dynamicFormProps = {
 } as const;
 
 export const DynamicForm = defineComponent({
-  components: { SchemaField, SectionInfo, DiagramUploadControl, RelatedRecordGroups },
+  components: { SchemaField, SectionInfo, CopyPromptControl, DiagramUploadControl, RelatedRecordGroups },
   emits: ["copy-markdown"],
   props: dynamicFormProps,
   computed: {
@@ -52,8 +52,8 @@ export const DynamicForm = defineComponent({
       const items = mutableRecords(sectionModel, section.repeatable.dataKey);
       items.push(createRepeaterItem(section.repeatable, nextNumericId(items)));
     },
-    copyKey(section: Section) {
-      return `${this.pageSchema.id}:${section.key}`;
+    copyKey(section: Section, record?: DataModel, path: readonly (string | number)[] = []): string {
+      return `${this.pageSchema.id}:${section.key}:${record ? 'record-' + record.id : 'section'}:${JSON.stringify(path)}`;
     },
     fieldId(section: Section, field: Field, item: DataModel | null = null) {
       return [this.pageSchema.id, section.id, item?.id, field.key].filter(Boolean).join("-");
@@ -90,14 +90,26 @@ export const DynamicForm = defineComponent({
         ? formatRecordDisplayId(displayId, item, index)
         : `${section.repeatable.itemLabel || "Item"} ${index + 1}`;
     },
-    promptFor(section: Section) {
-      const prompt = buildSectionPrompt(this.pageSchema, section, this.dataModel, this.documentModel);
+    promptFor(section: Section, record?: DataModel, fieldPath?: readonly (string | number)[]): string {
+      const prompt = buildFormPrompt(this.pageSchema, section, this.dataModel, this.documentModel, { record, fieldPath });
       return addEvidenceContextToPrompt(
         prompt,
         this.pageSchema.evidence,
         this.documentModel,
         this.documentSchemas
       );
+    },
+    promptRequest(section: Section, record?: DataModel, path: readonly (string | number)[] = []): CopyRequest {
+      const recordLabel = record && section.repeatable ? formatRecordDisplayId(section.repeatable.displayId, record) : '';
+      const form = this;
+      return {
+        get markdown() { return form.promptFor(section, record, path); },
+        title: [section.title, recordLabel, ...path].filter(value => value !== '').join(' — '),
+        key: this.copyKey(section, record, path)
+      };
+    },
+    fieldPromptFactory(section: Section, record?: DataModel): FieldPromptFactory {
+      return path => this.promptRequest(section, record, path);
     },
     removeItem(section: RepeatableSection, item: DataModel) {
       const items = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
@@ -171,6 +183,10 @@ export const DynamicForm = defineComponent({
             >
               <div class="d-flex align-items-center justify-content-between mb-3">
                 <h4 class="h6 mb-0">{{ itemTitle(section, item, itemIndex) }}</h4>
+                <copy-prompt-control persistent :copied="copiedSection === copyKey(section, item)"
+                  :label="'Copy formatted-answer prompt for ' + itemTitle(section, item, itemIndex)"
+                  tooltip="Copies every input and nested field for this exact record. The AI returns ready-to-enter answers for this record."
+                  @copy="$emit('copy-markdown', promptRequest(section, item))"></copy-prompt-control>
                 <button
                   v-if="section.repeatable.allowRemove !== false && itemsFor(section).length > section.repeatable.minimum"
                   class="btn btn-link btn-sm text-danger p-0"
@@ -187,6 +203,8 @@ export const DynamicForm = defineComponent({
                   :id-base="fieldId(section, field, item)"
                   :model-value="item[field.key]"
                   :periods="periodCount"
+                  :copy-prompt="fieldPromptFactory(section, item)" :prompt-path="[field.key]" :copied-section="copiedSection"
+                  @copy-markdown="$emit('copy-markdown', $event)"
                   @update:model-value="item[field.key] = $event"
                 ></schema-field>
               </div>
@@ -202,6 +220,8 @@ export const DynamicForm = defineComponent({
               :id-base="fieldId(section, field)"
               :model-value="sectionModel(section)[field.key]"
               :periods="periodCount"
+              :copy-prompt="fieldPromptFactory(section)" :prompt-path="[field.key]" :copied-section="copiedSection"
+              @copy-markdown="$emit('copy-markdown', $event)"
               @update:model-value="sectionModel(section)[field.key] = $event"
             ></schema-field>
           </div>
@@ -226,13 +246,7 @@ export const FormProgress = defineComponent({
       return `${this.pageSchema.id}:interview`;
     },
     interviewPrompt(): string {
-      const prompt = buildInterviewPrompt(this.pageSchema, this.dataModel, this.documentModel);
-      return addEvidenceContextToPrompt(
-        prompt,
-        this.pageSchema.evidence,
-        this.documentModel,
-        this.documentSchemas
-      );
+      return buildInterviewPrompt(this.pageSchema, this.dataModel, this.documentModel);
     },
     percent(): number {
       return completion(this.pageSchema, this.dataModel, this.documentModel);
@@ -245,11 +259,11 @@ export const FormProgress = defineComponent({
           <span>{{ pageSchema.form?.showCompletion === false ? 'AI guidance' : 'Form completion' }}</span>
           <strong v-if="pageSchema.form?.showCompletion !== false">{{ percent }}%</strong>
         </div>
-        <copy-prompt-control
+        <copy-prompt-control persistent
           button-class="completion-copy-trigger"
           :copied="copiedSection === copyKey"
           :label="'Copy the ' + pageSchema.title + ' AI interview prompt'"
-          tooltip="Copies an AI interview prompt for this tab’s missing answers, followed by an inventory and handoff to field prompts."
+          tooltip="Copies a complete interview of this tab: every existing record and nested input. The AI gathers missing information naturally, then hands off to formatted-answer prompts."
           @copy="$emit('copy-markdown', { markdown: interviewPrompt, title: pageSchema.title + ' interview prompt', key: copyKey })"
         ></copy-prompt-control>
       </div>

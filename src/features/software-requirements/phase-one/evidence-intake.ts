@@ -1,3 +1,4 @@
+import { promptGuidance } from "../workflow/prompt-guidance.ts";
 import { issueFollowUpFields } from "../issue-follow-up.ts";
 import { evidenceIntakeSources } from "./evidence.ts";
 
@@ -35,8 +36,7 @@ export const evidenceIntakeStage = {
     ]
   },
   ai: {
-    draftingGuidance: "Use the connected CR, SR, CBA, FSA, and General Notes as evidence. Summarize their combined fitness for SRS construction; never copy whole sections, invent a resolution, or erase a conflict. Every baseline issue must identify the affected source or decision and remain open unless the workspace contains a confirmed resolution.",
-    interviewGuidance: "Begin by reviewing the connected source panels. Ask only about contradictions, missing authority, stale evidence, and the evidence cutoff. Avoid asking the user to repeat information already recorded in a source document."
+    ...promptGuidance["srs-baseline-evidence-intake"]
   },
   sections: [
     {

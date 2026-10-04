@@ -1,12 +1,15 @@
 import type { Field, FieldOption, Section, Repeater, SchemaNode, Reference, EvidenceSource, EvidenceGroup, GuideStep, Guide, AiGuidance, AiDefinition, DocumentConfig, Evidence } from '../../core/schema/schema-types.ts';
 import { needPriorities } from '../../core/schema/shared-options.ts';
 import { text, short, choice, optional, section, records, metadata, source, guide, ai } from '../planning/schema-helpers.ts';
-const task = 'Prepare a short request: sponsor, established business need, proposed capabilities, expected benefits and material issues. Reuse Client Requirements. Summarize or group its needs into capabilities without interviewing the client again about settled facts. Leave costs to CBA and feasibility judgments to FSA.';
+const task = 'Establish the project sponsor, proposed capabilities, expected benefits and material issues for a concise request based on Client Requirements.';
 export const systemRequestSchema: SchemaNode = {
   id: 'system-request', stateKey: 'systemRequest', code: 'SR', label: 'System Request (SR)', title: 'System Request', description: 'Turn the established client needs into a short proposal and business case.',
   compactPreview: true, omitEmptyFields: true, formComponent: 'evidence-form',
   form: { kicker: 'Project initiation', intro: 'Build a short business case from the client’s existing answers.', showCompletion: true },
-  guide: guide('Propose the project', [{ term: 'Sponsor', definition: 'The business person accountable for supporting the request.' }, { term: 'Business value', definition: 'The improvement expected from delivering a capability.' }]), ai: ai(task, [{ term: 'Sponsor', definition: 'The business person accountable for supporting the request.' }, { term: 'Business value', definition: 'The improvement expected from delivering a capability.' }]),
+  guide: guide('Propose the project', [{ term: 'Sponsor', definition: 'The business person accountable for supporting the request.' }, { term: 'Business value', definition: 'The improvement expected from delivering a capability.' }]), ai: ai(task, [{ term: 'Sponsor', definition: 'The business person accountable for supporting the request.' }, { term: 'Business value', definition: 'The improvement expected from delivering a capability.' }], {
+    interviewGuidance: 'Reuse settled Client Requirements from available conversation or memory. Cover every current capability, benefit and special issue, clarify missing sponsor or outcome details, and check for uncovered client needs. Leave quantified costs to CBA and feasibility judgments to FSA.',
+    draftingGuidance: 'Format the requested sponsor, capability, benefit and special-issue records as complete form values. Group or summarize client needs into high-level capabilities with exact need links; keep benefits under their linked capability or the project-wide group. Do not rewrite the carried business problem or invent quantified benefits.'
+  }),
   evidence: { title: 'Client discovery', sources: [source('client-requirements', ['business-context', 'client-needs', 'stakeholders', 'scope-constraints', 'discovery-record'])] },
   document: { titleField: 'projectName', organizationField: 'clientOrganization', versionField: 'version', metadata: [
     { key: 'requestDate', label: 'Request date', format: 'date' }, { key: 'preparedBy', label: 'Prepared by' }, { key: 'sponsorName', label: 'Sponsor' }, { key: 'version', label: 'Version' }

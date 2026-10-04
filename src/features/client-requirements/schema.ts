@@ -1,7 +1,7 @@
 import type { Field, FieldOption, Section, Repeater, SchemaNode, Reference, EvidenceSource, EvidenceGroup, GuideStep, Guide, AiGuidance, AiDefinition, DocumentConfig, Evidence } from '../../core/schema/schema-types.ts';
 import { needPriorities } from '../../core/schema/shared-options.ts';
 import { text, short, choice, optional, section, records, metadata, guide, ai } from '../planning/schema-helpers.ts';
-const task = 'Establish the client problem, desired result, affected people, needs and boundaries. Finish with short context and numbered lists. Do not design the solution, invent targets or require an explanation for each obvious need.';
+const task = 'Establish the client problem, desired result, affected people, every client need, boundaries and discovery sources.';
 export const clientRequirementsSchema: SchemaNode = {
   id: 'client-requirements', stateKey: 'clientRequirements', code: 'CR', label: 'Client Requirements (CR)', title: 'Client Requirements',
   description: 'Establish the client’s problem, desired result, people, needs and project boundary.', compactPreview: true, omitEmptyFields: true,
@@ -9,7 +9,10 @@ export const clientRequirementsSchema: SchemaNode = {
   guide: guide('Understand the request', [
     { term: 'Stakeholder', definition: 'A person or group affected by the project or able to influence it.' },
     { term: 'Scope', definition: 'What this project includes and excludes.' }
-  ]), ai: ai(task, [{ term: 'Stakeholder', definition: 'A person or group affected by the project or able to influence it.' }, { term: 'Scope', definition: 'The boundary of included and excluded project work.' }]),
+  ]), ai: ai(task, [{ term: 'Stakeholder', definition: 'A person or group affected by the project or able to influence it.' }, { term: 'Scope', definition: 'The boundary of included and excluded project work.' }], {
+    interviewGuidance: 'Explore the current problem and desired result, then cover every current stakeholder and need and check for missing groups or outcomes. Clarify the actual boundary, material limits and discovery sources naturally. Do not design the solution, invent success targets or require an explanation for each obvious need.',
+    draftingGuidance: 'Format the requested project identity, concise context, stakeholder records, client needs, boundaries and supported sources. Keep one requested outcome or capability per need. Use known measures only; preserve client language and distinguish confirmed limits from assumptions.'
+  }),
   document: { titleField: 'projectName', organizationField: 'clientOrganization', versionField: 'version', metadata: [
     { key: 'primaryContact', label: 'Primary contact' }, { key: 'preparedBy', label: 'Prepared by' },
     { key: 'preparationDate', label: 'Date', format: 'date' }, { key: 'version', label: 'Version' }

@@ -4,7 +4,9 @@ Read the smallest matching file set first.
 
 For CR/SR/CBA/FSA authoring, start with `docs/planning-simplification.md` and the specific feature schema or section. CBA input sections live in `features/cost-benefit-analysis/sections/`; financial prompt context lives in `financial-evidence.ts`.
 
-For SRS authoring 0.3.0-alpha, start with `docs/srs-simplification.md` and `features/software-requirements/simplification/{field-policy,stages}.ts`. These define the active reduced forms; original phase schemas retain legacy descriptors.
+For SRS authoring, start with `docs/srs-simplification.md` and `features/software-requirements/simplification/{field-policy,stages}.ts`. These define the active reduced forms; original phase schemas retain legacy descriptors.
+
+For any AI workflow change, read `docs/ai-prompts.md` first. It is the authoritative contract for full-tab discovery and scoped form formatting across every feature and specialized editor.
 
 | Request | Primary files | Read shared code only if needed |
 |---|---|---|
@@ -17,7 +19,8 @@ For SRS authoring 0.3.0-alpha, start with `docs/srs-simplification.md` and `feat
 | Change repeatable forms | `components/forms/FormWorkspace.ts` | `core/schema/state-factory.ts`, `record-values.ts` |
 | Change conditional visibility | `core/schema/field-visibility.ts` | Relevant schema |
 | Change completion calculation | `core/schema/form-completion.ts` | Relevant schema completion flags |
-| Change AI prompts | `core/ai/prompt-builder.ts`, `core/ai/prompt-contract.ts`, `core/ai/evidence-context.ts` | Relevant schema `ai` guidance/definitions; `features/software-requirements/workflow/{prompt-tasks,prompt-definitions}.ts` for SRS interviews |
+| Change AI prompts or recursive form contracts | `core/ai/{interview-prompt,form-prompt,prompt-schema,prompt-builder,prompt-contract}.ts` | `docs/ai-prompts.md`, `docs/guided-interviews.md`; relevant schema `ai` guidance/definitions; `core/ai/evidence-context.ts` for form evidence only; SRS `workflow/{prompt-tasks,prompt-definitions}.ts`; CBA `financial-evidence.ts` for form financial context |
+| Change scoped AI copy controls | `components/controls/FormControls.ts`, `components/fields/SchemaField.ts` | Generic form/group/record editors, specialized feature editor only when used; pass complete scope through the shared builder rather than a custom prompt template |
 | Change CBA formulas | `features/cost-benefit-analysis/calculations.ts` | CBA schema |
 | Change CBA chart | `features/cost-benefit-analysis/chart-model.ts`, `CbaSummary.ts` | `styles/cba.css` |
 | Change CBA document | `features/cost-benefit-analysis/CbaPreview.ts` | `styles/preview.css` |
@@ -45,7 +48,7 @@ For SRS authoring 0.3.0-alpha, start with `docs/srs-simplification.md` and `feat
 | Change shared-record stage filtering | `core/schema/section-records.ts` | Form, preview, completion, and AI consumers; never filter saved state |
 | Change schema-placed previews (Phase 2 onward) | `core/schema/placed-preview.ts`, `components/preview/PlacedStagePreview.ts` | Section `documentTarget`, `documentSubsection`, `previewTitle`; generic preview only for rendering |
 | Change live record selectors | `core/records/reference-fields.ts` | `components/forms/FormWorkspace.ts`; feature `field.reference` descriptors |
-| Change connected evidence references | `components/references/WorkspaceEvidencePanel.ts` | `features/software-requirements/phase-one/evidence.ts`, `styles/workspace-evidence.css` |
+| Change connected evidence references or earlier-answer views | `core/evidence/evidence-model.ts`, `components/references/WorkspaceEvidencePanel.ts` | `core/ai/evidence-context.ts` shares the resolver; relevant feature evidence descriptors, `styles/workspace-evidence.css`, `docs/connected-evidence.md` |
 | Change the finished SRS outline or placement | `features/software-requirements/document-outline.ts` | `core/schema/schema-tree.ts`, generic preview |
 | Change generic nested navigation | `components/navigation/SubpageWorkspace.ts` | `styles/navigation.css` |
 | Change application header/tabs | `src/html/index.html`, `styles/shell.css`, `styles/navigation.css` | `app/app.ts` |

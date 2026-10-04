@@ -1,3 +1,4 @@
+import { promptGuidance } from "../workflow/prompt-guidance.ts";
 import { actorSources } from "./evidence.ts";
 import { actorReference } from "./record-references.ts";
 
@@ -24,16 +25,13 @@ export const actorsGoalsStage = {
     ]
   },
   ai: {
-    includeSiblingContext: true,
     orientation: {
       requiredDefinitions: ["Actor", "Goal"],
       what: "An actor is a role outside the system that interacts with it, such as a customer or an external service; it is not a particular named person. A goal is the useful result that role needs. We identify these so later use cases describe the right work for the right participants.",
-      plan: "Use the agreed system boundary to distinguish what the product does from who or what interacts with it. Reuse known stakeholder roles, clarify their exchanges, then ask what result each role needs and how they recognize success. Connect those answers to existing evidence; detailed steps come later.",
       focus: "Reuse the agreed boundary. For uncertain roles, ask what each can do or needs to achieve that the others cannot. Then recommend whether separate actors are useful, with a short reason. Do not open by asking the client to choose between abstract actor classifications. Explain the stakeholder/actor distinction only when relevant.",
       example: "In a hypothetical booking system, Customer is an actor and Obtain a confirmed reservation is a goal. Clicking a button is a step toward that result. The system's own database is an internal component, not an external actor. Use this only as an illustration, not as a fact about the client's project."
     },
-    draftingGuidance: "Identify roles outside the stated subject boundary, using connected perspectives, scope decisions, and vocabulary. Do not automatically convert stakeholders into actors or invent external services. Group proposed goals beneath their actor, using existing IDs only to identify records being updated. The form assigns each goal’s actor link automatically; do not return or ask the user to fill an Actor ID field. Keep supporting source references. Explain unsupported scope as unresolved. Primary/supporting participation is use-case-specific; do not infer it solely from actor kind. Preserve IDs and record provisional decisions honestly.",
-    interviewGuidance: "Confirm the boundary, ask who exchanges information across it, then work actor by actor: clarify the role and its desired outcomes together before moving on. The user adds goals beneath their actor; never ask them to repeat an actor ID. Reuse known perspectives. Distinguish the sponsor from users, a role from a named person, and a supporting external service from an internal component. Ask only for the next level of detail, not flows, screens, or a full FR list."
+    ...promptGuidance["srs-discovery-actors-goals"]
   },
   sections: [
     {

@@ -1,3 +1,4 @@
+import { promptGuidance } from "../workflow/prompt-guidance.ts";
 import { scopeBaselineSources } from "./evidence.ts";
 
 export const scopeBaselineStage = {
@@ -34,8 +35,7 @@ export const scopeBaselineStage = {
     ]
   },
   ai: {
-    draftingGuidance: "Compare rather than concatenate the CR needs and scope, SR capabilities and issues, and FSA risks and conditions. Flag uncovered needs, unsupported capabilities, and conflicting boundaries. Do not turn an assumption, benefit, or feasibility concern into a product capability.",
-    interviewGuidance: "Use the connected records as the agenda. Ask the user to decide only real discrepancies, gaps, exclusions, deferrals, and conditions; do not ask them to rewrite the existing scope."
+    ...promptGuidance["srs-baseline-scope"]
   },
   sections: [
     {

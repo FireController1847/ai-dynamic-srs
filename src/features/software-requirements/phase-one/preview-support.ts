@@ -1,6 +1,7 @@
+import { connectedEvidence, evidenceSectionHasContent } from '../../../core/evidence/evidence-model.ts';
 import type { DataModel, DocumentModel, EvidenceSource, Field, SchemaNode, Section } from "../../../core/schema/schema-types.ts";
 import { hasNonDefaultValue, hasValue } from "../../../core/records/record-values.ts";
-import { asDataModel, dataModelForSection, isDataModel } from "../../../core/schema/data-models.ts";
+import { asDataModel, isDataModel } from "../../../core/schema/data-models.ts";
 import { documentOutlineIndex } from "../../../core/schema/schema-tree.ts";
 import { softwareRequirementsDocument } from "../document-outline.ts";
 
@@ -42,11 +43,6 @@ export function sourceData(documentModel: DocumentModel, documentSchemas: readon
     data: schema ? asDataModel(documentModel[schema.stateKey]) : {},
     schema
   };
-}
-
-function sourceField(section: Section | undefined, key: string): Pick<Field, "key" | "default"> {
-  const fields = section?.repeatable?.fields || section?.fields || [];
-  return fields.find((candidate) => candidate.key === key) || { key };
 }
 
 export function schemaSection(schema: SchemaNode | undefined, sectionId: string): Section | undefined {
@@ -98,24 +94,9 @@ export function carriedFeatureDisposition(scopeDisposition: unknown, decision: D
     || "Candidate feature from the System Request; scope review is pending";
 }
 
-export function sourceHasMeaningfulEvidence(definition: EvidenceSource, schema: SchemaNode, data: DataModel, documentModel: DocumentModel) {
-  return (definition.groups || []).some((group) => {
-    const section = schemaSection(schema, group.sectionId);
-    if (!section) {
-      return false;
-    }
-
-    const sectionData = dataModelForSection(section, data, documentModel);
-    if (section.repeatable) {
-      const keys = group.recordFieldKeys || section.repeatable.fields.map(({ key }) => key);
-      return activeRecords(sectionData[section.repeatable.dataKey]).some((record) => (
-        keys.some((key) => hasNonDefaultValue(record[key], sourceField(section, key)?.default))
-      ));
-    }
-
-    const keys = group.fieldKeys || (section.fields || []).map(({ key }) => key);
-    return keys.some((key) => hasNonDefaultValue(sectionData[key], sourceField(section, key)?.default));
-  });
+export function sourceHasMeaningfulEvidence(definition: EvidenceSource, schema: SchemaNode, _data: DataModel, documentModel: DocumentModel): boolean {
+  return connectedEvidence({ sources: [definition] }, documentModel, [schema])
+    .some(source => source.groups.some(evidenceSectionHasContent));
 }
 
 export function evidenceLines(entries: readonly (readonly [string, unknown])[]) {

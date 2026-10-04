@@ -1,17 +1,19 @@
-import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../core/schema/schema-types.ts';
+import type { CopyRequest, Help } from '../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
+
+export type FieldPromptFactory = (path: readonly (string | number)[]) => CopyRequest;
 export const CopyPromptControl = defineComponent({
   emits: ["copy"],
   props: {
     buttonClass: { type: String, default: "" },
     copied: { type: Boolean, default: false },
+    persistent: { type: Boolean, default: false },
     label: { type: String, required: true },
     tooltip: { type: String, required: true }
   },
   template: `
-    <span class="section-copy-control">
+    <span class="section-copy-control" :class="{ 'is-persistent': persistent }">
       <button
         v-bs-tooltip="copied ? 'Copied' : tooltip"
         class="section-copy-trigger"
@@ -56,9 +58,10 @@ export const SectionInfo = defineComponent({
   template: `
     <span class="section-help">
       <copy-prompt-control
+        persistent
         :copied="copied"
-        :label="'Copy ' + title + ' AI prompt as Markdown'"
-        tooltip="Copies an AI-ready Markdown prompt for this section. Paste it into a chat to help draft the fields."
+        :label="'Copy ' + title + ' formatted-answer prompt'"
+        tooltip="Copies the complete form structure for this section or collection. The AI returns ready-to-enter answers using known information; use the tab interview to gather missing details."
         @copy="$emit('copy-markdown', { markdown: copyText, title, key: copyKey })"
       ></copy-prompt-control>
       <span v-if="helpContent" class="section-info-tip">

@@ -1,26 +1,24 @@
+import type { CopyRequest, DataModel, DocumentModel, Field, Repeater, SchemaNode, Section } from '../../core/schema/schema-types.ts';
 import type { Note, NotesModel } from './note-types.ts';
-import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
-import { buildSectionPrompt } from "../../core/ai/prompt-builder.ts";
-import { formatDate as formatDocumentDate } from "../../core/formatting/dates.ts";
-import { formatDocumentTitle } from "../../core/formatting/document-titles.ts";
+import { buildFormPrompt } from "../../core/ai/prompt-builder.ts";
+import { addEvidenceContextToPrompt } from '../../core/ai/evidence-context.ts';
 import { hasValue as hasContent, nextNumericId } from "../../core/records/record-values.ts";
-import { PrintDocumentButton } from "../../components/controls/PrintButton.ts";
-import { DocumentCoverPage } from "../../components/preview/DocumentCoverPage.ts";
-import { PreviewWatermark } from "../../components/preview/PreviewWatermark.ts";
-import { SectionInfo } from "../../components/controls/FormControls.ts";
+import { CopyPromptControl, SectionInfo } from "../../components/controls/FormControls.ts";
+import type { FieldPromptFactory } from '../../components/controls/FormControls.ts';
 import { SchemaField } from "../../components/fields/SchemaField.ts";
 import { countNested, dateTimeLabel, newNote, populatedNotes, timestampLabel, today } from "./note-model.ts";
 
 export const NotesForm = defineComponent({
-  components: { SchemaField, SectionInfo },
+  components: { SchemaField, SectionInfo, CopyPromptControl },
   emits: ["copy-markdown"],
   props: {
     copiedSection: { type: String, default: "" },
     dataModel: { type: Object as PropType<NotesModel>, required: true },
-    pageSchema: { type: Object as PropType<SchemaNode>, required: true }
+    pageSchema: { type: Object as PropType<SchemaNode>, required: true },
+    documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) },
+    documentSchemas: { type: Array as PropType<SchemaNode[]>, default: () => [] }
   },
   data() {
     return {
@@ -43,6 +41,23 @@ export const NotesForm = defineComponent({
       const field = this.noteSection.repeatable.fields.find(({ key }) => key === "references");
       if (!field) throw new Error("Notes schema is missing its references field.");
       return field;
+    },
+    bodyField(): Field {
+      const field = this.noteSection.repeatable.fields.find(({ key }) => key === 'body');
+      if (!field) throw new Error('Notes schema is missing its body field.');
+      return { ...field, helpText: 'Keep this as the current understanding. Explain a meaningful revision with the optional change explanation when editing.' };
+    },
+    promptSection(): Section & { repeatable: Repeater } {
+      return { ...this.noteSection, repeatable: { ...this.noteSection.repeatable, fields: [this.bodyField, this.referenceField],
+        aiAddendum: 'Each note has editable Note and References inputs. Creation dates are recorded automatically. Meaningful revisions can have an optional change explanation; the application creates the dated edit-history record, so do not return direct date, editor, or history inputs.' } };
+    },
+    promptPage(): SchemaNode {
+      return { ...this.pageSchema, sections: [this.promptSection] };
+    },
+    reasonField(): Field {
+      return { key: 'editReason', label: 'Explain this change', type: 'text', optional: true, default: '',
+        placeholder: "Only needed when the note's meaning changed",
+        aiHint: 'Give a brief confirmed reason for this actual revision. Omit for minor spelling or formatting fixes; do not invent an edit.' };
     },
     referenceCount(): number {
       return countNested(this.notes, "references");
@@ -109,7 +124,25 @@ export const NotesForm = defineComponent({
       this.originalEditSnapshot = "";
     },
     promptForNotes() {
-      return buildSectionPrompt(this.pageSchema, this.noteSection, this.dataModel);
+      const prompt = buildFormPrompt(this.promptPage, this.promptSection, this.dataModel, this.documentModel);
+      return addEvidenceContextToPrompt(prompt, this.pageSchema.evidence, this.documentModel, this.documentSchemas);
+    },
+    notePrompt(note: Note, path: readonly (string | number)[] = []): CopyRequest {
+      const isDraft = note === this.draft;
+      const form = this;
+      return { get markdown() {
+        const isEditing = !isDraft && form.editingId === note.id;
+        const section = isEditing ? { ...form.promptSection, repeatable: { ...form.promptSection.repeatable, fields: [...form.promptSection.repeatable.fields, form.reasonField] } } : form.promptSection;
+        const record: DataModel = isDraft ? { ...note, id: undefined } : isEditing ? { ...note, editReason: form.editReason } : note;
+        const model: DataModel = isEditing ? { ...form.dataModel, notes: form.dataModel.notes.map(saved => saved === note ? record : saved) } : form.dataModel;
+        const prompt = buildFormPrompt(form.promptPage, section, model, form.documentModel, { record, fieldPath: path });
+        return addEvidenceContextToPrompt(prompt, form.pageSchema.evidence, form.documentModel, form.documentSchemas);
+      },
+        title: `${isDraft ? 'New note' : 'Note ' + note.id}${path.length ? ' — ' + path.join(' / ') : ''}`,
+        key: `${this.pageSchema.id}:${this.noteSection.key}:${isDraft ? 'draft' : 'record-' + note.id}:${JSON.stringify(path)}` };
+    },
+    fieldPromptFactory(note: Note): FieldPromptFactory {
+      return path => this.notePrompt(note, path);
     },
     postedLabel(note: Note) {
       return timestampLabel(note);
@@ -151,12 +184,26 @@ export const NotesForm = defineComponent({
             ></section-info>
           </div>
           <p class="text-body-secondary">Each note becomes one item in the running list.</p>
-          <textarea v-model="draft.body" class="form-control notes-quick-input" rows="4" placeholder="Write a note…" aria-label="New note"></textarea>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="small text-body-secondary">New note</span>
+            <copy-prompt-control persistent :copied="copiedSection === notePrompt(draft).key" label="Copy formatted-answer prompt for this new note"
+              tooltip="Copies all editable inputs for this new note. The AI returns ready-to-enter note text and any supported references."
+              @copy="$emit('copy-markdown', notePrompt(draft))"></copy-prompt-control>
+          </div>
+          <div class="row g-3">
+            <schema-field :field="{ ...bodyField, rows: 4, placeholder: 'Write a note…', hideLabel: true }"
+              input-class="notes-quick-input"
+              :id-base="pageSchema.id + '-draft-body'" :model-value="draft.body" :document-model="documentModel"
+              :copy-prompt="fieldPromptFactory(draft)" :prompt-path="['body']" :copied-section="copiedSection"
+              @copy-markdown="$emit('copy-markdown', $event)" @update:model-value="draft.body = $event"></schema-field>
+          </div>
 
           <details class="notes-optional-details mt-3">
             <summary>Add references <span class="optional-label">Optional</span></summary>
             <div class="row g-3 pt-3">
-              <schema-field :field="referenceField" :id-base="pageSchema.id + '-draft-references'" :model-value="draft.references" @update:model-value="draft.references = $event"></schema-field>
+              <schema-field :field="referenceField" :id-base="pageSchema.id + '-draft-references'" :model-value="draft.references" :document-model="documentModel"
+                :copy-prompt="fieldPromptFactory(draft)" :prompt-path="['references']" :copied-section="copiedSection"
+                @copy-markdown="$emit('copy-markdown', $event)" @update:model-value="draft.references = $event"></schema-field>
             </div>
           </details>
 
@@ -179,20 +226,41 @@ export const NotesForm = defineComponent({
             <template v-if="editingId !== note.id">
               <div class="notes-entry-heading">
                 <p class="mb-1"><span class="preserve-lines">{{ note.body }}</span><time class="notes-posted-at" :datetime="note.createdAt || note.createdDate">({{ postedLabel(note) }})</time></p>
-                <button class="btn btn-outline-secondary btn-sm" type="button" @click="startEdit(note)">Edit</button>
+                <div class="d-flex align-items-center gap-2">
+                  <copy-prompt-control persistent :copied="copiedSection === notePrompt(note).key" :label="'Copy formatted-answer prompt for note ' + note.id"
+                    tooltip="Copies all editable inputs for this note, with its current answers. The AI returns formatted note text and supported references."
+                    @copy="$emit('copy-markdown', notePrompt(note))"></copy-prompt-control>
+                  <button class="btn btn-outline-secondary btn-sm" type="button" @click="startEdit(note)">Edit</button>
+                </div>
               </div>
               <p v-if="note.updatedAt || note.updatedDate || note.references?.length" class="notes-entry-meta mb-0"><span v-if="note.updatedAt || note.updatedDate">Edited {{ editedLabel(note) }}</span><span v-if="(note.updatedAt || note.updatedDate) && note.references?.length"> · </span><span v-if="note.references?.length">{{ note.references.length }} reference{{ note.references.length === 1 ? '' : 's' }}</span></p>
             </template>
 
             <template v-else>
-              <textarea v-model="note.body" class="form-control" rows="5" aria-label="Edit note"></textarea>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-body-secondary">Editing note {{ note.id }}</span>
+                <copy-prompt-control persistent :copied="copiedSection === notePrompt(note).key" :label="'Copy formatted-answer prompt for note ' + note.id"
+                  tooltip="Copies all editable inputs for this note. The AI returns ready-to-enter answers without starting an interview."
+                  @copy="$emit('copy-markdown', notePrompt(note))"></copy-prompt-control>
+              </div>
+              <div class="row g-3">
+                <schema-field :field="{ ...bodyField, hideLabel: true }" :id-base="pageSchema.id + '-' + note.id + '-body'"
+                  :model-value="note.body" :document-model="documentModel" :copy-prompt="fieldPromptFactory(note)"
+                  :prompt-path="['body']" :copied-section="copiedSection"
+                  @copy-markdown="$emit('copy-markdown', $event)" @update:model-value="note.body = $event"></schema-field>
+              </div>
               <details class="notes-optional-details mt-3">
                 <summary>Edit references <span class="optional-label">Optional</span></summary>
                 <div class="row g-3 pt-3">
-                  <schema-field :field="referenceField" :id-base="pageSchema.id + '-' + note.id + '-references'" :model-value="note.references" @update:model-value="note.references = $event"></schema-field>
+                  <schema-field :field="referenceField" :id-base="pageSchema.id + '-' + note.id + '-references'" :model-value="note.references" :document-model="documentModel"
+                    :copy-prompt="fieldPromptFactory(note)" :prompt-path="['references']" :copied-section="copiedSection"
+                    @copy-markdown="$emit('copy-markdown', $event)" @update:model-value="note.references = $event"></schema-field>
                 </div>
               </details>
-              <div class="mt-3"><label class="form-label">Explain this change <span class="optional-label">Optional</span></label><input v-model="editReason" class="form-control" type="text" placeholder="Only needed when the note's meaning changed"></div>
+              <div class="row mt-3"><schema-field :field="reasonField" :id-base="pageSchema.id + '-' + note.id + '-edit-reason'"
+                :model-value="editReason" :document-model="documentModel" :copy-prompt="fieldPromptFactory(note)"
+                :prompt-path="['editReason']" :copied-section="copiedSection"
+                @copy-markdown="$emit('copy-markdown', $event)" @update:model-value="editReason = $event"></schema-field></div>
               <div class="notes-edit-actions mt-3"><button class="btn btn-link btn-sm text-danger" type="button" @click="removeNote(note)">Delete note</button><button class="btn btn-primary btn-sm" type="button" @click="finishEdit(note)">Done</button></div>
             </template>
           </div>
@@ -204,118 +272,4 @@ export const NotesForm = defineComponent({
   `
 });
 
-export const NotesPreview = defineComponent({
-  components: { DocumentCoverPage, PreviewWatermark, PrintDocumentButton },
-  emits: ["print"],
-  props: {
-    dataModel: { type: Object as PropType<NotesModel>, required: true },
-    isPrinting: { type: Boolean, default: false },
-    pageSchema: { type: Object as PropType<SchemaNode>, required: true },
-    printDateLabel: { type: String, required: true },
-    projectContext: { type: Object as PropType<DataModel>, required: true }
-  },
-  computed: {
-    coverMetadataEntries(): MetadataEntry[] {
-      return [
-        { key: "version", label: "Version", value: this.version },
-        { key: "entries", label: "Entries", value: this.notes.length }
-      ];
-    },
-    documentTitle(): string {
-      return formatDocumentTitle(this.projectTitle, this.pageSchema.title || "General Notes");
-    },
-    notes(): Note[] {
-      return populatedNotes(this.dataModel);
-    },
-    projectTitle(): unknown {
-      return this.projectContext.projectName || "";
-    },
-    version(): unknown {
-      return this.dataModel.version || "0.1";
-    }
-  },
-  methods: {
-    formatDate(value: unknown) {
-      return formatDocumentDate(value);
-    },
-    referenceLabel(reference: DataModel, index: number) {
-      return reference.title || `Reference ${index + 1}`;
-    },
-    postedLabel(note: Note) {
-      return timestampLabel(note);
-    },
-    editLabel(edit: DataModel) {
-      return dateTimeLabel(edit.editedAt, edit.editedDate);
-    }
-  },
-  template: `
-    <div :id="pageSchema.id + '-preview'" class="document-preview-section">
-      <div class="preview-toolbar">
-        <div>
-          <p class="section-kicker mb-1">Live document</p>
-          <h2 class="h4 mb-1">Preview</h2>
-          <p class="text-body-secondary mb-0">Every note, reference, and edit explanation is collated automatically.</p>
-        </div>
-        <print-document-button
-          :is-printing="isPrinting"
-          @print="$emit('print', pageSchema.id)"
-        ></print-document-button>
-      </div>
-
-      <article class="document-preview notes-document is-print-target" :aria-label="pageSchema.label + ' document preview'">
-        <header class="print-running-header" aria-hidden="true">
-          <span>{{ documentTitle }}</span>
-          <span>{{ printDateLabel }}</span>
-        </header>
-
-        <div class="document-content notes-document-content">
-          <preview-watermark :is-printing="isPrinting"></preview-watermark>
-          <document-cover-page
-            :document-code="pageSchema.code"
-            :document-name="pageSchema.title || pageSchema.label"
-            :metadata-entries="coverMetadataEntries"
-            :project-title="projectTitle"
-          ></document-cover-page>
-
-          <div class="document-body document-body-after-cover">
-          <section>
-            <h2>1. Notes</h2>
-            <ul v-if="notes.length" class="notes-document-list">
-              <li v-for="note in notes" :key="note.id" class="notes-document-item">
-                <p><span class="preserve-lines">{{ note.body }}</span><time class="notes-posted-at" :datetime="note.createdAt || note.createdDate">({{ postedLabel(note) }})</time></p>
-
-                <div v-if="note.references?.length" class="notes-document-supporting">
-                  <strong>References</strong>
-                  <ol class="notes-reference-list">
-                  <li v-for="(reference, referenceIndex) in note.references" :key="reference.id">
-                    <strong>{{ referenceLabel(reference, referenceIndex) }}</strong>
-                    <span v-if="reference.type"> — {{ reference.type }}</span>
-                    <span v-if="reference.locator" class="notes-reference-locator">{{ reference.locator }}</span>
-                    <span v-if="reference.asOfDate">Source date / as of: {{ formatDate(reference.asOfDate) }}</span>
-                    <span v-if="reference.notes" class="preserve-lines">{{ reference.notes }}</span>
-                  </li>
-                  </ol>
-                </div>
-
-                <div v-if="note.editHistory?.length" class="notes-document-supporting">
-                  <strong>Edit history</strong>
-                  <ul class="notes-edit-list">
-                    <li v-for="edit in note.editHistory" :key="edit.id"><span v-if="edit.editedAt || edit.editedDate">{{ editLabel(edit) }} — </span>{{ edit.reason }}</li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
-            <p v-if="!notes.length" class="document-empty">No notebook entries have been completed yet.</p>
-          </section>
-          </div>
-        </div>
-
-        <footer class="print-running-footer" aria-hidden="true">
-          <span>{{ projectTitle || "Untitled Dynamic SRS" }}</span>
-          <span class="print-page-number">Page </span>
-          <span>{{ pageSchema.code }} · v{{ version }}</span>
-        </footer>
-      </article>
-    </div>
-  `
-});
+export { NotesPreview } from "./NotesPreview.ts";
