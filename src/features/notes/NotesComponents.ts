@@ -19,26 +19,30 @@ export const NotesForm = defineComponent({
   emits: ["copy-markdown"],
   props: {
     copiedSection: { type: String, default: "" },
-    dataModel: { type: Object as PropType<DataModel>, required: true },
+    dataModel: { type: Object as PropType<NotesModel>, required: true },
     pageSchema: { type: Object as PropType<SchemaNode>, required: true }
   },
   data() {
     return {
       draft: newNote(),
-      editingId: null,
+      editingId: null as number | null,
       editReason: "",
       originalEditSnapshot: ""
     };
   },
   computed: {
     noteSection(): Section & { repeatable: Repeater } {
-      return this.pageSchema.sections.find(({ key }) => key === "notebookEntries");
+      const section = (this.pageSchema.sections || []).find(({ key }) => key === "notebookEntries");
+      if (!section?.repeatable) throw new Error("Notes schema is missing its notebook entries repeater.");
+      return section as Section & { repeatable: Repeater };
     },
     notes(): Note[] {
       return populatedNotes(this.dataModel);
     },
     referenceField(): Field {
-      return this.noteSection.repeatable.fields.find(({ key }) => key === "references");
+      const field = this.noteSection.repeatable.fields.find(({ key }) => key === "references");
+      if (!field) throw new Error("Notes schema is missing its references field.");
+      return field;
     },
     referenceCount(): number {
       return countNested(this.notes, "references");
@@ -204,7 +208,7 @@ export const NotesPreview = defineComponent({
   components: { DocumentCoverPage, PreviewWatermark, PrintDocumentButton },
   emits: ["print"],
   props: {
-    dataModel: { type: Object as PropType<DataModel>, required: true },
+    dataModel: { type: Object as PropType<NotesModel>, required: true },
     isPrinting: { type: Boolean, default: false },
     pageSchema: { type: Object as PropType<SchemaNode>, required: true },
     printDateLabel: { type: String, required: true },

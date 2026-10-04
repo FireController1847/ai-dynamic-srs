@@ -35,7 +35,7 @@ export function newNote(id: number = 1): Note {
 
 export function dateTimeLabel(timestamp: unknown, fallbackDate: unknown) {
   if (timestamp) {
-    const date = new Date(timestamp);
+    const date = timestamp instanceof Date ? timestamp : new Date(String(timestamp));
     if (!Number.isNaN(date.getTime())) {
       const parts = new Intl.DateTimeFormat("en-US", {
         year: "numeric",
@@ -45,7 +45,7 @@ export function dateTimeLabel(timestamp: unknown, fallbackDate: unknown) {
         minute: "2-digit",
         hour12: true,
         timeZoneName: "short"
-      }).formatToParts(date).reduce((result, part) => {
+      }).formatToParts(date).reduce<Record<string, string>>((result, part) => {
         result[part.type] = part.value;
         return result;
       }, {});
@@ -53,7 +53,7 @@ export function dateTimeLabel(timestamp: unknown, fallbackDate: unknown) {
     }
   }
 
-  return fallbackDate || "Date unavailable";
+  return fallbackDate ? String(fallbackDate) : "Date unavailable";
 }
 
 export function timestampLabel(note: Note) {
