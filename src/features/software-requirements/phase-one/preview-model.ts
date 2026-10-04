@@ -56,7 +56,7 @@ function sourceReferences(documentModel: DocumentModel, documentSchemas: readonl
         ? `${completion(schema, data, documentModel)}% complete in the current workspace`
         : "Available as a supporting project record"
     };
-  }).filter((item): item is DataModel => item !== null);
+  }).filter((item) => item !== null);
 }
 
 function buildEvidenceIntake(stage: SchemaNode, localData: DataModel, documentModel: DocumentModel, documentSchemas: readonly SchemaNode[]): BaselinePreviewModel {
