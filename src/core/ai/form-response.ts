@@ -223,7 +223,6 @@ export function buildAiFormResponseContract(
       ...base,
       records: [{
         id: null,
-        ...(parent.length ? { parent: null } : {}),
         fields: fieldTemplate
       }],
       needsInformation: []
@@ -244,7 +243,7 @@ export function renderAiFormResponseContract(
   const contract = buildAiFormResponseContract(page, section, documentModel);
   return [
     'Return only one valid dsrs-form v1 JSON object. mode is merge. null means unsupported/no change; omitted fields also remain unchanged.',
-    'Use existing record IDs exactly; omit id for a new record. Never return read-only/app-managed fields or diagram payloads.',
+    'Use existing record IDs exactly; omit id (or leave it null) for a new record. Add parent only for a new grouped record. Never return read-only/app-managed fields or diagram payloads.',
     `Shape: ${JSON.stringify(contract.envelope)}`,
     contract.fieldTypes.length ? `Types: ${contract.fieldTypes.join('; ')}` : ''
   ].filter(Boolean).join('\n');
