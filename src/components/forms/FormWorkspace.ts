@@ -92,15 +92,19 @@ export const DynamicForm = defineComponent({
       const artifactField = section.repeatable.artifactField;
       if (!artifactField) return;
       const records = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
-      for (const figure of figures) {
+      const plannedRecords = [...records];
+      const additions = figures.map((figure) => {
         const file = isDataModel(figure.file) ? figure.file : null;
-        if (!file) continue;
-        records.push(createRepeaterItem(
+        if (!file) throw new Error("AI diagram batch figure is missing its validated file payload.");
+        const item = createRepeaterItem(
           section.repeatable,
-          nextRepeaterRecordId(section.repeatable, records, this.documentModel),
+          nextRepeaterRecordId(section.repeatable, plannedRecords, this.documentModel),
           { ...figure, [artifactField]: file }
-        ));
-      }
+        );
+        plannedRecords.push(item);
+        return item;
+      });
+      records.push(...additions);
     },
     itemTitle(section: RepeatableSection, item: DataModel, index: number) {
       const displayId = section.repeatable.displayId;
