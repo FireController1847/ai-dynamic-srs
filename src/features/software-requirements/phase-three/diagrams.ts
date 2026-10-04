@@ -1,12 +1,15 @@
 import type { Field, FieldOption, Section, Repeater, SchemaNode, Reference, EvidenceSource, EvidenceGroup, GuideStep, Guide, AiGuidance, AiDefinition, DocumentConfig, Evidence } from '../../../core/schema/schema-types.ts';
 import { stage, reviewSection, recordSection, text, choice, recordsPath } from "./shared.ts";
 import { catalogEvidence, casualSource, mapSource } from "./evidence.ts";
+import { useCaseDiagramConfig, activityDiagramConfig } from './diagram-config.ts';
 
 function figures(id: string, title: string, target: string, group: string, extraFields: Field[] = []): Section {
   return recordSection(id, title, target, group === "use-case-map" ? 3 : 1, "artifacts", "FIG-", "title", [
     text("artifactGroup", "Diagram group", { type: "text", default: group, hidden: true, editable: false, completion: false, includeInPreview: false, includeInPrompt: false }),
     text("title", "Figure title", { type: "text" }),
-    { key: "file", label: "Diagram file", type: "diagram-file", default: null, collectionPath: [...recordsPath, "artifacts"], artifactField: "file", aiHint: "File bytes are omitted. The user uploads or replaces the actual DrawIO/PNG/JPEG file in the application." },
+    { key: "file", label: "Diagram file", type: "diagram-file", default: null, collectionPath: [...recordsPath, "artifacts"], artifactField: "file",
+      diagram: group === 'use-case-map' ? useCaseDiagramConfig : activityDiagramConfig,
+      aiHint: "Upload DrawIO/XML/PNG/JPEG or use the figure/section copy prompt and paste its dsrs-diagram response into Import AI diagram. Stored file contents remain omitted from prompts." },
     text("caption", "Caption / what this figure demonstrates"),
     text("useCaseReferences", "Use cases shown (IDs)", { type: "text", placeholder: "SRS-UC-001, SRS-UC-002" }),
     text("actorReferences", "Actors shown (IDs)", { type: "text", placeholder: "SRS-ACT-001, SRS-ACT-002" }),
@@ -21,7 +24,7 @@ function figures(id: string, title: string, target: string, group: string, extra
 
 export const useCaseMapStage = stage(
   "srs-behavior-use-case-map", "useCaseMap", "Use-Case Map",
-  "Upload a use-case diagram, connect it to the catalog, and reconcile its actors, boundary, and relationships.",
+  "Upload or generate a use-case diagram, connect it to the catalog, and reconcile its actors, boundary, and relationships.",
   ["functional-behavior.use-case-model"], [...catalogEvidence, casualSource],
   [
     reviewSection("map-review", "Use-Case Map Review", "functional-behavior.use-case-model", "Check every actor association and use-case relationship against the canonical records."),
@@ -33,7 +36,7 @@ export const useCaseMapStage = stage(
   "Use the catalog's actors, use cases, and directed relationships. Record a meaningful figure title, caption, IDs covered, and discrepancies. The diagram is evidence to compare with the records, not a replacement catalog. Do not infer associations from a filename or claim a visual review without the supplied image.",
   [
     { title: "Draw the catalog", text: "Place use cases inside the subject boundary and actors outside it. Add associations and justified include/extend/generalization relationships." },
-    { title: "Upload controlled figures", text: "Choose multiple .drawio/.xml or PNG/JPEG files. Every file receives a stable FIG ID; replacing its file retains that identity." },
+    { title: "Upload controlled figures", text: "Upload .drawio/.xml or PNG/JPEG files, or copy the figure/section AI prompt and import its dsrs-diagram response. The app generates editable DrawIO XML. Every file receives a stable FIG ID; replacing its file retains that identity." },
     { title: "Compare both ways", text: "Check for catalog cases missing from the map and diagram elements missing from the catalog. Correct the source records before marking the figure reconciled." }
   ]
 );

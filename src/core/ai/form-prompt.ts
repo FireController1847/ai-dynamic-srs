@@ -3,6 +3,7 @@ import { isDataModel } from '../schema/data-models.ts';
 import { sectionRecords } from '../schema/section-records.ts';
 import { fieldVisible } from '../schema/field-visibility.ts';
 import { hasValue } from '../records/record-values.ts';
+import { buildDiagramPrompt, diagramPromptField } from './diagram-prompt.ts';
 import { responseContract, referenceContract, parentPromptGuidance } from './prompt-contract.ts';
 import {
   promptFields, promptPeriodCount, promptRecordLabel, sectionPromptModel,
@@ -70,6 +71,10 @@ export function buildFormPrompt(
   const invalid = invalidRecord || (target.fieldPath?.length && !scoped);
   const title = [page.title || page.label, section.title, recordTitle, ...(scoped?.labels || [])].filter(Boolean).join(' / ');
   if (invalid) return `# Form prompt: ${title}\n\nThe requested target is unavailable or outside this stage's eligible records. Do not fill a different scope.\n\n## Needs information\n\n- A current eligible record or field target is needed; no substitute has been selected.\n`;
+  const diagram = diagramPromptField(scoped?.fields || fields);
+  if (diagram && (!scoped || scoped.active)) {
+    return buildDiagramPrompt(section, diagram, scoped ? [scoped.model] : record ? [record] : section.repeatable ? records : [model], documentModel);
+  }
   const scope = scoped ? `Only the named ${typeof target.fieldPath?.at(-1) === 'number' ? 'nested item' : 'field or nested collection'}: ${scoped.labels.join(' / ')}. Other supplied values are context only.`
     : record ? `Only ${recordTitle}; supply its complete applicable editable inputs. Do not add or answer other records.`
     : `The entire ${section.title} form${section.repeatable ? ' collection, including all eligible saved records and all additional entries agreed during the interview' : ''}.`;

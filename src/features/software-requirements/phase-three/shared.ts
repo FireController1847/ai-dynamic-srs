@@ -42,7 +42,7 @@ export function caseView(id: string, title: string, subsection: number, fields: 
     .map((field) => ({ ...field, editable: false, completion: false }));
   return recordSection(id, title, "functional-behavior.use-case-descriptions", subsection, "useCases", "SRS-UC-", "name", [...identity, ...fields], {
     allowAdd: false, allowRemove: false, recordFilter: activeCases, completionMinimum: 1,
-    emptyText: "No active use cases yet. Refine the candidates in the Use-Case Catalog first."
+    emptyText: "No active use cases yet. Identify them in 02.3 Use Cases first."
   });
 }
 

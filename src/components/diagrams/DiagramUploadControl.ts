@@ -1,7 +1,7 @@
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
-import { DIAGRAM_FILE_ACCEPT, MAX_DIAGRAM_COLLECTION_BYTES, readDiagramArtifact } from "../../core/artifacts/diagram-files.ts";
+import { DIAGRAM_FILE_ACCEPT, assertDiagramCollectionLimit, readDiagramArtifact } from "../../core/artifacts/diagram-files.ts";
 import { errorMessage } from "../../core/formatting/errors.ts";
 
 export const DiagramUploadControl = defineComponent({
@@ -27,12 +27,7 @@ export const DiagramUploadControl = defineComponent({
         for (const file of selected) {
           try {
             const payload = await readDiagramArtifact(file);
-            const currentBytes = this.files.filter((entry) => entry && entry !== this.replacing)
-              .reduce((sum, entry) => sum + (Number(entry.sizeBytes) || 0), 0);
-            const pendingBytes = accepted.reduce((sum, entry) => sum + (Number(entry.sizeBytes) || 0), 0);
-            if (currentBytes + pendingBytes + payload.sizeBytes > MAX_DIAGRAM_COLLECTION_BYTES) {
-              throw new Error("The shared diagram register has a 3 MB total file limit, including retired figures.");
-            }
+            assertDiagramCollectionLimit(this.files, this.replacing, [...accepted, payload]);
             accepted.push(payload);
           } catch (error) { this.errors.push(`${file.name}: ${errorMessage(error)}`); }
         }

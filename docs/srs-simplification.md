@@ -29,10 +29,10 @@ Original phase schemas retain descriptors/defaults used to build the simplified 
 - Vocabulary: terms, definitions and optional usage notes.
 - User Classes: existing group names and characteristics affecting use; no repeated interaction questionnaire.
 - Actors & Goals: actor name, optional clarification and goal list. Canonical actor/goal IDs and automatic links remain.
-- Use Cases: one catalog in discovery, including optional directed relationships. The second catalog stage is removed; old navigation selections are redirected. New triggers, interests and other detail belong in Detailed Descriptions.
-- Casual Descriptions: refine `briefDescription` on the same use case, not a second mandatory account. Older separately saved stories are not automatically rewritten.
+- 02.3 Use Cases: identify and organize behavior through names, primary/supporting actors, goal links, dispositions and optional directed relationships. Short descriptions are not authoring or completion inputs here. This remains the single catalog; the second catalog stage is removed. Triggers, interests and other detail belong in Detailed Descriptions.
+- 03.1 Casual Descriptions: author or refine `briefDescription` on each eligible existing use case. Phase 2 identifies behavior; Phase 3 describes behavior. Names and primary actors are read-only context, and each short description is required for this stage’s completion. Existing descriptions remain intact until edited; older separately saved stories are not automatically rewritten. No second catalog or migration is introduced.
 - Detailed Descriptions: carried identity, editable trigger, appropriate detail level, conditions, numbered normal flow and relevant alternatives/subflows. No justification essay for choosing overview or omitting a diagram.
-- Diagrams: actual file, title, caption, named case links and optional scenario. No prose transcription of lanes, guards and object flows. Binary/XML payloads stay out of prompts.
+- Diagrams: uploaded DrawIO/XML/PNG/JPEG or AI-generated editable DrawIO, title, caption, named case links and optional scenario. The section/figure copy prompt returns a compact dsrs-diagram graph for Import AI diagram; the app owns layout. No prose transcription of lanes, guards and object flows. Binary/XML payloads stay out of prompts.
 - Functional requirements: statement, existing links and optional acceptance detail. Rationale and verification-method essays are not routine inputs.
 - Quality requirements: put conditions and measurable targets in the statement. Preserve proposed/agreed status. Categories use a simple applicability choice, not findings essays.
 - Interface requirements: put the required exchange/contract and necessary failure behavior in the statement, linking earlier obligations where appropriate. Separate overlapping contract inputs are retired.
@@ -41,7 +41,7 @@ Original phase schemas retain descriptors/defaults used to build the simplified 
 
 Existing provenance remains stored and can accompany field prompts without requiring re-entry. Typed source locators remain available for external evidence. Known actor, goal, use-case and figure links use name-based selectors while preserving the saved comma-separated ID representation. Unavailable links remain visible until explicitly corrected.
 
-Progress percentages, bars, phase totals and completed-tab indicators are available for the simplified SRS. Completion follows the active essential fields and record minimums; removed fields, optional qualifications, hidden metadata and read-only context do not contribute. Detailed Descriptions evaluates the trigger, detail choice and visible normal flow rather than carried catalog identity; an overview does not require hidden flows. The AI guidance button remains alongside progress. CR/SR/CBA/FSA follow the same concise authoring approach; see [Planning simplification](planning-simplification.md). Remaining Phase 5–7 placeholders have not been implemented and remain incomplete.
+Progress percentages, bars, phase totals and completed-tab indicators are available for the simplified SRS. Use Cases requires a name per catalog entry, without a short description. Casual Descriptions requires `briefDescription` for every active, non-retired case; deferred/excluded cases remain saved without participating in this stage. Completion follows the active essential fields and record minimums; removed fields, optional qualifications, hidden metadata and read-only context do not contribute. Detailed Descriptions evaluates the trigger, detail choice and visible normal flow rather than carried catalog identity; an overview does not require hidden flows. The AI guidance button remains alongside progress. CR/SR/CBA/FSA follow the same concise authoring approach; see [Planning simplification](planning-simplification.md). Remaining Phase 5–7 placeholders have not been implemented and remain incomplete.
 
 ## Prompt contract
 
@@ -51,14 +51,14 @@ The tab interview receives the complete active schema and current-tab inventory/
 
 ## Saved workspaces
 
-Application version is 0.4.0-alpha and new saves use workspace envelope version 2. Imports and local storage validate the envelope and normalize current fields; there is no version migration, answer conversion, archive creation, recovery UI or legacy navigation remapping. Accepted older envelopes are read as supplied. Undeclared saved values are preserved without rewriting or deleting them, including data previously produced by migration.
+Application version is 0.5.0-alpha and new saves use workspace envelope version 2. Imports and local storage validate the envelope and normalize current fields; there is no version migration, answer conversion, archive creation, recovery UI or legacy navigation remapping. Accepted older envelopes are read as supplied. Undeclared saved values are preserved without rewriting or deleting them, including data previously produced by migration.
 
 Optional inputs show their title once in the disclosure summary. The inner input retains a visually hidden label for accessibility.
 
 ## Manual verification — not run
 
 1. Import a saved workspace and save/reopen it. Confirm current answers and files remain intact without creating an archive or converting earlier answers.
-2. Confirm obsolete saved navigation falls back to an available stage. Editing a use-case summary should appear in Casual Descriptions and detailed context.
+2. Confirm obsolete saved navigation falls back to an available stage. In 02.3, confirm short descriptions are absent and named cases can complete without one. In 03.1, confirm carried names/actors are read-only and every eligible case needs a short description. Edit a description there and confirm it appears in detailed context with the same ID.
 3. Create actors and goals, then use cases. Confirm automatic parent links, moving and retirement preserve IDs and unavailable-link recovery still works.
 4. Select several named links, retain an unavailable saved link, remove one explicitly, then save/reopen. Inspect preview labels and copied reference values.
 5. Inspect every implemented SRS stage: no retired review questionnaires, no archived-answer recovery UI, no blank optional field paragraphs in previews, and an accessible AI guidance button alongside the completion percentage and bar. Fill essential answers and inspect phase totals and completed-tab indicators; blank optional answers must not block completion. In Detailed Descriptions, switch between overview and detailed behavior and confirm only visible essential fields count. Phase 5–7 placeholders must remain incomplete.
@@ -69,5 +69,7 @@ Optional inputs show their title once in the disclosure summary. The inner input
 10. Open the human guide on all 16 implemented stages, including completed tabs. Inspect section tips and the quality/interface applicability tips by mouse and keyboard: meaningful prose, no empty sections or undefined values. Copy the separate AI interview and form prompts; confirm interviews include complete current-tab context while form prompts retain exact references and complete selected evidence. Neither should copy on-page help or diagram payloads. Use `guided-interviews.md` for the app-wide prompt review.
 
 Category/overview contradictions are surfaced by `simplification/authoring-findings.ts`; these are specific findings, not a replacement checklist of optional fields.
+
+Focused regression cases for the 02.3/03.1 boundary live in `tests/srs-use-case-boundary.test.mjs`, covering completion, AI prompts, stable references and saved-description round trips.
 
 No builds, tests, browser checks or automated verification were run for this refactor, per the user's instruction. Existing automated tests that encode the former questionnaire/one-third-completion contracts will require revision before being treated as release validation.

@@ -80,10 +80,16 @@ export function diagramCollectionSize(records: DataModel[] = [], excludedId: unk
   ), 0);
 }
 
+export function assertDiagramCollectionLimit(files: DataModel[], replacing: DataModel | null, pending: DataModel[]): void {
+  const bytes = [...files.filter(file => file !== replacing), ...pending]
+    .reduce((total, file) => total + (Number(file.sizeBytes) || 0), 0);
+  if (bytes > MAX_DIAGRAM_COLLECTION_BYTES) throw new Error('The shared diagram register has a 3 MB total file limit, including retired figures.');
+}
+
 export function diagramFileSummary(file: unknown) {
   return asDataModel(file).sourceFileName
     ? `${asDataModel(file).sourceFileName} (${asDataModel(file).artifactKind || "Diagram"}; ${Number(asDataModel(file).sizeBytes) || 0} bytes). File contents omitted.`
-    : "No diagram file uploaded.";
+    : "No diagram file attached.";
 }
 
 export function diagramPayloadError(file: unknown) {

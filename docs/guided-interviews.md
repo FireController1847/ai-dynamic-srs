@@ -19,3 +19,5 @@ If the inventory changes, copy a fresh tab prompt. A previous copied prompt cann
 7. Review copied prompts from CR, SR, CBA, FSA, all implemented SRS stages, Effort Breakdown, and General Notes. Confirm their task guidance follows the shared two-job contract, including specialized actor/goal editing. Empty optional collections must not force fabricated records.
 
 No builds, tests, automated checks, browser sessions, or real-model evaluations were run for this pass. Application version is `0.4.1-alpha`; workspace format remains 2.
+
+Diagram sections/figures use a dedicated semantic generation response rather than formatted metadata answers. Follow [AI-generated diagrams](ai-diagrams.md) for selected evidence, one fenced dsrs-diagram JSON response, upload/import replacement and shared rendering checks. Ordinary interviews and metadata scopes must still exclude stored file contents.

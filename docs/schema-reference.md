@@ -32,13 +32,13 @@ Supported field types are:
 - `checkbox-group`
 - `period-values`
 - `nested-records`
-- `diagram-file` (validated file payload; rendered media in list previews, metadata only in prompts)
+- `diagram-file` (validated uploaded or AI-generated DrawIO file payload; rendered media in list previews, metadata only in ordinary prompts)
 
 Common field keys include `key`, `label`, `type`, `default`, `columns`, `placeholder`, `helpText`, `aiHint`, `completion`, `includeInPreview`, and `showWhen`.
 
 `editable: false` renders carried context without an input and excludes it from repeatable completion. `hidden: true` hides internal metadata from forms; use `includeInPreview: false` and `includeInPrompt: false` as appropriate as well. A select may declare `reference: { dataPath, displayId, labelField }` for live record choices that save stable IDs.
 
-`diagram-file` fields declare `collectionPath` and `artifactField` for shared storage limits. The payload contains source filename, kind, MIME type, byte count, timestamps, and content. It is not text for the AI to generate. Uploaded data is preserved inside `.dsrs`; original XML and image payloads never enter clipboard prompts.
+`diagram-file` fields declare `collectionPath` and `artifactField` for shared storage limits. The payload contains source filename, kind, MIME type, byte count, timestamps, and content. Every editable field offers upload and Import AI diagram. An optional typed `diagram` descriptor selects the registered semantic type, reference/evidence sources, scope links and saved-label aliases for the section/figure generation prompt. The AI returns a compact `dsrs-diagram` graph; the application owns validation, layout and editable DrawIO XML generation. Both paths preserve the same file in `.dsrs`; original XML and image payloads never enter clipboard prompts. See [AI-generated diagrams](ai-diagrams.md).
 
 Visibility conditions use either one condition or `showWhen.all`. A condition supports `equals` or `in`.
 

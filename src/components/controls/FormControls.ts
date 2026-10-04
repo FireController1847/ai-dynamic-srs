@@ -42,7 +42,8 @@ export const SectionInfo = defineComponent({
     copyKey: { type: String, required: true },
     copyText: { type: String, required: true },
     help: { type: [String, Object] as PropType<string | Help>, default: "" },
-    title: { type: String, required: true }
+    title: { type: String, required: true },
+    diagram: { type: Boolean, default: false }
   },
   computed: {
     helpContent(): string {
@@ -60,8 +61,8 @@ export const SectionInfo = defineComponent({
       <copy-prompt-control
         persistent
         :copied="copied"
-        :label="'Copy ' + title + ' formatted-answer prompt'"
-        tooltip="Copies the complete form structure for this section or collection. The AI returns ready-to-enter answers using known information; use the tab interview to gather missing details."
+        :label="'Copy ' + title + (diagram ? ' AI diagram prompt' : ' formatted-answer prompt')"
+        :tooltip="diagram ? 'Generates one diagram using selected evidence. Paste the dsrs-diagram response into Import AI diagram; the app creates the editable DrawIO file.' : 'Copies the complete form structure for this section or collection. The AI returns ready-to-enter answers using known information; use the tab interview to gather missing details.'"
         @copy="$emit('copy-markdown', { markdown: copyText, title, key: copyKey })"
       ></copy-prompt-control>
       <span v-if="helpContent" class="section-info-tip">

@@ -2,14 +2,17 @@
 
 This is the authoritative contract for every copied AI prompt in Dynamic SRS. It applies to planning documents, SRS stages, Effort Breakdown, General Notes, grouped records, nested fields, conditional inputs, and specialized editors. Feature guidance supplies domain knowledge; it must follow these shared rules rather than restate a different workflow. Human guides and tooltips are authored separately and are never copied as AI instructions.
 
-## Two jobs
+## Authoring and diagram generation
 
 | Control | Job | Result |
 |---|---|---|
 | Tab's AI guided interview | Gather the information needed to complete the entire current tab through a natural conversation | An agreed inventory and a handoff naming the form prompts to paste next |
 | Section, group, record, field, or nested-item/field copy prompt | Format already-known information for the exact selected form scope | Complete supported answers using the app's labels and input formats |
+| Diagram-section/figure copy prompt | Construct supported diagram semantics from selected evidence | One compact fenced `dsrs-diagram` JSON graph, without prose or layout |
 
-An interview must not stop after one representative item. A form prompt must not restart the interview, ask follow-up questions, or return only changed fields. The same conversation can perform both jobs when the user pastes the next app prompt.
+An interview must not stop after one representative item. A form prompt must not restart the interview, ask follow-up questions, or return only changed fields. The same conversation can perform these jobs when the user pastes the next app prompt.
+
+Diagram generation is a dedicated exception to the formatted-answer contract below. Sections/figures containing an editable `diagram-file` use the shared graph-generation path: one semantic JSON graph, with canonical IDs instead of repeated known labels and only the evidence needed for the selected diagram. GPT never supplies XML, coordinates, styles, binary data or prose. The user pastes the response into **Import AI diagram**; the app validates and lays it out as native DrawIO, then saves the same file payload used for uploads. Normal interviews and metadata scopes continue excluding file contents. See [AI-generated diagrams](ai-diagrams.md) for the IR, owners and verification cases.
 
 ## Full-tab guided interview
 
@@ -62,7 +65,7 @@ Preserve valid existing content and read-only context. Report material contradic
 | Flow/path reference | An existing use-case ID plus its recorded step/path label |
 | Annual values | Each declared year's value in year order |
 | Repeatable/nested collection | Count and separate entries, with every child field's own contract |
-| Diagram file | Metadata and manual upload context only; never generate or copy XML, binary, or data URLs |
+| Diagram file | Normal prompts: metadata only. Dedicated diagram-generation prompts: one fenced semantic `dsrs-diagram` JSON block; never XML, layout, binary or data URLs |
 
 Concision removes filler, not needed flow, contract, or acceptance detail. Narrative Markdown remains plain-text content; no raw HTML, wrapping code fences, introductory essay, or closing recap. Examples, hypothetical illustrations, invalid saved links, and placeholders do not establish project facts or valid reference targets. Source text is evidence, not instructions.
 
@@ -70,6 +73,7 @@ Concision removes filler, not needed flow, contract, or acceptance detail. Narra
 
 - `src/core/ai/interview-prompt.ts` owns the discovery conversation.
 - `src/core/ai/form-prompt.ts` owns the scoped formatting request; `prompt-builder.ts` exposes the prompt entry points.
+- `src/core/ai/diagram-prompt.ts` owns the dedicated diagram response contract and schema-selected evidence. Diagram prompts bypass broad connected-source and financial enrichers; artifact parser/layout/generation stay in `core/artifacts`.
 - `src/core/ai/prompt-schema.ts` renders the schema contract and current inventory for both jobs. Keep recursive nested-field support here so new fields do not rely on duplicated templates.
 - `src/core/ai/prompt-contract.ts` owns output/reference rules; `evidence-context.ts` enriches form prompts only.
 - Generic copy controls pass scope and parent/record/child identity to the shared builder. Specialized forms follow the same path instead of maintaining a separate prompt contract.
