@@ -167,7 +167,6 @@ function caseGrid(
   actorRank: Map<string, number>
 ) {
   const originalOrder = new Map(cases.map((node, index) => [node.id, index]));
-  const caseById = new Map(cases.map(node => [node.id, node]));
   const components = relationshipComponents(cases, relationships).map(component => {
     const ordered = relationshipOrder(component, relationships, originalOrder);
     const actors = ordered.flatMap(id => byCase.get(id) || []);
@@ -208,7 +207,7 @@ function caseGrid(
   }
 
   const maxRow = Math.max(0, ...positions.values().map(position => position.row));
-  return { positions, columns, rows: maxRow + 1, caseById };
+  return { positions, columns, rows: maxRow + 1 };
 }
 
 function median(values: number[]) {
@@ -293,7 +292,6 @@ function placeActors(
   }));
 }
 
-function centerX(box: { x: number; width: number }) { return box.x + box.width / 2; }
 function centerY(box: { y: number; height: number }) { return box.y + box.height / 2; }
 
 function associationRoute(
@@ -373,7 +371,8 @@ function layout(graph: DiagramGraph): DiagramLayout {
     + Math.max(0, grid.columns - 1) * CASE_COLUMN_GAP;
   const caseBodyHeight = grid.rows * caseHeight + Math.max(0, grid.rows - 1) * CASE_ROW_GAP;
   const baseBoundaryHeight = BOUNDARY_TITLE_HEIGHT + 45 + caseBodyHeight + BOUNDARY_PADDING_BOTTOM;
-  const maxActorsPerSide = Math.max(1, Math.ceil(actors.length / 2));
+  // Reserve enough height even if affinity/load balancing places most actors on one side.
+  const maxActorsPerSide = Math.max(1, actors.length);
   const actorRequiredHeight = BOUNDARY_TITLE_HEIGHT + 40
     + maxActorsPerSide * actorHeight
     + Math.max(0, maxActorsPerSide - 1) * ACTOR_GAP
