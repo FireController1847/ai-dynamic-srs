@@ -9,7 +9,7 @@ function figures(id: string, title: string, target: string, group: string, extra
     text("title", "Figure title", { type: "text" }),
     { key: "file", label: "Diagram file", type: "diagram-file", default: null, collectionPath: [...recordsPath, "artifacts"], artifactField: "file",
       diagram: group === 'use-case-map' ? useCaseDiagramConfig : activityDiagramConfig,
-      aiHint: "Upload DrawIO/XML/PNG/JPEG or use the figure/section copy prompt and paste its dsrs-diagram response into Import AI diagram. Stored file contents remain omitted from prompts." },
+      aiHint: "Upload DrawIO/XML/PNG/JPEG. A section copy prompt returns an ordered dsrs-diagrams batch for Import AI diagrams; an individual figure prompt returns one dsrs-diagram for Import AI diagram. Stored file contents remain omitted from prompts." },
     text("caption", "Caption / what this figure demonstrates"),
     text("useCaseReferences", "Use cases shown (IDs)", { type: "text", placeholder: "SRS-UC-001, SRS-UC-002" }),
     text("actorReferences", "Actors shown (IDs)", { type: "text", placeholder: "SRS-ACT-001, SRS-ACT-002" }),
@@ -36,7 +36,7 @@ export const useCaseMapStage = stage(
   "Use the catalog's actors, use cases, and directed relationships. Record a meaningful figure title, caption, IDs covered, and discrepancies. The diagram is evidence to compare with the records, not a replacement catalog. Do not infer associations from a filename or claim a visual review without the supplied image.",
   [
     { title: "Draw the catalog", text: "Place use cases inside the subject boundary and actors outside it. Add associations and justified include/extend/generalization relationships." },
-    { title: "Upload controlled figures", text: "Upload .drawio/.xml or PNG/JPEG files, or copy the figure/section AI prompt and import its dsrs-diagram response. The app generates editable DrawIO XML. Every file receives a stable FIG ID; replacing its file retains that identity." },
+    { title: "Upload controlled figures", text: "Upload .drawio/.xml or PNG/JPEG files, or use the section AI prompt to import an ordered dsrs-diagrams batch. Individual figure prompts still generate one dsrs-diagram and replace only that figure's file. The app generates editable DrawIO XML and assigns stable FIG IDs." },
     { title: "Compare both ways", text: "Check for catalog cases missing from the map and diagram elements missing from the catalog. Correct the source records before marking the figure reconciled." }
   ]
 );
