@@ -16,8 +16,8 @@ export const FeasibilityPreview = defineComponent({
   computed: {
     previewData(): DataModel { return { ...this.dataModel, calculatedFinancials: financialEvidence(this.documentModel.costBenefitAnalysis) }; },
     previewSchema(): SchemaNode {
-      return { ...this.pageSchema, sections: this.pageSchema.sections.map(section => section.id === 'economic-feasibility'
-        ? { ...section, fields: [{ key: 'calculatedFinancials', label: 'Calculated CBA results', type: 'textarea' }, ...section.fields] } : section) };
+      return { ...this.pageSchema, sections: (this.pageSchema.sections || []).map((section: Section) => section.id === 'economic-feasibility'
+        ? { ...section, fields: [{ key: 'calculatedFinancials', label: 'Calculated CBA results', type: 'textarea' }, ...(section.fields || [])] } : section) };
     }
   },
   template: `<document-preview v-bind="$props" :page-schema="previewSchema" :data-model="previewData" @print="$emit('print', $event)"></document-preview>`
