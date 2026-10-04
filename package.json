@@ -6,9 +6,10 @@
   "description": "A local, browser-based Dynamic SRS planning workspace.",
   "type": "module",
   "scripts": {
-    "start": "webpack serve --config webpack.config.mjs --mode development",
-    "build": "webpack --config webpack.config.mjs --mode production",
-    "pages:prepare": "npm run build"
+    "start": "webpack serve --config webpack.config.mts --disable-interpret --mode development",
+    "build": "npm run typecheck && webpack --config webpack.config.mts --disable-interpret --mode production",
+    "pages:prepare": "npm run build",
+    "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
     "@popperjs/core": "2.11.8",
@@ -17,11 +18,15 @@
     "vue": "3.5.41"
   },
   "devDependencies": {
+    "@types/bootstrap": "5.2.11",
+    "@types/node": "24.19.0",
     "copy-webpack-plugin": "13.0.1",
     "css-loader": "7.1.5",
     "css-minimizer-webpack-plugin": "7.0.4",
     "html-webpack-plugin": "5.6.8",
     "mini-css-extract-plugin": "2.10.2",
+    "ts-loader": "9.6.2",
+    "typescript": "5.9.3",
     "webpack": "5.111.1",
     "webpack-cli": "6.0.1",
     "webpack-dev-server": "5.2.6"
