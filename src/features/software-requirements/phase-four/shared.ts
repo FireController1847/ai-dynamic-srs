@@ -7,7 +7,7 @@ import { requirementKindField, requirementFilter, requirementDisplayId } from ".
 export { text, choice, recordSection };
 export const recordsPath = ["softwareRequirementsSpecification", "records"];
 export const actorReference = { dataPath: [...recordsPath, "actors"], displayId: { prefix: "SRS-ACT-", padding: 3 }, labelField: "name" };
-export const internal = (key: string, value: unknown): Field => ({ key, type: "text", default: value, hidden: true, editable: false, includeInPrompt: false, includeInPreview: false });
+export const internal = (key: string, value: unknown): Field => ({ key, label: key, type: "text", default: value, hidden: true, editable: false, includeInPrompt: false, includeInPreview: false });
 
 export function review(id: string, title: string, target: string, question: string, outcomes: string[] = ["In progress", "Requirements identified", "No additional requirements", "Needs clarification"]): Section {
   return {

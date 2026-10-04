@@ -2,18 +2,20 @@ import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../..
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../../core/schema/schema-types.ts';
+import type { SrsRecords } from "../record-types.ts";
+import { srsRecords } from "../record-types.ts";
 export const SupportingWork = defineComponent({
   props: { showQuestions: { type: Boolean, default: true }, documentModel: { type: Object as PropType<DocumentModel>, required: true } },
   data() { return { question: '' }; },
   computed: {
-    srs(): import("../record-types.ts").SrsRecords { return this.documentModel.softwareRequirementsSpecification; },
-    issues(): DataModel[] { return (this.srs.records.evidenceIssues || []).filter(item => !item._retired && !item.retired && !['Resolved', 'Accepted exception'].includes(String(item.status))); },
+    records(): SrsRecords { return srsRecords(this.documentModel); },
+    issues(): DataModel[] { return (this.records.evidenceIssues || []).filter(item => !item._retired && !item.retired && !['Resolved', 'Accepted exception'].includes(String(item.status))); },
     openCount(): number { return this.issues.filter(item => !['Resolved', 'Accepted exception'].includes(String(item.status))).length; }
   },
   methods: {
     add() {
       if (!this.question.trim()) return;
-      const items = this.srs.records.evidenceIssues;
+      const items = this.records.evidenceIssues || (this.records.evidenceIssues = []);
       items.push({ id: Math.max(0, ...items.map(item => Number(item.id) || 0)) + 1, description: this.question.trim(), status: 'Open', resolution: '' });
       this.question = '';
     }

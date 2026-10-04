@@ -4,7 +4,8 @@ import { catalogEvidence, casualSource, mapSource, activitySource, detailSource 
 import { evidenceIntakeStage } from "../phase-one/evidence-intake.ts";
 import { requirementKindField, requirementFilter, requirementDisplayId } from "../requirement-records.ts";
 
-const issues = evidenceIntakeStage.sections.find(({ id }) => id === "baseline-exceptions");
+const issues = (evidenceIntakeStage.sections || []).find(({ id }) => id === "baseline-exceptions");
+if (!issues) throw new Error("Evidence intake schema is missing the baseline-exceptions section.");
 
 export const functionalRequirementsStage = stage(
   "srs-behavior-functional-requirements", "atomicRequirements", "Functional Requirements",

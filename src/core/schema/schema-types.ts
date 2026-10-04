@@ -68,7 +68,7 @@ export interface DocumentConfig {
   contextFallbackFields?: string[]; outline?: OutlineSection[];
   authorField?: string; statusField?: string; code?: string; layout?: string;
   showCover?: boolean; sectionNumber?: string; dateDocument?: string;
-  metadata?: { key: string; label: string; format?: string }[];
+  metadata?: { key: string; label: string; format?: string; dateDocument?: string }[];
 }
 export interface SchemaNode {
   [key: string]: unknown;

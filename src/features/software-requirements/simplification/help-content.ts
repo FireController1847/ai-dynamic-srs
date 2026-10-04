@@ -86,7 +86,8 @@ const sectionHelp: Record<string, string> = {
 };
 
 export function humanSectionHelp(section: Section): string {
-  return sectionHelp[section.id] || recordHelp[section.repeatable?.dataKey] || section.description || '';
+  const dataKey = section.repeatable?.dataKey;
+  return sectionHelp[section.id] || (dataKey ? recordHelp[dataKey] : "") || section.description || '';
 }
 
 export const scalarSectionHelp: Record<string, string> = {

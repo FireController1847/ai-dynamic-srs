@@ -81,7 +81,7 @@ const app = createApp({
   },
   computed: {
     projectContext(): DataModel {
-      return this.documentSections[this.projectContextStateKey];
+      return this.documentSections[this.projectContextStateKey] || {};
     },
     lastSavedLabel(): string {
       if (!this.workspaceUpdatedAt) {
@@ -143,7 +143,7 @@ const app = createApp({
       }
     },
     documentTitleFor(pageId: string) {
-      const page = this.pages.find(({ id }) => id === pageId);
+      const page = this.pages.find((candidate: SchemaNode) => candidate.id === pageId);
       const sectionTitle = page?.title || page?.label || "Dynamic SRS";
       const titleKey = page?.document?.titleField || "projectName";
       const projectTitle = String(this.documentValueForPage(page, titleKey) || "").trim();
@@ -175,7 +175,7 @@ const app = createApp({
       );
     },
     navigateWorkspace({ pageId, anchorId, subpageSelections = {} }: NavigationRequest) {
-      if (!this.pages.some(({ id }) => id === pageId)) {
+      if (!this.pages.some((candidate: SchemaNode) => candidate.id === pageId)) {
         return;
       }
 
@@ -255,7 +255,7 @@ const app = createApp({
       try {
         await this.$nextTick();
 
-        const page = this.pages.find(({ id }) => id === pageId);
+        const page = this.pages.find((candidate: SchemaNode) => candidate.id === pageId);
         if (!page) {
           throw new Error("The active document preview could not be found.");
         }

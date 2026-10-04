@@ -4,17 +4,19 @@ import { evidenceIntakeStage } from "../phase-one/evidence-intake.ts";
 import { stage, text, choice, internal, review } from "./shared.ts";
 import { baselineSources, operatingSource, attributesSource, interfacesSource } from "./evidence.ts";
 
-const decisions = scopeBaselineStage.sections.find(({ id }) => id === "scope-decisions");
+const decisions = (scopeBaselineStage.sections || []).find(({ id }) => id === "scope-decisions");
+if (!decisions?.repeatable) throw new Error("Scope baseline schema is missing the scope-decisions repeater.");
+const decisionSection = decisions as Section & { repeatable: Repeater };
 function decisionView(id: string, title: string, type: string, target: string, extraFields: Field[]): Section {
   return {
-    ...decisions, id, key: id, title, documentTarget: target, documentSubsection: 1,
+    ...decisionSection, id, key: id, title, documentTarget: target, documentSubsection: 1,
     description: `Refine the existing ${type.toLowerCase()} records from Scope Baseline in place. Add only genuinely new decisions; existing IDs and source wording are retained.`,
     repeatable: {
-      ...decisions.repeatable, itemLabel: type, addLabel: `Add ${type.toLowerCase()}`,
+      ...decisionSection.repeatable, itemLabel: type, addLabel: `Add ${type.toLowerCase()}`,
       recordFilter: { key: "decisionType", equals: type },
       fields: [
         internal("decisionType", type),
-        ...decisions.repeatable.fields.filter(({ key }) => key !== "decisionType"),
+        ...decisionSection.repeatable.fields.filter(({ key }) => key !== "decisionType"),
         ...extraFields
       ]
     }
@@ -50,7 +52,8 @@ export const operatingContextStage = stage(
   ]
 );
 
-const issues = evidenceIntakeStage.sections.find(({ id }) => id === "baseline-exceptions");
+const issues = (evidenceIntakeStage.sections || []).find(({ id }) => id === "baseline-exceptions");
+if (!issues) throw new Error("Evidence intake schema is missing the baseline-exceptions section.");
 export const assumptionsStage = stage(
   "srs-quality-assumptions", "assumptionsAndDependencies", "Assumptions & Dependencies",
   "Check what the specification still relies on being true. Refine earlier assumptions and connect each uncertainty to the behavior or requirement it could invalidate.",
