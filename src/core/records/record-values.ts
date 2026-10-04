@@ -21,7 +21,8 @@ export function displayValue(value: unknown, fallback: string = "Not provided") 
 }
 
 export function resolveContextValue(localState: DataModel | undefined, contextState: DataModel | undefined, key: string) {
-  return hasValue(localState?.[key]) ? localState[key] : contextState?.[key];
+  const localValue = localState?.[key];
+  return hasValue(localValue) ? localValue : contextState?.[key];
 }
 
 export function nextNumericId(records: DataModel[] = []) {

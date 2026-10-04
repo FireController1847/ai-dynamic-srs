@@ -3,7 +3,8 @@ import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
 import { preferredScrollBehavior } from "../../core/browser/motion.ts";
 
-const controlState = new WeakMap();
+interface PreviewControlState { frameId: number; panelObserver: MutationObserver | null; }
+const controlState = new WeakMap<object, PreviewControlState>();
 
 export const PreviewNavigationControl = defineComponent({
   props: {
@@ -16,7 +17,7 @@ export const PreviewNavigationControl = defineComponent({
     };
   },
   mounted() {
-    const state = {
+    const state: PreviewControlState = {
       frameId: 0,
       panelObserver: null
     };

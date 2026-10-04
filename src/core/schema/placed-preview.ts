@@ -12,7 +12,8 @@ function previewValue(field: Field, value: unknown, documentModel: DataModel) {
     return String(value || '').split(/[,;]\s*/).filter(Boolean).map(id => choices.find(option => option.value === id)?.label || id).join('; ');
   }
   const resolved = resolveReferenceField(field, documentModel, value);
-  return value ? resolved.options?.find((option) => option.value === value)?.label || value : value;
+  const matched = resolved.options?.find((option) => typeof option === "object" && option.value === value);
+  return value ? (matched && typeof matched === "object" ? matched.label : value) : value;
 }
 
 // Preserve authored fields; placement changes headings, not the form's content contract.

@@ -80,7 +80,7 @@ function renderPeriodValues(value: unknown, periods: number) {
   return Array.from({ length: periods }, (_, index) => `- **Year ${index + 1}:** ${promptValue(values[index])}`).join("\n");
 }
 
-function renderPromptField(field: Field, value: unknown, periods: number = 0, documentModel: DataModel = {}) {
+function renderPromptField(field: Field, value: unknown, periods: number = 0, documentModel: DataModel = {}): string {
   let markdown = `### ${field.label}\n\n`;
 
   if (field.type === "nested-records") {
@@ -102,7 +102,7 @@ function renderPromptField(field: Field, value: unknown, periods: number = 0, do
   return markdown;
 }
 
-function renderNestedRecords(field: Field, value: unknown, periods: number = 0, headingLevel: number = 4, documentModel: DataModel = {}) {
+function renderNestedRecords(field: Field, value: unknown, periods: number = 0, headingLevel: number = 4, documentModel: DataModel = {}): string {
   const records = recordItems(value);
   const minimumRecords = Math.max(1, Number(field.minimum) || 0);
   const recordsToRender: DataModel[] = records.length
@@ -113,8 +113,8 @@ function renderNestedRecords(field: Field, value: unknown, periods: number = 0, 
     ? ""
     : "> AI guidance only—omit this line from the response: No records currently exist. Use the template below to add as many supported records as needed, or omit the template entirely when none apply.\n\n";
 
-  const renderedRecords = recordsToRender.map((record, index) => {
-    const nestedFields = (field.fields || []).map((nestedField) => {
+  const renderedRecords: string = recordsToRender.map((record, index): string => {
+    const nestedFields: string = (field.fields || []).map((nestedField): string => {
       if (nestedField.type === "nested-records") {
         return `- **${nestedField.label}:**\n${renderNestedRecords(nestedField, record[nestedField.key], periods, headingLevel + 1, documentModel)}`;
       }

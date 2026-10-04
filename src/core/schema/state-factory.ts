@@ -2,7 +2,8 @@ import type { DataModel, DocumentModel, DataPath, RecordItem, Field, FieldOption
 import { ensureRecordAtPath } from "./data-models.ts";
 
 function clone<T>(value: T): T {
-  return value === undefined ? undefined : JSON.parse(JSON.stringify(value)) as T;
+  if (value === undefined) return value;
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
 function cloneRecord(value: unknown): DataModel {
@@ -118,12 +119,12 @@ function applyStateDefaults(state: DataModel, defaults: DataModel | undefined) {
 
 export function createNestedItem(field: Field, id: number, savedItem: unknown = {}): RecordItem {
   const savedRecord = cloneRecord(savedItem);
-  return (field.fields || []).reduce((item, nestedField) => {
+  return (field.fields || []).reduce<RecordItem>((item, nestedField) => {
     item[nestedField.key] = Object.hasOwn(savedRecord, nestedField.key)
       ? normalizeFieldValue(nestedField, savedRecord[nestedField.key])
       : createFieldDefault(nestedField);
     return item;
-  }, { ...savedRecord, id: positiveInteger(savedRecord.id) || positiveInteger(id) || 1 });
+  }, { ...savedRecord, id: positiveInteger(savedRecord.id) || positiveInteger(id) || 1 } as RecordItem);
 }
 
 export function createFieldDefault(field: Field) {
@@ -153,12 +154,12 @@ export function normalizeFieldValue(field: Field, value: unknown) {
 
 export function createRepeaterItem(repeater: Repeater, id: number, savedItem: unknown = {}): RecordItem {
   const savedRecord = cloneRecord(savedItem);
-  return repeater.fields.reduce((item, field) => {
+  return repeater.fields.reduce<RecordItem>((item, field) => {
     item[field.key] = Object.hasOwn(savedRecord, field.key)
       ? normalizeFieldValue(field, savedRecord[field.key])
       : createFieldDefault(field);
     return item;
-  }, { ...savedRecord, id: positiveInteger(savedRecord.id) || positiveInteger(id) || 1 });
+  }, { ...savedRecord, id: positiveInteger(savedRecord.id) || positiveInteger(id) || 1 } as RecordItem);
 }
 
 export function createPageState(page: SchemaNode, savedState: unknown = {}): DataModel {

@@ -22,13 +22,13 @@ export const WorkflowStageOverview = defineComponent({
       const nodes = schemaNodeIndex(this.rootSchema);
       return (this.nodeSchema.workflow?.dependsOn || [])
         .map((id) => nodes.get(id))
-        .filter(Boolean);
+        .filter((node): node is SchemaNode => Boolean(node));
     },
     documentTargets(): OutlineSection[] {
-      const sections = documentOutlineIndex(this.rootSchema.document?.outline);
+      const sections = documentOutlineIndex(this.rootSchema.document?.outline || []);
       return (this.nodeSchema.documentTargets || [])
         .map((key) => sections.get(key))
-        .filter(Boolean);
+        .filter((target): target is OutlineSection & { number: string } => Boolean(target));
     },
     positionLabel(): string {
       const sequence = this.nodeSchema.workflow?.sequence;
@@ -41,7 +41,7 @@ export const WorkflowStageOverview = defineComponent({
       return (this.nodeSchema.workflow?.reviews || [])
         .filter((id) => !dependencies.has(id))
         .map((id) => nodes.get(id))
-        .filter(Boolean);
+        .filter((node): node is SchemaNode => Boolean(node));
     },
     roleLabel(): string {
       return titleCase(this.nodeSchema.workflow?.role || "planned");
