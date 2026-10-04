@@ -8,6 +8,7 @@ import { DynamicForm, FormProgress } from "../forms/FormWorkspace.ts";
 import { PageGuide } from "../forms/PageGuide.ts";
 import { completion, hasCompletionCriteria, isFormComplete } from "../../core/schema/form-completion.ts";
 import { documentOutlineIndex } from "../../core/schema/schema-tree.ts";
+import { asDataModel } from "../../core/schema/data-models.ts";
 import { PreviewNavigationControl } from "./PreviewNavigationControl.ts";
 import { TabCompletionCheck } from "./TabCompletionCheck.ts";
 import { FormSidebarToggle } from "./FormSidebarToggle.ts";
@@ -32,7 +33,7 @@ export const SubpageNode = defineComponent({
     projectContext: { type: Object as PropType<DataModel>, required: true },
     rootPageId: { type: String, required: true },
     rootPageSchema: { type: Object as PropType<SchemaNode>, required: true },
-    sectionPath: { type: Array as PropType<string[]>, default: () => [] }
+    sectionPath: { type: Array as PropType<number[]>, default: () => [] }
   },
   data() {
     return {
@@ -45,7 +46,7 @@ export const SubpageNode = defineComponent({
         || this.nodeSchema.subpages?.[0];
     },
     activeChildData(): DataModel {
-      return this.activeChild ? this.dataModel[this.activeChild.stateKey] || {} : {};
+      return this.activeChild ? asDataModel(this.dataModel[this.activeChild.stateKey]) : {};
     },
     activeChildPath(): number[] {
       const childIndex = this.nodeSchema.subpages?.findIndex(({ id }) => id === this.activeChild?.id) ?? -1;
@@ -64,7 +65,7 @@ export const SubpageNode = defineComponent({
         return this.nodeSchema.code;
       }
 
-      const kind = this.nodeSchema.workflow.kind === "phase" ? "Phase" : "Stage";
+      const kind = this.nodeSchema.workflow?.kind === "phase" ? "Phase" : "Stage";
       return `${kind} ${sequence} of ${total} · ${this.nodeSchema.code}`;
     },
     persistedChildId(): string {
@@ -133,12 +134,14 @@ export const SubpageNode = defineComponent({
         return false;
       }
 
-      return isFormComplete(child, this.dataModel[child.stateKey] || {}, this.documentModel);
+      return isFormComplete(child, asDataModel(this.dataModel[child.stateKey]), this.documentModel);
     },
     moveTab(offset: number) {
-      const currentIndex = this.nodeSchema.subpages.findIndex(({ id }) => id === this.activeChildId);
-      const nextIndex = (currentIndex + offset + this.nodeSchema.subpages.length) % this.nodeSchema.subpages.length;
-      this.updateActiveChild(this.nodeSchema.subpages[nextIndex].id);
+      const subpages = this.nodeSchema.subpages || [];
+      if (!subpages.length) return;
+      const currentIndex = subpages.findIndex(({ id }) => id === this.activeChildId);
+      const nextIndex = (currentIndex + offset + subpages.length) % subpages.length;
+      this.updateActiveChild(subpages[nextIndex].id);
       this.$nextTick(() => {
         const tab = document.getElementById(`${this.activeChildId}-subtab`);
         tab?.focus();
@@ -147,7 +150,7 @@ export const SubpageNode = defineComponent({
     },
     selectChild(childId: string, event: Event) {
       this.updateActiveChild(childId);
-      event.currentTarget.scrollIntoView({ behavior: preferredScrollBehavior(), block: "nearest", inline: "center" });
+      (event.currentTarget as HTMLElement | null)?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "nearest", inline: "center" });
     },
     updateActiveChild(childId: string) {
       this.activeChildId = childId;

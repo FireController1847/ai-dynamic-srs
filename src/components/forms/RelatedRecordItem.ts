@@ -7,23 +7,25 @@ import { fieldVisible } from "../../core/schema/field-visibility.ts";
 import { resolveReferenceField } from "../../core/records/reference-fields.ts";
 import { formatRecordDisplayId } from "../../core/records/record-values.ts";
 
+type ParentSection = Section & { repeatable: Repeater & { parent: ParentConfig } };
+
 export const RelatedRecordItem = defineComponent({
   components: { SchemaField },
   emits: ["move", "remove", "relationship"],
   props: {
-    item: { type: Object as PropType<DataModel>, required: true }, section: { type: Object as PropType<Section>, required: true },
+    item: { type: Object as PropType<DataModel>, required: true }, section: { type: Object as PropType<ParentSection>, required: true },
     documentModel: { type: Object as PropType<DocumentModel>, required: true }, parents: { type: Array as PropType<ParentChoice[]>, required: true },
     idBase: { type: String, required: true }, periods: { type: Number, default: 0 },
     ungrouped: { type: Boolean, default: false }, removable: { type: Boolean, default: true }
   },
-  data() { return { relationshipDraft: this.item[this.section.repeatable.parent.fieldKey] || "" }; },
+  data() { return { relationshipDraft: String(this.item[this.section.repeatable.parent.fieldKey] || "") }; },
   watch: {
-    currentParent(value: unknown) { this.relationshipDraft = value; }
+    currentParent(value: string) { this.relationshipDraft = value; }
   },
   computed: {
     config(): ParentConfig { return this.section.repeatable.parent; },
     referenceId(): string { return formatRecordDisplayId(this.section.repeatable.displayId, this.item); },
-    currentParent(): unknown { return this.item[this.config.fieldKey] || ""; },
+    currentParent(): string { return String(this.item[this.config.fieldKey] || ""); },
     parentKnown(): boolean { return this.parents.some(parent => parent.value === this.currentParent); },
     fields(): Field[] {
       return this.section.repeatable.fields.filter(field => !field.hidden && fieldVisible(field, this.item)

@@ -23,15 +23,18 @@ export const PlacedStagePreview = defineComponent({
   },
   computed: {
     previewModel(): ReturnType<typeof placedPreviewModel> {
+      const config = this.documentConfig || {};
       return placedPreviewModel(this.pageSchema, this.dataModel, this.documentModel, {
-        ...this.documentConfig,
+        ...config,
         title: this.sectionContext?.documentTitle || this.pageSchema.title
       });
     },
     previewData(): DataModel {
+      const dateDocument = this.documentConfig?.dateDocument;
+      const datedDocument = dateDocument ? this.documentModel[dateDocument] : undefined;
       return {
         ...this.previewModel.data,
-        _lastModified: this.documentModel[this.documentConfig.dateDocument]?._lastModified,
+        _lastModified: datedDocument?._lastModified,
         documentStatus: "Working partial",
         version: this.previewModel.data.version || "0.1"
       };

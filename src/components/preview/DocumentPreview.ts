@@ -10,11 +10,14 @@ import { fieldVisible } from "../../core/schema/field-visibility.ts";
 import { displayValue as fallbackValue, formatRecordDisplayId, hasValue as hasContent, resolveContextValue } from "../../core/records/record-values.ts";
 import { formatDate } from "../../core/formatting/dates.ts";
 import { formatDocumentTitle } from "../../core/formatting/document-titles.ts";
-import { dataModelForSection } from "../../core/schema/data-models.ts";
+import { dataModelForSection, recordItems } from "../../core/schema/data-models.ts";
+import { sectionRecords } from "../../core/schema/section-records.ts";
 import { PrintDocumentButton } from "../controls/PrintButton.ts";
 import { DocumentCoverPage } from "./DocumentCoverPage.ts";
 import { PreviewWatermark } from "./PreviewWatermark.ts";
 import { DiagramMedia } from "../diagrams/DiagramMedia.ts";
+
+type RepeatableSection = Section & { repeatable: Repeater };
 
 export const documentPreviewProps = {
   dataModel: { type: Object as PropType<DataModel>, required: true },
@@ -41,7 +44,8 @@ export const DocumentPreview = defineComponent({
     documentName(): string {
       return this.sectionContext?.documentTitle
         || this.pageSchema.title
-        || this.pageSchema.label;
+        || this.pageSchema.label
+        || "Dynamic SRS";
     },
     documentTitle(): string {
       return formatDocumentTitle(this.projectTitle, this.documentName, { partial: this.isPartial });
@@ -70,7 +74,7 @@ export const DocumentPreview = defineComponent({
       return excerptName ? `${excerptName} · Working partial` : "Working partial";
     },
     previewSections(): Section[] {
-      return this.pageSchema.sections.filter(section => section.includeInPreview !== false
+      return (this.pageSchema.sections || []).filter(section => section.includeInPreview !== false
         && (!this.pageSchema.omitEmptyFields || (section.repeatable ? this.repeaterItems(section).length : this.previewFields(section).length)));
     },
     projectTitle(): unknown {
@@ -84,7 +88,7 @@ export const DocumentPreview = defineComponent({
   },
   methods: {
     narrativeMarkdown,
-    displayId(section: Section, item: DataModel, index: number) {
+    displayId(section: RepeatableSection, item: DataModel, index: number) {
       const displayId = section.repeatable.displayId;
       return formatRecordDisplayId(displayId, item, index);
     },
@@ -123,29 +127,24 @@ export const DocumentPreview = defineComponent({
       return `${field.itemLabel || "Item"} ${index + 1}`;
     },
     populatedNestedRecords(field: Field, value: unknown) {
-      if (!Array.isArray(value)) {
-        return [];
-      }
-
       const fields = this.nestedFields(field);
-      return value.filter((record) => fields.some((nestedField) => hasContent(record[nestedField.key])));
+      return recordItems(value).filter((record) => fields.some((nestedField) => hasContent(record[nestedField.key])));
     },
     previewFields(section: Section) {
       return (section.fields || []).filter(field => field.includeInPreview !== false
         && (!this.pageSchema.omitEmptyFields || (fieldVisible(field, this.sectionModel(section)) && hasContent(this.sectionModel(section)[field.key]))));
     },
-    previewRepeaterFields(section: Section) {
+    previewRepeaterFields(section: RepeatableSection) {
       return section.repeatable.fields.filter((field) => field.includeInPreview !== false);
     },
-    repeaterItems(section: Section) {
-      return (this.sectionModel(section)[section.repeatable.dataKey] || [])
-        .filter((item) => !item._retired && !item.retired);
+    repeaterItems(section: RepeatableSection): DataModel[] {
+      return sectionRecords(section.repeatable, this.sectionModel(section));
     },
-    primaryRepeaterField(section: Section) {
+    primaryRepeaterField(section: RepeatableSection) {
       const fields = this.previewRepeaterFields(section);
       return fields.find((field) => field.key === section.repeatable.primaryField) || fields[0];
     },
-    secondaryRepeaterFields(section: Section, item: DataModel | null = null) {
+    secondaryRepeaterFields(section: RepeatableSection, item: DataModel | null = null) {
       const primaryField = this.primaryRepeaterField(section);
       return this.previewRepeaterFields(section).filter(field => field.key !== primaryField?.key
         && (!this.pageSchema.omitEmptyFields || !item || ((field.preserveWhenHidden || fieldVisible(field, item)) && hasContent(item[field.key]))));

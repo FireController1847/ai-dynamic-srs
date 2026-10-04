@@ -4,7 +4,7 @@ import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
 import { RelatedRecordItem } from "./RelatedRecordItem.ts";
 import { SectionInfo } from "../controls/FormControls.ts";
-import { dataModelForSection } from "../../core/schema/data-models.ts";
+import { dataModelForSection, mutableRecords } from "../../core/schema/data-models.ts";
 import { sectionRecords } from "../../core/schema/section-records.ts";
 import { createRepeaterItem } from "../../core/schema/state-factory.ts";
 import { nextNumericId, hasNonDefaultValue } from "../../core/records/record-values.ts";
@@ -12,11 +12,13 @@ import { parentRecordGroups, parentScopedSection } from "../../core/records/pare
 import { buildSectionPrompt } from "../../core/ai/prompt-builder.ts";
 import { addEvidenceContextToPrompt } from "../../core/ai/evidence-context.ts";
 
+type ParentSection = Section & { repeatable: Repeater & { parent: ParentConfig } };
+
 export const RelatedRecordGroups = defineComponent({
   components: { RelatedRecordItem, SectionInfo },
   emits: ["copy-markdown"],
   props: {
-    section: { type: Object as PropType<Section>, required: true }, pageSchema: { type: Object as PropType<SchemaNode>, required: true },
+    section: { type: Object as PropType<ParentSection>, required: true }, pageSchema: { type: Object as PropType<SchemaNode>, required: true },
     dataModel: { type: Object as PropType<DataModel>, required: true }, documentModel: { type: Object as PropType<DocumentModel>, required: true },
     documentSchemas: { type: Array as PropType<SchemaNode[]>, default: () => [] }, copiedSection: { type: String, default: "" },
     periods: { type: Number, default: 0 }
@@ -36,7 +38,7 @@ export const RelatedRecordGroups = defineComponent({
       if (!value && !this.config.allowUngrouped) return;
       if (value && !this.model.parents.some(parent => parent.value === value)) return;
       const repeater = this.section.repeatable;
-      const records = this.sectionModel[repeater.dataKey];
+      const records = mutableRecords(this.sectionModel, repeater.dataKey);
       const empty = sectionRecords(repeater, this.sectionModel).find(item => !item[this.config.fieldKey]
         && repeater.fields.every(field => !hasNonDefaultValue(item[field.key], field.default)));
       if (empty && value) { empty[this.config.fieldKey] = value; return; }
@@ -53,7 +55,7 @@ export const RelatedRecordGroups = defineComponent({
       // Configured shared collections use stable IDs; never cascade from parents.
       if (this.section.repeatable.stableIds) item._retired = true;
       else {
-        const items = this.sectionModel[this.section.repeatable.dataKey];
+        const items = mutableRecords(this.sectionModel, this.section.repeatable.dataKey);
         const index = items.indexOf(item);
         if (index >= 0) items.splice(index, 1);
       }

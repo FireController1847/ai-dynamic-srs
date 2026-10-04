@@ -1,10 +1,10 @@
 import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
+import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence, EvidenceGroup } from '../../core/schema/schema-types.ts';
 import { hasNonDefaultValue } from "../../core/records/record-values.ts";
 import { completion, hasCompletionCriteria } from "../../core/schema/form-completion.ts";
-import { dataModelForSection, valueAtPath } from "../../core/schema/data-models.ts";
+import { asDataModel, dataModelForSection, valueAtPath } from "../../core/schema/data-models.ts";
 import { schemaNodeIndex } from "../../core/schema/schema-tree.ts";
 import { sectionRecords } from "../../core/schema/section-records.ts";
 
@@ -38,8 +38,8 @@ export const WorkspaceEvidencePanel = defineComponent({
         }
 
         const data = definition.dataPath
-          ? valueAtPath(this.documentModel, definition.dataPath) || {}
-          : this.documentModel[rootSchema.stateKey] || {};
+          ? asDataModel(valueAtPath(this.documentModel, definition.dataPath))
+          : asDataModel(this.documentModel[rootSchema.stateKey]);
         return {
           data,
           definition,
@@ -48,11 +48,11 @@ export const WorkspaceEvidencePanel = defineComponent({
           schema,
           tracked: hasCompletionCriteria(schema)
         };
-      }).filter(Boolean);
+      }).filter((source): source is EvidenceView => source !== null);
     }
   },
   methods: {
-    fieldFor(section: Section | undefined, key: string) {
+    fieldFor(section: Section | undefined, key: string): Pick<Field, "key" | "default"> {
       const fields = section?.repeatable?.fields || section?.fields || [];
       return fields.find((field) => field.key === key) || { key };
     },
@@ -122,7 +122,7 @@ export const WorkspaceEvidencePanel = defineComponent({
     },
     sectionModel(source: EvidenceView, group: EvidenceGroup): DataModel {
       const section = this.groupSection(source, group);
-      return dataModelForSection(section || {}, source.data, this.documentModel);
+      return section ? dataModelForSection(section, source.data, this.documentModel) : source.data;
     },
     toggleExpanded() {
       this.expanded = !this.expanded;

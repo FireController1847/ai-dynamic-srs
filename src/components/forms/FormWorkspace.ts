@@ -5,7 +5,7 @@ import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice
 import { buildInterviewPrompt, buildSectionPrompt } from "../../core/ai/prompt-builder.ts";
 import { addEvidenceContextToPrompt } from "../../core/ai/evidence-context.ts";
 import { completion } from "../../core/schema/form-completion.ts";
-import { dataModelForSection } from "../../core/schema/data-models.ts";
+import { dataModelForSection, isDataModel, mutableRecords } from "../../core/schema/data-models.ts";
 import { fieldVisible } from "../../core/schema/field-visibility.ts";
 import { createRepeaterItem } from "../../core/schema/state-factory.ts";
 import { formatRecordDisplayId, nextNumericId } from "../../core/records/record-values.ts";
@@ -16,19 +16,23 @@ import { CopyPromptControl, SectionInfo } from "../controls/FormControls.ts";
 import { SchemaField } from "../fields/SchemaField.ts";
 import { RelatedRecordGroups } from "./RelatedRecordGroups.ts";
 
+export type RepeatableSection = Section & { repeatable: Repeater };
+
+export const dynamicFormProps = {
+  copiedSection: { type: String, default: "" },
+  dataModel: { type: Object as PropType<DataModel>, required: true },
+  documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) },
+  documentSchemas: { type: Array as PropType<SchemaNode[]>, default: () => [] },
+  pageSchema: { type: Object as PropType<SchemaNode>, required: true }
+};
+
 export const DynamicForm = defineComponent({
   components: { SchemaField, SectionInfo, DiagramUploadControl, RelatedRecordGroups },
   emits: ["copy-markdown"],
-  props: {
-    copiedSection: { type: String, default: "" },
-    dataModel: { type: Object as PropType<DataModel>, required: true },
-    documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) },
-    documentSchemas: { type: Array as PropType<SchemaNode[]>, default: () => [] },
-    pageSchema: { type: Object as PropType<SchemaNode>, required: true }
-  },
+  props: dynamicFormProps,
   computed: {
     visibleSections(): Section[] {
-      return this.pageSchema.sections.filter(section => section.repeatable || this.fieldsFor(section).length);
+      return (this.pageSchema.sections || []).filter(section => section.repeatable || this.fieldsFor(section).length);
     },
     periodCount(): number {
       if (!this.pageSchema.periodField) {
@@ -43,13 +47,10 @@ export const DynamicForm = defineComponent({
     }
   },
   methods: {
-    addItem(section: Section & { repeatable: import("../../core/schema/schema-types.ts").Repeater }) {
+    addItem(section: RepeatableSection) {
       const sectionModel = this.sectionModel(section);
-      const items = Array.isArray(sectionModel[section.repeatable.dataKey])
-        ? sectionModel[section.repeatable.dataKey]
-        : (sectionModel[section.repeatable.dataKey] = []);
-      const nextId = nextNumericId(items);
-      items.push(createRepeaterItem(section.repeatable, nextId));
+      const items = mutableRecords(sectionModel, section.repeatable.dataKey);
+      items.push(createRepeaterItem(section.repeatable, nextNumericId(items)));
     },
     copyKey(section: Section) {
       return `${this.pageSchema.id}:${section.key}`;
@@ -63,26 +64,31 @@ export const DynamicForm = defineComponent({
       return fields.filter((field) => !field.hidden && fieldVisible(field, model))
         .map((field) => resolveReferenceField(field, this.documentModel, model[field.key]));
     },
-    itemsFor(section: Section & { repeatable: import("../../core/schema/schema-types.ts").Repeater }) {
+    itemsFor(section: RepeatableSection) {
       return sectionRecords(section.repeatable, this.sectionModel(section));
     },
-    artifactFiles(section: Section) {
-      return (this.sectionModel(section)[section.repeatable.dataKey] || [])
-        .map((record) => record[section.repeatable.artifactField]).filter(Boolean);
+    artifactFiles(section: RepeatableSection): DataModel[] {
+      const artifactField = section.repeatable.artifactField;
+      if (!artifactField) return [];
+      return sectionRecords(section.repeatable, this.sectionModel(section))
+        .map((record) => record[artifactField])
+        .filter(isDataModel);
     },
-    addArtifacts(section: Section & { repeatable: import("../../core/schema/schema-types.ts").Repeater }, files: DataModel[]) {
-      const records = this.sectionModel(section)[section.repeatable.dataKey];
+    addArtifacts(section: RepeatableSection, files: DataModel[]) {
+      const artifactField = section.repeatable.artifactField;
+      if (!artifactField) return;
+      const records = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
       for (const file of files) {
         records.push(createRepeaterItem(section.repeatable, nextNumericId(records), {
-          title: file.title, [section.repeatable.artifactField]: file
+          title: file.title, [artifactField]: file
         }));
       }
     },
-    itemTitle(section: Section & { repeatable: import("../../core/schema/schema-types.ts").Repeater }, item: DataModel, index: number) {
+    itemTitle(section: RepeatableSection, item: DataModel, index: number) {
       const displayId = section.repeatable.displayId;
       return displayId
         ? formatRecordDisplayId(displayId, item, index)
-        : `${section.repeatable.itemLabel} ${index + 1}`;
+        : `${section.repeatable.itemLabel || "Item"} ${index + 1}`;
     },
     promptFor(section: Section) {
       const prompt = buildSectionPrompt(this.pageSchema, section, this.dataModel, this.documentModel);
@@ -93,8 +99,8 @@ export const DynamicForm = defineComponent({
         this.documentSchemas
       );
     },
-    removeItem(section: Section & { repeatable: import("../../core/schema/schema-types.ts").Repeater }, item: DataModel) {
-      const items = this.sectionModel(section)[section.repeatable.dataKey];
+    removeItem(section: RepeatableSection, item: DataModel) {
+      const items = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
       if (section.repeatable.stableIds) {
         item._retired = true;
         return;
