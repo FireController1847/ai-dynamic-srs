@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseDiagramResponse } from '../src/core/artifacts/diagram-ir.ts';
+import { parseDiagramBatchResponse } from '../src/core/artifacts/diagram-batch.ts';
 import { diagramContext } from '../src/core/artifacts/diagram-context.ts';
 import { diagramDrawioXml } from '../src/core/artifacts/diagram-drawio.ts';
 import { diagramType } from '../src/core/artifacts/diagram-types.ts';
@@ -21,6 +22,98 @@ const activity = { t: 'activity', g: [['customer', 'Customer'], ['system', '@sys
   ['decline', 'action', 'Offer another time', 'system'], ['merge', 'merge', '', 'system'], ['end', 'end', '', 'system']
 ], e: [['start', 'ask'], ['ask', 'check'], ['check', 'record', 'flow', '[yes]'], ['check', 'decline', 'flow', '[no]'], ['record', 'merge'], ['decline', 'merge'], ['merge', 'end']] };
 const page = id => schema.subpages.flatMap(phase => phase.subpages).find(stage => stage.id === id);
+
+const reportedFixture = () => JSON.parse(readFileSync(new URL('./fixtures/reported-use-case-diagram.json', import.meta.url), 'utf8'));
+
+function fixtureDocument(input) {
+  const nodeById = new Map(input.n.map(row => [row[0], row]));
+  const actorLinks = new Map();
+  for (const edge of input.e) {
+    if ((edge[2] || 'association') !== 'association') continue;
+    const from = nodeById.get(edge[0]);
+    const to = nodeById.get(edge[1]);
+    const actor = from?.[1] === 'actor' ? from : to?.[1] === 'actor' ? to : null;
+    const useCase = from?.[1] === 'use-case' ? from : to?.[1] === 'use-case' ? to : null;
+    if (!actor || !useCase) continue;
+    actorLinks.set(useCase[0], [...(actorLinks.get(useCase[0]) || []), actor[2]]);
+  }
+  return {
+    clientRequirements: { projectName: 'CommunityApp' },
+    softwareRequirementsSpecification: { records: {
+      actors: input.n.filter(row => row[1] === 'actor').map(row => ({
+        id: Number(row[2].split('-').at(-1)), name: `Actor ${row[2]}`
+      })),
+      useCases: input.n.filter(row => row[1] === 'use-case').map(row => {
+        const refs = actorLinks.get(row[0]) || [];
+        return {
+          id: Number(row[2].split('-').at(-1)),
+          name: `Use Case ${row[2]}`,
+          disposition: 'Candidate',
+          primaryActorId: refs[0] || '',
+          supportingActorReferences: refs.slice(1).join(', ')
+        };
+      }),
+      useCaseRelationships: []
+    } }
+  };
+}
+
+function graphForReferences(input, references) {
+  const selected = new Set(references);
+  const nodeById = new Map(input.n.map(row => [row[0], row]));
+  const caseLocalIds = new Set(input.n.filter(row => row[1] === 'use-case' && selected.has(row[2])).map(row => row[0]));
+  const actorLocalIds = new Set();
+  const edges = [];
+  for (const edge of input.e) {
+    const kind = edge[2] || 'association';
+    if (kind === 'association') {
+      const from = nodeById.get(edge[0]);
+      const to = nodeById.get(edge[1]);
+      const actor = from?.[1] === 'actor' ? from : to?.[1] === 'actor' ? to : null;
+      const useCase = from?.[1] === 'use-case' ? from : to?.[1] === 'use-case' ? to : null;
+      if (actor && useCase && caseLocalIds.has(useCase[0])) {
+        actorLocalIds.add(actor[0]);
+        edges.push(edge);
+      }
+    } else if (caseLocalIds.has(edge[0]) && caseLocalIds.has(edge[1])) {
+      edges.push(edge);
+    }
+  }
+  const nodes = input.n.filter(row =>
+    (row[1] === 'use-case' && caseLocalIds.has(row[0]))
+    || (row[1] === 'actor' && actorLocalIds.has(row[0])));
+  return { t: 'use-case', g: input.g, n: nodes, e: edges };
+}
+
+function noRectOverlap(left, right) {
+  return left.x + left.width <= right.x || right.x + right.width <= left.x
+    || left.y + left.height <= right.y || right.y + right.height <= left.y;
+}
+
+function assertReadableUseCaseLayout(graph) {
+  const layout = diagramType('use-case').layout(graph);
+  const boundary = layout.vertices.find(vertex => vertex.id === graph.groups[0].id);
+  const cases = layout.vertices.filter(vertex => graph.nodes.find(node => node.id === vertex.id)?.kind === 'use-case');
+  const actors = layout.vertices.filter(vertex => graph.nodes.find(node => node.id === vertex.id)?.kind === 'actor');
+  for (const useCase of cases) {
+    assert.equal(useCase.parent, boundary.id);
+    assert(useCase.x >= 0 && useCase.y >= 58);
+    assert(useCase.x + useCase.width <= boundary.width);
+    assert(useCase.y + useCase.height <= boundary.height);
+  }
+  for (let i = 0; i < cases.length; i += 1) {
+    for (let j = i + 1; j < cases.length; j += 1) assert(noRectOverlap(cases[i], cases[j]));
+  }
+  for (const actor of actors) {
+    assert(actor.x + actor.width <= boundary.x || actor.x >= boundary.x + boundary.width);
+  }
+  for (let i = 0; i < actors.length; i += 1) {
+    for (let j = i + 1; j < actors.length; j += 1) assert(noRectOverlap(actors[i], actors[j]));
+  }
+  const associations = layout.edges.filter((edge, index) => (graph.edges[index].kind || 'association') === 'association');
+  associations.forEach(edge => assert(edge.points?.length >= 4));
+  return { layout, boundary, cases, actors };
+}
 
 test('compact references resolve saved labels and render deterministic native cells', () => {
   const document = { clientRequirements: { projectName: 'Appointments & care' }, softwareRequirementsSpecification: { records: {
@@ -59,11 +152,8 @@ test('code-block JSON and fenced responses use the same validation for both diag
 test('reported 12-actor, 47-use-case JSON retains references and relationships in native DrawIO', () => {
   const response = readFileSync(new URL('./fixtures/reported-use-case-diagram.json', import.meta.url), 'utf8');
   const input = JSON.parse(response);
-  const record = row => ({ id: Number(row[2].split('-').at(-1)), name: `Saved label for ${row[0]}`, disposition: 'Candidate' });
-  const document = { clientRequirements: { projectName: 'Reported system' }, softwareRequirementsSpecification: { records: {
-    actors: input.n.filter(row => row[1] === 'actor').map(record),
-    useCases: input.n.filter(row => row[1] === 'use-case').map(record)
-  } } };
+  const document = fixtureDocument(input);
+  document.clientRequirements.projectName = 'Reported system';
   const context = diagramContext(useCaseDiagramConfig, document);
   const graph = parseDiagramResponse(response, context, 'use-case');
   assert.deepEqual(graph, parseDiagramResponse(fence(input), context, 'use-case'));
@@ -185,4 +275,81 @@ test('diagram prompts narrow evidence and cannot be enriched with unrelated meta
   const context = diagramContext(activityDiagramConfig, document, [{ useCaseReferences: 'SRS-UC-007', scenario: 'Known scenario' }]);
   assert.match(JSON.stringify(context.evidence), /Known scenario/);
   assert.doesNotMatch(JSON.stringify(context.evidence), /UNRELATED-|PRIVATE-XML|SECRET-FILENAME/);
+});
+
+test('section-level use-case batch preserves the six established CommunityApp figures and readable layouts', () => {
+  const input = reportedFixture();
+  const document = fixtureDocument(input);
+  const range = (start, end) => Array.from({ length: end - start + 1 }, (_, index) => `SRS-UC-${String(start + index).padStart(3, '0')}`);
+  const partitions = [
+    ['Local Account, Discovery, and Participation', [...range(1, 14), 'SRS-UC-025']],
+    ['Reviews, Reporting, and Community Moderation', [...range(19, 22), 'SRS-UC-026']],
+    ['Purchases and Personal Publishing', [...range(23, 24), ...range(27, 28)]],
+    ['Organization Ownership and Governance', [...range(15, 18), ...range(29, 37)]],
+    ['Delegated Organization Management', [...range(29, 34), ...range(38, 43)]],
+    ['CommunityApp Support and Administration', range(44, 47)]
+  ];
+  const figures = partitions.map(([title, references]) => {
+    const graph = graphForReferences(input, references);
+    const actorReferences = graph.n.filter(row => row[1] === 'actor').map(row => row[2]).join(', ');
+    return {
+      title,
+      caption: `Use-Case coverage for ${title}.`,
+      useCaseReferences: references.join(', '),
+      actorReferences,
+      graph
+    };
+  });
+  const response = '```dsrs-diagrams\n' + JSON.stringify({ figures }) + '\n```';
+  const parsed = parseDiagramBatchResponse(response, useCaseDiagramConfig, document);
+  assert.deepEqual(parsed.map(figure => figure.metadata.title), partitions.map(([title]) => title));
+  assert.equal(parsed.length, 6);
+
+  for (const figure of parsed) {
+    const { layout, boundary, actors } = assertReadableUseCaseLayout(figure.graph);
+    assert.match(diagramDrawioXml(figure.graph), /<mxfile/);
+    assert.equal(diagramDrawioXml(figure.graph), diagramDrawioXml(figure.graph));
+    if (actors.length > 1) {
+      assert(actors.some(actor => actor.x + actor.width <= boundary.x));
+      assert(actors.some(actor => actor.x >= boundary.x + boundary.width));
+    }
+    for (const edge of figure.graph.edges.filter(edge => edge.kind === 'generalization')) {
+      const from = layout.vertices.find(vertex => vertex.id === edge.from);
+      const to = layout.vertices.find(vertex => vertex.id === edge.to);
+      assert(Math.hypot((from.x + from.width / 2) - (to.x + to.width / 2), (from.y + from.height / 2) - (to.y + to.height / 2)) < 450);
+    }
+  }
+
+  const broken = structuredClone({ figures });
+  broken.figures[4].actorReferences = 'SRS-ACT-999';
+  assert.throws(() => parseDiagramBatchResponse(JSON.stringify(broken), useCaseDiagramConfig, document), /outside this figure|canonical actor/);
+});
+
+test('section prompt requests a batch while individual figure prompt remains single-figure', () => {
+  const stage = page('srs-behavior-use-case-map');
+  const section = stage.sections.find(section => section.repeatable?.dataKey === 'artifacts');
+  const input = reportedFixture();
+  const document = fixtureDocument(input);
+  const figure = {
+    id: 2,
+    artifactGroup: 'use-case-map',
+    title: 'Local Account, Discovery, and Participation',
+    caption: 'Local participation',
+    useCaseReferences: 'SRS-UC-001, SRS-UC-002',
+    actorReferences: 'SRS-ACT-001'
+  };
+  document.softwareRequirementsSpecification.records.artifacts = [figure];
+
+  const sectionPrompt = buildFormPrompt(stage, section, {}, document);
+  assert.match(sectionPrompt, /^# AI diagrams:/);
+  assert.match(sectionPrompt, /dsrs-diagrams/);
+  assert.match(sectionPrompt, /Preserve figure partitions/);
+  assert.match(sectionPrompt, /Local Account, Discovery, and Participation/);
+  assert.doesNotMatch(sectionPrompt, /one combined diagram/);
+
+  const figurePrompt = buildFormPrompt(stage, section, {}, document, { record: figure });
+  assert.match(figurePrompt, /^# AI diagram:/);
+  assert.match(figurePrompt, /dsrs-diagram/);
+  assert.doesNotMatch(figurePrompt, /dsrs-diagrams/);
+  assert.match(figurePrompt, /replaces only this figure's file/);
 });
