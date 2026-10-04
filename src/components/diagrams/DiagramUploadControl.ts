@@ -29,7 +29,7 @@ export const DiagramUploadControl = defineComponent({
             const payload = await readDiagramArtifact(file);
             const currentBytes = this.files.filter((entry) => entry && entry !== this.replacing)
               .reduce((sum, entry) => sum + (Number(entry.sizeBytes) || 0), 0);
-            const pendingBytes = accepted.reduce((sum, entry) => sum + entry.sizeBytes, 0);
+            const pendingBytes = accepted.reduce((sum, entry) => sum + (Number(entry.sizeBytes) || 0), 0);
             if (currentBytes + pendingBytes + payload.sizeBytes > MAX_DIAGRAM_COLLECTION_BYTES) {
               throw new Error("The shared diagram register has a 3 MB total file limit, including retired figures.");
             }

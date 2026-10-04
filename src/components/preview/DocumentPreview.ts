@@ -31,7 +31,7 @@ export const documentPreviewProps = {
   projectContext: { type: Object as PropType<DataModel>, required: true },
   sectionContext: { type: Object as PropType<SectionContext | null>, default: null },
   partial: { type: Boolean, default: false }
-};
+} as const;
 
 export const DocumentPreview = defineComponent({
   components: { MarkdownText, DocumentCoverPage, PreviewWatermark, PrintDocumentButton, DiagramMedia },
@@ -75,7 +75,7 @@ export const DocumentPreview = defineComponent({
     },
     previewSections(): Section[] {
       return (this.pageSchema.sections || []).filter(section => section.includeInPreview !== false
-        && (!this.pageSchema.omitEmptyFields || (section.repeatable ? this.repeaterItems(section).length : this.previewFields(section).length)));
+        && (!this.pageSchema.omitEmptyFields || (section.repeatable ? this.repeaterItems(section as RepeatableSection).length : this.previewFields(section).length)));
     },
     projectTitle(): unknown {
       const key = this.configuration.titleField || "projectName";

@@ -10,7 +10,7 @@ export const evidenceFormProps = {
   documentModel: { type: Object as PropType<DocumentModel>, required: true },
   documentSchemas: { type: Array as PropType<SchemaNode[]>, required: true },
   pageSchema: { type: Object as PropType<SchemaNode>, required: true }
-};
+} as const;
 
 export const EvidenceForm = defineComponent({
   name: "EvidenceForm",

@@ -1,6 +1,5 @@
 import type { ObjectDirective } from 'vue';
-import Popover from 'bootstrap/js/dist/popover';
-import Tooltip from 'bootstrap/js/dist/tooltip';
+import { Popover, Tooltip } from 'bootstrap';
 
 type OverlayElement = HTMLElement & { __dsrsTooltip?: Tooltip; __dsrsPopover?: Popover };
 type PopoverBinding = Partial<Popover.Options>;

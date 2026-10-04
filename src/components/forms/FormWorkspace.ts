@@ -24,7 +24,7 @@ export const dynamicFormProps = {
   documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) },
   documentSchemas: { type: Array as PropType<SchemaNode[]>, default: () => [] },
   pageSchema: { type: Object as PropType<SchemaNode>, required: true }
-};
+} as const;
 
 export const DynamicForm = defineComponent({
   components: { SchemaField, SectionInfo, DiagramUploadControl, RelatedRecordGroups },
