@@ -7,12 +7,12 @@ import { formatRecordDisplayId } from "../../core/records/record-values.ts";
 // do not reclassify a record in place, because that would change its reference ID.
 const prefixes: Readonly<Record<string, string>> = Object.freeze({ Functional: "SRS-FR-", Quality: "SRS-QR-", Interface: "SRS-IR-" });
 
-export const requirementDisplayId = (kind: string) => ({ prefix: prefixes[kind], padding: 3 });
-export const requirementKindField = (kind: string) => ({
-  key: "requirementKind", type: "text", default: kind,
+export const requirementDisplayId = (kind: string) => ({ prefix: prefixes[kind] || "SRS-REQ-", padding: 3 });
+export const requirementKindField = (kind: string): Field => ({
+  key: "requirementKind", label: "Requirement kind", type: "text", default: kind,
   hidden: true, editable: false, includeInPrompt: false, includeInPreview: false
 });
-export const requirementFilter = (kind: string, group: string | undefined) => ({ all: [
+export const requirementFilter = (kind: string, group?: string) => ({ all: [
   { key: "requirementKind", equals: kind },
   ...(group ? [{ key: "specificationGroup", equals: group }] : [])
 ] });

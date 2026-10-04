@@ -38,7 +38,8 @@ export function behaviorReview(stageId: string, documentModel: DocumentModel, ph
   const activities = catalog(phaseThreeStages[3], "activity-figures", records);
   const requirements = catalog(phaseThreeStages[5], "functional-requirements", records);
   const discovery = discoveryReview("srs-discovery-processes", documentModel);
-  const active = sectionRecords({ dataKey: "items", recordFilter: activeCases }, { items: cases.items }) as ReviewRecord[];
+  const active: ReviewRecord[] = sectionRecords({ dataKey: "items", recordFilter: activeCases }, { items: cases.items })
+    .map((item): ReviewRecord => ({ ...item, referenceId: String(item.referenceId || ""), label: item.label || "Unnamed record" }));
   const activeRequirements = requirements.items.filter(({ status }) => !["Deferred", "Rejected"].includes(String(status)));
   const handoff = followThroughReview(documentModel, phase, rank);
   const messages = [...discovery.messages, ...handoff.messages];

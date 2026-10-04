@@ -5,6 +5,7 @@ import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
 import type { calculate } from './calculations.ts';
 import { buildChart, currencyFormatter } from "./chart-model.ts";
+import { numberValue } from "./calculations.ts";
 
 export const CbaTrendChart = defineComponent({
   props: {
@@ -19,13 +20,13 @@ export const CbaTrendChart = defineComponent({
   },
   methods: {
     compactCurrency(value: unknown) {
-      const options = this.currencyCode && this.currencyCode !== "Other"
+      const options: Intl.NumberFormatOptions = this.currencyCode && this.currencyCode !== "Other"
         ? { style: "currency", currency: this.currencyCode, notation: "compact", maximumFractionDigits: 1 }
         : { notation: "compact", maximumFractionDigits: 1 };
-      return new Intl.NumberFormat(undefined, options).format(value);
+      return new Intl.NumberFormat(undefined, options).format(numberValue(value));
     },
     currency(value: unknown) {
-      return currencyFormatter(this.currencyCode).format(value);
+      return currencyFormatter(this.currencyCode).format(numberValue(value));
     }
   },
   template: `

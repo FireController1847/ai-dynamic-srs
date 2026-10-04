@@ -9,9 +9,9 @@ import { requirementReferenceId } from "./requirement-records.ts";
 export function followThroughReview(documentModel: DocumentModel, phase: number = 3, behaviorRank: number = 5) {
   const srs = documentModel.softwareRequirementsSpecification || {};
   const records = srsRecords(documentModel);
-  const issues = (records.evidenceIssues || []).filter(live).filter(item =>
+  const issues: ReviewRecord[] = (records.evidenceIssues || []).filter(live).filter(item =>
     ["description", "affectedDecision", "resolution", "nextAction", "sourceReferences", "affectedReferences", "owner", "resolutionEvidence"].some(key => present(item[key]))
-  ).map(item => ({ ...item, referenceId: idFor("SRS-ISS-", item), label: item.description || "Issue needing a description" }));
+  ).map((item): ReviewRecord => ({ ...item, referenceId: idFor("SRS-ISS-", item), label: item.description || "Issue needing a description" }));
   const messages = [];
   const available = availableSrsIds(records);
   for (const issue of issues) {

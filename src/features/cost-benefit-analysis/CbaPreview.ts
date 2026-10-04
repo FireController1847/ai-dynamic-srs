@@ -1,4 +1,5 @@
 import type { BenefitCashFlow, CashFlow } from './model-types.ts';
+import { recordItems } from "../../core/schema/data-models.ts";
 import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
@@ -50,7 +51,7 @@ export const CbaPreview = defineComponent({
       return this.documentValue(this.pageSchema.document?.versionField || "version") || "0.1";
     },
     documentTitle(): string {
-      return formatDocumentTitle(this.projectTitle, this.pageSchema.title || this.pageSchema.label);
+      return formatDocumentTitle(this.projectTitle, this.pageSchema.title || this.pageSchema.label || "Cost-Benefit Analysis");
     },
     quantifiedBenefits(): BenefitCashFlow[] {
       return this.model.benefits.filter((item) => item.populated && !item.isIntangible);
@@ -64,7 +65,7 @@ export const CbaPreview = defineComponent({
     populatedOngoingCosts(): CashFlow[] {
       return this.model.ongoingCosts.filter((item) => item.populated);
     },
-    estimateDetails(): { key: string; label: string; value: unknown }[] {
+    estimateDetails(): Array<(BenefitCashFlow | CashFlow) & { referenceId: string }> {
       return [
         ...this.model.benefits.map(item => ({ ...item, referenceId: `CBA-BEN-${String(item.id).padStart(3, '0')}` })),
         ...this.model.oneTimeCosts.map(item => ({ ...item, referenceId: `CBA-OTC-${String(item.id).padStart(3, '0')}` })),
@@ -72,7 +73,7 @@ export const CbaPreview = defineComponent({
       ].filter(item => item.populated && (item.assumptions || item.sourceIds || (!item.isIntangible && item.description)));
     },
     populatedSources(): DataModel[] {
-      return (this.dataModel.sources || []).filter((item) => !item._retired && !item.retired && (hasContent(item.item) || hasContent(item.sourceName) || hasContent(item.reference)));
+      return recordItems(this.dataModel.sources).filter((item) => !item._retired && !item.retired && (hasContent(item.item) || hasContent(item.sourceName) || hasContent(item.reference)));
     }
   },
   methods: {
@@ -92,7 +93,7 @@ export const CbaPreview = defineComponent({
     percent(value: unknown) {
       return value === null
         ? "Not available"
-        : new Intl.NumberFormat(undefined, { style: "percent", maximumFractionDigits: 2 }).format(value / 100);
+        : new Intl.NumberFormat(undefined, { style: "percent", maximumFractionDigits: 2 }).format(numberValue(value) / 100);
     }
   },
   template: `

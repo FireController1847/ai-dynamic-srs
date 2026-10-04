@@ -24,7 +24,7 @@ export const CbaModelSummary = defineComponent({
     percent(value: unknown) {
       return value === null
         ? "Not available"
-        : new Intl.NumberFormat(undefined, { style: "percent", maximumFractionDigits: 2 }).format(value / 100);
+        : new Intl.NumberFormat(undefined, { style: "percent", maximumFractionDigits: 2 }).format(numberValue(value) / 100);
     }
   },
   template: `

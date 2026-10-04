@@ -31,14 +31,14 @@ export const EffortBreakdownPreview = defineComponent({
     model(): ReturnType<typeof calculateEffortBreakdown> { return calculateEffortBreakdown(this.dataModel); },
     projectTitle(): unknown { return this.documentValue("projectName") || ""; },
     version(): unknown { return this.dataModel.version || "0.1"; },
-    documentTitle(): string { return formatDocumentTitle(this.projectTitle, this.pageSchema.title || this.pageSchema.label); },
-    memberNames(): string[] { return [1, 2, 3, 4, 5].map((number) => this.dataModel[`member${number}Name`] || `Member ${number}`); }
+    documentTitle(): string { return formatDocumentTitle(this.projectTitle, this.pageSchema.title || this.pageSchema.label || "Effort Breakdown"); },
+    memberNames(): string[] { return [1, 2, 3, 4, 5].map((number) => String(this.dataModel[`member${number}Name`] || `Member ${number}`)); }
   },
   methods: {
     displayValue, formatDate,
     documentValue(key: string): unknown { return resolveContextValue(this.dataModel, this.projectContext, key); },
-    points(value: unknown) { return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value); },
-    percent(value: unknown) { return `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value)}%`; }
+    points(value: unknown) { return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(Number(value) || 0); },
+    percent(value: unknown) { return `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(Number(value) || 0)}%`; }
   },
   template: `
     <div :id="pageSchema.id + '-preview'" class="document-preview-section">
