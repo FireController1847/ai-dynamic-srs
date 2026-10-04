@@ -160,8 +160,8 @@ test('reported 12-actor, 47-use-case JSON retains references and relationships i
   assert.equal(graph.nodes.length, 59);
   assert.equal(graph.edges.length, input.e.length);
   assert.equal(graph.groups[0].label, 'Reported system');
-  assert.equal(graph.nodes.find(node => node.id === 'a13').label, 'Saved label for a13');
-  assert.equal(graph.nodes.find(node => node.id === 'u47').label, 'Saved label for u47');
+  assert.equal(graph.nodes.find(node => node.id === 'a13').label, 'Actor SRS-ACT-013');
+  assert.equal(graph.nodes.find(node => node.id === 'u47').label, 'Use Case SRS-UC-047');
   assert.equal(graph.edges.filter(edge => edge.kind === 'generalization').length, 6);
   const xml = diagramDrawioXml(graph);
   assert.equal(xml, diagramDrawioXml(parseDiagramResponse(fence(input), context, 'use-case')));
