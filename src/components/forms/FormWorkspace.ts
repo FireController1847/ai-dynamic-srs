@@ -88,6 +88,20 @@ export const DynamicForm = defineComponent({
         }));
       }
     },
+    addAiArtifacts(section: RepeatableSection, figures: DataModel[]) {
+      const artifactField = section.repeatable.artifactField;
+      if (!artifactField) return;
+      const records = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
+      for (const figure of figures) {
+        const file = isDataModel(figure.file) ? figure.file : null;
+        if (!file) continue;
+        records.push(createRepeaterItem(
+          section.repeatable,
+          nextRepeaterRecordId(section.repeatable, records, this.documentModel),
+          { ...figure, [artifactField]: file }
+        ));
+      }
+    },
     itemTitle(section: RepeatableSection, item: DataModel, index: number) {
       const displayId = section.repeatable.displayId;
       return displayId
@@ -170,8 +184,8 @@ export const DynamicForm = defineComponent({
                 @uploaded="addArtifacts(section, $event)"
               ></diagram-upload-control>
               <diagram-ai-import-control v-if="diagramFieldFor(section)" :key="pageSchema.id + section.id + '-ai'"
-                :config="diagramFieldFor(section).diagram" :document-model="documentModel" :files="artifactFiles(section)"
-                @uploaded="addArtifacts(section, $event)"></diagram-ai-import-control>
+                batch :config="diagramFieldFor(section).diagram" :document-model="documentModel" :files="artifactFiles(section)"
+                @batch-uploaded="addAiArtifacts(section, $event)"></diagram-ai-import-control>
             </div>
             <p v-if="!itemsFor(section).length" class="nested-records-empty mt-4 mb-0">
               {{ section.repeatable.emptyText || 'No records have been added. Use the button above when one applies.' }}
