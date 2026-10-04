@@ -10,7 +10,7 @@ export type FieldOption = string | number | { value: unknown; label: string };
 export interface Field {
   [key: string]: unknown;
   key: string; label: string; type?: string; default?: unknown;
-  fields?: Field[]; options?: FieldOption[]; reference?: Reference;
+  fields?: Field[]; options?: FieldOption[]; reference?: Reference; references?: Reference[];
   columns?: string; placeholder?: string; helpText?: string; aiHint?: string;
   completion?: boolean; includeInPreview?: boolean; includeInPrompt?: boolean;
   showWhen?: Condition; editable?: boolean; hidden?: boolean; optional?: boolean;

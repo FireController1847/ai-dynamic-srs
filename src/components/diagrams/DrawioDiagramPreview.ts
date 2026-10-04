@@ -2,12 +2,21 @@ import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../..
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
+import { errorMessage } from "../../core/formatting/errors.ts";
 const DRAWIO_VIEWER_URL = "https://viewer.diagrams.net/js/viewer-static.min.js";
 const DRAWIO_VIEWER_SCRIPT_ID = "drawio-static-viewer";
 
-let viewerPromise = null;
+interface GraphViewerApi { processElements(): void; }
+declare global {
+  interface Window {
+    GraphViewer?: GraphViewerApi;
+    onDrawioViewerLoad?: () => void;
+  }
+}
 
-function loadDrawioViewer() {
+let viewerPromise: Promise<GraphViewerApi> | null = null;
+
+function loadDrawioViewer(): Promise<GraphViewerApi> {
   if (window.GraphViewer) {
     return Promise.resolve(window.GraphViewer);
   }
@@ -16,8 +25,8 @@ function loadDrawioViewer() {
     return viewerPromise;
   }
 
-  let timeout;
-  viewerPromise = new Promise((resolve, reject) => {
+  let timeout: number | undefined;
+  viewerPromise = new Promise<GraphViewerApi>((resolve, reject) => {
     timeout = window.setTimeout(() => reject(new Error("The diagrams.net viewer timed out. Check your connection and reopen the preview.")), 15000);
     const existingScript = document.getElementById(DRAWIO_VIEWER_SCRIPT_ID);
     const previousCallback = window.onDrawioViewerLoad;
@@ -54,7 +63,9 @@ function loadDrawioViewer() {
     viewerPromise = null;
     document.getElementById(DRAWIO_VIEWER_SCRIPT_ID)?.remove();
     throw error;
-  }).finally(() => window.clearTimeout(timeout));
+  }).finally(() => {
+    if (timeout !== undefined) window.clearTimeout(timeout);
+  });
 
   return viewerPromise;
 }
@@ -94,20 +105,19 @@ export const DrawioDiagramPreview = defineComponent({
         const GraphViewer = await loadDrawioViewer();
         await this.$nextTick();
 
-        if (!this.$refs.viewer) {
-          return;
-        }
+        const viewer = this.$refs.viewer as HTMLElement | undefined;
+        if (!viewer) return;
 
         GraphViewer.processElements();
         const renderDeadline = Date.now() + 3000;
-        while (this.$refs.viewer && !this.$refs.viewer.querySelector("svg") && Date.now() < renderDeadline) {
-          await new Promise((resolve) => window.setTimeout(resolve, 50));
+        while (!viewer.querySelector("svg") && Date.now() < renderDeadline) {
+          await new Promise<void>((resolve) => window.setTimeout(resolve, 50));
         }
-        if (this.$refs.viewer && !this.$refs.viewer.querySelector("svg")) {
+        if (!viewer.querySelector("svg")) {
           throw new Error("No drawable content was found. Check the selected diagram page or upload a PNG/JPEG export.");
         }
       } catch (error) {
-        this.errorMessage = error.message;
+        this.errorMessage = errorMessage(error);
       } finally {
         this.isLoading = false;
       }

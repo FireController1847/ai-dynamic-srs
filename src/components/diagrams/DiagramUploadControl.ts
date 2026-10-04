@@ -2,6 +2,7 @@ import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
 import { DIAGRAM_FILE_ACCEPT, MAX_DIAGRAM_COLLECTION_BYTES, readDiagramArtifact } from "../../core/artifacts/diagram-files.ts";
+import { errorMessage } from "../../core/formatting/errors.ts";
 
 export const DiagramUploadControl = defineComponent({
   name: "DiagramUploadControl",
@@ -12,15 +13,16 @@ export const DiagramUploadControl = defineComponent({
     multiple: { type: Boolean, default: false },
     label: { type: String, default: "Upload diagram" }
   },
-  data() { return { accept: DIAGRAM_FILE_ACCEPT, busy: false, errors: [], disposed: false }; },
+  data() { return { accept: DIAGRAM_FILE_ACCEPT, busy: false, errors: [] as string[], disposed: false }; },
   beforeUnmount() { this.disposed = true; },
   methods: {
     async upload(event: Event) {
-      const selected = [...(event.target.files || [])];
-      event.target.value = "";
+      const input = event.currentTarget as HTMLInputElement | null;
+      const selected = [...(input?.files || [])];
+      if (input) input.value = "";
       this.errors = [];
       this.busy = true;
-      const accepted = [];
+      const accepted: DataModel[] = [];
       try {
         for (const file of selected) {
           try {
@@ -32,7 +34,7 @@ export const DiagramUploadControl = defineComponent({
               throw new Error("The shared diagram register has a 3 MB total file limit, including retired figures.");
             }
             accepted.push(payload);
-          } catch (error) { this.errors.push(`${file.name}: ${error.message}`); }
+          } catch (error) { this.errors.push(`${file.name}: ${errorMessage(error)}`); }
         }
         if (!this.disposed && accepted.length) this.$emit("uploaded", accepted);
       } finally { this.busy = false; }

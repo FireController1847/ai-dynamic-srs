@@ -9,8 +9,8 @@ export const RecordLinksField = defineComponent({
   computed: {
     selected(): string[] { return String(this.modelValue || '').split(/[,;]\s*/).map(s => s.trim()).filter(Boolean); },
     choices(): ParentChoice[] {
-      const options = (this.field.references || [this.field.reference]).filter(Boolean)
-        .flatMap(reference => referenceChoices(reference, this.documentModel));
+      const references = (this.field.references || [this.field.reference]).filter((reference): reference is import("../../core/schema/schema-types.ts").Reference => Boolean(reference));
+      const options: ParentChoice[] = references.flatMap((reference) => referenceChoices(reference, this.documentModel));
       return [...new Map(options.map(option => [option.value, option])).values()];
     },
     unavailable(): string[] { return this.selected.filter(value => !this.choices.some(option => option.value === value)); }

@@ -1,9 +1,9 @@
-import type { DataModel, DocumentModel, DataPath, RecordItem, Field, FieldOption, Section, Repeater, SchemaNode, Condition, DisplayId, Reference, DocumentConfig, OutlineSection, Evidence, EvidenceGroup, EvidenceSource } from '../schema/schema-types.ts';
+import type { DataModel, Field, ParentChoice, Reference } from '../schema/schema-types.ts';
 import { fieldVisible } from "../schema/field-visibility.ts";
 import { recordItems, valueAtPath } from "../schema/data-models.ts";
 import { formatRecordDisplayId, hasValue } from "./record-values.ts";
 
-export function referenceChoices(reference: Reference, documentModel: DataModel) {
+export function referenceChoices(reference: Reference, documentModel: DataModel): ParentChoice[] {
   const records = valueAtPath(documentModel, reference.dataPath);
   return recordItems(records)
     .filter((record) => record && !record._retired && !record.retired && hasValue(record[reference.labelField])

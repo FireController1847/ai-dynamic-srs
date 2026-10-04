@@ -2,7 +2,7 @@ import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../..
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../core/schema/schema-types.ts';
-import { valueAtPath } from "../../core/schema/data-models.ts";
+import { isDataModel, recordItems, valueAtPath } from "../../core/schema/data-models.ts";
 import { diagramPayloadError } from "../../core/artifacts/diagram-files.ts";
 import { DiagramUploadControl } from "./DiagramUploadControl.ts";
 import { DiagramMedia } from "./DiagramMedia.ts";
@@ -19,19 +19,21 @@ export const DiagramFileField = defineComponent({
   computed: {
     files(): DataModel[] {
       const records = valueAtPath(this.documentModel, this.field.collectionPath || []);
-      return (Array.isArray(records) ? records : []).map((record) => record?.[this.field.artifactField || "file"]).filter(Boolean);
+      const artifactField = typeof this.field.artifactField === "string" ? this.field.artifactField : "file";
+      return recordItems(records).map((record) => record[artifactField]).filter(isDataModel);
     },
-    downloadable(): boolean { return this.modelValue && !diagramPayloadError(this.modelValue); }
+    downloadable(): boolean { return isDataModel(this.modelValue) && !diagramPayloadError(this.modelValue); }
   },
   methods: {
     download() {
-      if (!this.downloadable) return;
-      const file = this.modelValue;
+      const file = isDataModel(this.modelValue) ? this.modelValue : null;
+      if (!file || diagramPayloadError(file)) return;
       const drawio = file.artifactKind === "DrawIO source";
-      const href = drawio ? URL.createObjectURL(new Blob([file.content], { type: "application/xml" })) : file.content;
+      const content = String(file.content || "");
+      const href = drawio ? URL.createObjectURL(new Blob([content], { type: "application/xml" })) : content;
       const anchor = document.createElement("a");
       anchor.href = href;
-      anchor.download = file.sourceFileName || (drawio ? "diagram.drawio" : "diagram.png");
+      anchor.download = String(file.sourceFileName || (drawio ? "diagram.drawio" : "diagram.png"));
       anchor.click();
       if (drawio) setTimeout(() => URL.revokeObjectURL(href), 1000);
     }
