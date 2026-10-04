@@ -56,7 +56,7 @@ export const stageGuides: Record<string, Guide> = {
     'An assumption is a condition treated as true pending evidence; a dependency is something supplied by another party or system. Validation state records the evidence for the condition and is separate from confirmation of the decision. Track real follow-up work in shared questions.')
 };
 
-const recordHelp = {
+const recordHelp: Record<string, string> = {
   evidenceIssues: 'Record a real question, missing fact or conflict once. Identify affected records, then add the answer or next action. Resolve it only after the relevant source or answer has been updated.',
   audiences: 'Name each person or group that will read or use the specification. Readers may include approvers, developers, testers and operators; they need not all be system users.',
   scopeDecisions: 'Describe a material inclusion, exclusion, deferral, constraint or assumption. Refine the existing decision where possible so its identity and relationships remain intact.',
@@ -70,7 +70,7 @@ const recordHelp = {
   requirements: 'Write one supported, observable obligation per record. Link existing behavior and sources. Add acceptance detail only when the statement does not already make success clear.'
 };
 
-const sectionHelp = {
+const sectionHelp: Record<string, string> = {
   'casual-stories': 'Refine the existing short description into a concise account of the actor’s intention, system response and useful result. The name and actor are carried context; detailed steps come later.',
   'detailed-stories': 'Choose the detail level and identify the trigger. Detailed cases need a numbered normal flow, with relevant alternatives or subflows showing their branch and return points. Overview cases can leave flow fields blank.',
   'operating-constraints': 'Refine binding limits carried from Scope Baseline. Describe only actual restrictions on the system; do not present an unconfirmed implementation preference as a constraint.',
