@@ -2,6 +2,7 @@ import type { DataModel, Evidence, SchemaNode } from '../schema/schema-types.ts'
 import { connectedEvidence, evidenceSectionHasContent } from '../evidence/evidence-model.ts';
 import type { EvidenceSection, EvidenceValue } from '../evidence/evidence-model.ts';
 import { isGuidedInterviewPrompt } from './interview-prompt.ts';
+import { isDiagramPrompt } from './diagram-prompt.ts';
 
 function markdownValues(values: readonly EvidenceValue[], indent = ''): string {
   return values.map(value => `${indent}- **${value.label}:** ${value.text.replaceAll('\n', `\n${indent}  `)}`).join('\n');
@@ -27,7 +28,7 @@ export function buildEvidenceContext(evidence: Evidence | undefined, documentMod
 }
 
 export function addEvidenceContextToPrompt(markdown: string, evidence: Evidence | undefined, documentModel: DataModel, documentSchemas: readonly SchemaNode[]) {
-  if (isGuidedInterviewPrompt(markdown)) return markdown;
+  if (isGuidedInterviewPrompt(markdown) || isDiagramPrompt(markdown)) return markdown;
   const context = buildEvidenceContext(evidence, documentModel, documentSchemas);
   const marker = "## Form to complete";
 

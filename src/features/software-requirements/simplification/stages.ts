@@ -20,10 +20,11 @@ function compactSection(section: Section, stageId: string): Section | null {
   for (const f of r.fields.filter(f => ['status', 'scopeStatus'].includes(f.key) && !keep.includes(f.key))) fields.push({ ...f, hidden: true, editable: false, includeInPrompt: false, includeInPreview: true, showWhen: { key: f.key, in: ['Not an actor', 'Needs clarification', 'Needs scope decision', 'Deferred', 'Excluded'] } });
   if (stageId === 'srs-behavior-casual-descriptions') {
     fields = fields.filter(f => ['name', 'primaryActorId', 'briefDescription'].includes(f.key));
-    fields = fields.map(f => f.key === 'briefDescription' ? { ...f, editable: true, label: 'Short description', rows: 3 } : f);
+    fields = fields.map(f => f.key === 'briefDescription' ? { ...f, editable: true, label: 'Short description', rows: 3,
+      aiHint: 'Author or refine the actor intention, essential system response and meaningful successful result in a short connected paragraph. Preserve adequate existing descriptions; detailed steps and branches belong later.' } : f);
   }
   if (stageId === 'srs-discovery-processes') {
-    fields = fields.filter(f => !['trigger', 'importance', 'stakeholderInterests', 'detailLevel', 'descriptionStyle'].includes(f.key));
+    fields = fields.filter(f => !['briefDescription', 'trigger', 'importance', 'stakeholderInterests', 'detailLevel', 'descriptionStyle'].includes(f.key));
   }
   if (stageId === 'srs-behavior-detailed-descriptions' && r.dataKey === 'useCases') {
     fields = fields.map(f => f.key === 'trigger' ? { ...f, editable: true } : f);
@@ -41,6 +42,8 @@ function compactSection(section: Section, stageId: string): Section | null {
     ? { ...f, optional: true, aiHint: `${f.aiHint || ''} Supply only if necessary and not already established by the main answer or linked record.`.trim() } : f);
   const completionFields = stageId === 'srs-behavior-detailed-descriptions' && r.dataKey === 'useCases'
     ? ['trigger', 'detailLevel', 'normalFlow']
+    : stageId === 'srs-behavior-casual-descriptions' && r.dataKey === 'useCases'
+    ? ['briefDescription']
     : essentialFields[r.dataKey] || [];
   fields = fields.map(f => ({ ...f, completion: !f.hidden && !f.optional && f.editable !== false && completionFields.includes(f.key) }));
   if (!['useCases', 'requirements'].includes(r.dataKey) || !['srs-behavior-casual-descriptions', 'srs-discovery-processes'].includes(stageId)) fields.push(notes);

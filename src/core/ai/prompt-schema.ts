@@ -62,7 +62,7 @@ export function fieldInputContract(field: Field, documentModel: DataModel): stri
   if (field.type === 'nested-records') {
     rules.push(`Repeated ${field.itemLabel || 'item'} inputs. Give every agreed item separately, with a count and every applicable child field; do not summarize the collection in one paragraph.${field.minimum ? ` Minimum in the form: ${field.minimum}.` : ''}`);
   } else if (field.type === 'diagram-file') {
-    rules.push('File upload, not a text box. Supply no binary, data URL, XML, or invented file content. Use only supplied filename/caption metadata; identify the actual artifact still needed separately.');
+    rules.push('A diagram may be uploaded or generated using the dedicated diagram-section/figure copy prompt and Import AI diagram. This ordinary form/interview contract includes metadata only; never copy or return XML, binary, data URLs or invented file content here. The dedicated generation prompt requests semantic graph JSON separately.');
   } else if (field.type === 'period-values') {
     rules.push('One numeric value per analysis year, in year order; do not collapse to a total.');
   } else if (field.type === 'select' && !reference) {

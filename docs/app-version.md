@@ -48,6 +48,14 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.4.2-alpha` makes record deletion and allocation reference-aware. Removing a record with no remaining references releases its numeric ID, and new records fill the lowest safe gap. If any saved value still references the display ID, the record is retired instead and its ID remains reserved. Workspace format remains 2.
 
+## Use-case authoring boundary
+
+`0.5.0-alpha` confines 02.3 Use Cases to identifying and organizing behavior and makes 03.1 Casual Descriptions the authoring/completion owner of `briefDescription` on the same shared records. Saved descriptions, IDs and references remain intact; no migration or workspace-format change is required. Workspace format remains 2.
+
+## AI-generated DrawIO diagrams
+
+`0.5.0-alpha` adds a shared semantic graph-generation prompt and Import AI diagram alongside upload for every editable diagram-file field. The application validates the graph, resolves canonical labels and creates native editable DrawIO XML. Generated diagrams use the existing file payload, FIG IDs, preview/print/download and size limits. No IR is saved and workspace format remains 2. See [AI-generated diagrams](ai-diagrams.md).
+
 ## Manual review
 
-Open the application and confirm `v0.4.2-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.4.2-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.5.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.5.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.

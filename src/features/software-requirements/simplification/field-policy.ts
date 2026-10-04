@@ -16,7 +16,7 @@ export const recordFields: Record<string, string[]> = {
 };
 export const essentialFields: Record<string, string[]> = {
   audiences: ['nameOrGroup'], terms: ['term', 'definition'], perspectives: ['viewpoint', 'characteristics'],
-  actors: ['name'], goals: ['outcome'], useCases: ['name', 'briefDescription'],
+  actors: ['name'], goals: ['outcome'], useCases: ['name'],
   useCaseRelationships: ['relationship', 'toUseCaseId'], artifacts: ['title', 'file'],
   requirements: ['statement'], scopeDecisions: ['decisionType', 'statement'], evidenceIssues: ['description']
 };

@@ -3,7 +3,7 @@ import { catalogEvidence, casualSource, mapSource, activitySource } from "./evid
 
 export const casualDescriptionsStage = stage(
   "srs-behavior-casual-descriptions", "casualDescriptions", "Casual Descriptions",
-  "Give each active use case a short success story and behavioral contract before modeling the details.",
+  "Author or refine each active use case’s short behavioral description on the existing shared record before modeling the details.",
   ["functional-behavior.use-case-descriptions"], catalogEvidence,
   [
     reviewSection("casual-review", "Use-Case Description Review", "functional-behavior.use-case-descriptions", "Check that the short stories cover the catalog without silently changing its boundary."),
@@ -16,7 +16,7 @@ export const casualDescriptionsStage = stage(
       choice("casualStatus", "Story review", ["Draft", "Reviewed with questions", "Reviewed"])
     ])
   ],
-  "Write concise essential behavior, as in the Sunland casual descriptions. Carry identity, actors, goals, and triggers from the catalog. Describe success and the main interactions without screens, detailed branches, or invented policy. Raise new exceptions as questions for the diagrams and detailed descriptions.",
+  "Write concise essential behavior in briefDescription, as in the Sunland casual descriptions. Carry identity, actors and goals from 02.3 Use Cases. Describe success and the main interactions without screens, detailed branches, or invented policy. Triggers and detailed flows are authored in Detailed Descriptions. Raise new exceptions in the shared question register.",
   [
     { title: "Read the carried context", text: "Identity and participants come from the catalog. Correct them there once if the story exposes a mismatch." },
     { title: "Tell the success story", text: "Explain what the actor requests, what the system does, and what has changed when the goal succeeds." },

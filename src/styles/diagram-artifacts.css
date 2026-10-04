@@ -182,3 +182,8 @@
     min-height: 12rem;
   }
 }
+
+.diagram-ai-import-control {
+  flex: 1 1 16rem;
+  min-width: 0;
+}

@@ -2,6 +2,7 @@ import type { DataModel, Field, SchemaNode, Section } from '../schema/schema-typ
 import { asDataModel } from '../schema/data-models.ts';
 import { interviewOrientation } from './interview-orientation.ts';
 import { promptFields, promptPeriodCount, renderSectionContract, renderSectionInventory } from './prompt-schema.ts';
+import { diagramPromptField } from './diagram-prompt.ts';
 
 export function isGuidedInterviewPrompt(markdown: string): boolean {
   return markdown.startsWith('# Guided interview:');
@@ -32,6 +33,7 @@ export function buildInterviewPrompt(page: SchemaNode, dataModel: DataModel = {}
   const inventory = sections.map(({ section, local, page: owner }) => renderSectionInventory(section, local, documentModel, promptPeriodCount(owner, local))).join('\n\n');
   const task = page.ai?.task || page.description || page.label || page.title;
   const guidance = page.ai?.interviewGuidance;
+  const hasDiagrams = sections.some(({ section }) => diagramPromptField(section.repeatable?.fields || section.fields || []));
   return `# Guided interview: ${page.title || page.label}
 
 Your job is to gather enough supported information to complete every applicable item in this tab. Conduct a natural interview; final form values are produced later by the app's section, group, record or nested-item prompts.
@@ -55,6 +57,7 @@ Earlier project information is assumed to have been shared already. Reuse this c
 Stop only when all applicable existing and agreed new entries have been covered and every consequential gap is answered or explicitly left unresolved by the user. Do not stop just because a high-level inventory is available. Briefly identify any remaining blockers instead of claiming the tab is complete.
 Give the agreed repeatable inventory in saved/entry order with total counts and child counts under each parent; distinguish existing IDs from additions, without inventing new IDs. Preserve this order for form output. Scalar work needs only the relevant section handoff. If everything was already known, proceed directly to this handoff after checking coverage.
 Tell the user which app form prompt to paste next: a whole section for all entries, a parent group, a record prompt for one item, or a nested-item prompt for one child entry. Each includes all of that item's applicable input fields; there are no individual-field copy buttons. Request only relevant scopes. Those prompts return complete formatted inputs using the interview answers; they do not continue questioning. If they report Needs information, let the user resume this interview to resolve those named gaps. Do not draft final form values during discovery or instruct the formatting prompt to interview the user.
+${hasDiagrams ? '\nDiagram exception: the diagram-section/figure copy prompt generates one compact fenced dsrs-diagram semantic graph rather than formatted metadata answers. Gather the supported semantics here, then hand off to that copy control and Import AI diagram, or let the user upload an existing file. Title, caption and links remain manually editable. Do not generate the graph, DrawIO XML or coordinates during this interview.\n' : ''}
 
 ## Complete input contract
 

@@ -4,7 +4,7 @@ import type { PropType } from 'vue';
 import { buildInterviewPrompt, buildFormPrompt } from "../../core/ai/prompt-builder.ts";
 import { addEvidenceContextToPrompt } from "../../core/ai/evidence-context.ts";
 import { completion } from "../../core/schema/form-completion.ts";
-import { dataModelForSection, isDataModel, mutableRecords } from "../../core/schema/data-models.ts";
+import { dataModelForSection, isDataModel, mutableRecords, recordItems } from "../../core/schema/data-models.ts";
 import { fieldVisible } from "../../core/schema/field-visibility.ts";
 import { createRepeaterItem } from "../../core/schema/state-factory.ts";
 import { formatRecordDisplayId } from "../../core/records/record-values.ts";
@@ -12,6 +12,8 @@ import { nextRepeaterRecordId, removeRepeaterRecord } from "../../core/records/r
 import { resolveReferenceField } from "../../core/records/reference-fields.ts";
 import { sectionRecords } from "../../core/schema/section-records.ts";
 import { DiagramUploadControl } from "../diagrams/DiagramUploadControl.ts";
+import { DiagramAiImportControl } from '../diagrams/DiagramAiImportControl.ts';
+import { diagramPromptField } from '../../core/ai/diagram-prompt.ts';
 import { CopyPromptControl, SectionInfo } from "../controls/FormControls.ts";
 import type { FieldPromptFactory } from '../controls/FormControls.ts';
 import { SchemaField } from "../fields/SchemaField.ts";
@@ -28,7 +30,7 @@ export const dynamicFormProps = {
 } as const;
 
 export const DynamicForm = defineComponent({
-  components: { SchemaField, SectionInfo, CopyPromptControl, DiagramUploadControl, RelatedRecordGroups },
+  components: { SchemaField, SectionInfo, CopyPromptControl, DiagramUploadControl, DiagramAiImportControl, RelatedRecordGroups },
   emits: ["copy-markdown"],
   props: dynamicFormProps,
   computed: {
@@ -71,10 +73,11 @@ export const DynamicForm = defineComponent({
     artifactFiles(section: RepeatableSection): DataModel[] {
       const artifactField = section.repeatable.artifactField;
       if (!artifactField) return [];
-      return sectionRecords(section.repeatable, this.sectionModel(section))
+      return recordItems(this.sectionModel(section)[section.repeatable.dataKey])
         .map((record) => record[artifactField])
         .filter(isDataModel);
     },
+    diagramFieldFor(section: Section): Field | undefined { return diagramPromptField(section.repeatable?.fields || section.fields || []); },
     addArtifacts(section: RepeatableSection, files: DataModel[]) {
       const artifactField = section.repeatable.artifactField;
       if (!artifactField) return;
@@ -136,6 +139,7 @@ export const DynamicForm = defineComponent({
                 <h3 class="h5 mb-1">{{ section.title }}</h3>
                 <section-info
                   :title="section.title"
+                  :diagram="Boolean(diagramFieldFor(section))"
                   :copy-key="copyKey(section)"
                   :help="section.help"
                   :copy-text="promptFor(section)"
@@ -157,15 +161,18 @@ export const DynamicForm = defineComponent({
             :data-model="dataModel" :document-model="documentModel" :document-schemas="documentSchemas"
             :copied-section="copiedSection" :periods="periodCount" @copy-markdown="$emit('copy-markdown', $event)"></related-record-groups>
           <template v-else-if="section.repeatable">
-            <diagram-upload-control
-              v-if="section.repeatable.artifactField"
-              :key="pageSchema.id + section.id"
-              class="mt-3"
-              :files="artifactFiles(section)"
-              :multiple="true"
-              label="Upload diagram files"
-              @uploaded="addArtifacts(section, $event)"
-            ></diagram-upload-control>
+            <div v-if="section.repeatable.artifactField" class="d-flex flex-wrap gap-3 align-items-start mt-3">
+              <diagram-upload-control
+                :key="pageSchema.id + section.id"
+                :files="artifactFiles(section)"
+                :multiple="true"
+                label="Upload DrawIO/XML/PNG/JPEG"
+                @uploaded="addArtifacts(section, $event)"
+              ></diagram-upload-control>
+              <diagram-ai-import-control v-if="diagramFieldFor(section)" :key="pageSchema.id + section.id + '-ai'"
+                :config="diagramFieldFor(section).diagram" :document-model="documentModel" :files="artifactFiles(section)"
+                @uploaded="addArtifacts(section, $event)"></diagram-ai-import-control>
+            </div>
             <p v-if="!itemsFor(section).length" class="nested-records-empty mt-4 mb-0">
               {{ section.repeatable.emptyText || 'No records have been added. Use the button above when one applies.' }}
             </p>
@@ -177,8 +184,8 @@ export const DynamicForm = defineComponent({
               <div class="d-flex align-items-center justify-content-between mb-3">
                 <h4 class="h6 mb-0">{{ itemTitle(section, item, itemIndex) }}</h4>
                 <copy-prompt-control persistent :copied="copiedSection === copyKey(section, item)"
-                  :label="'Copy formatted-answer prompt for ' + itemTitle(section, item, itemIndex)"
-                  tooltip="Copies every input and nested field for this exact record. The AI returns ready-to-enter answers for this record."
+                  :label="(diagramFieldFor(section) ? 'Copy AI diagram prompt for ' : 'Copy formatted-answer prompt for ') + itemTitle(section, item, itemIndex)"
+                  :tooltip="diagramFieldFor(section) ? 'Generates one semantic diagram response for this figure. Paste the dsrs-diagram block into Import AI diagram.' : 'Copies every input and nested field for this exact record. The AI returns ready-to-enter answers for this record.'"
                   @copy="$emit('copy-markdown', promptRequest(section, item))"></copy-prompt-control>
                 <button
                   v-if="section.repeatable.allowRemove !== false && itemsFor(section).length > section.repeatable.minimum"

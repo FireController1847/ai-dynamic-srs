@@ -86,8 +86,8 @@ export function discoveryReview(stageId: string, documentModel: DocumentModel): 
         messages.push(`${useCase.referenceId}: a linked goal still needs scope confirmation.`);
       }
       if (useCase.disposition === "Ready for elaboration"
-        && ["name", "briefDescription", "trigger"].some((key) => !String(useCase[key] || "").trim())) {
-        messages.push(`${useCase.referenceId}: record its name, expected result, and trigger before marking it ready.`);
+        && !String(useCase.name || "").trim()) {
+        messages.push(`${useCase.referenceId}: record its name before marking it ready. Short descriptions belong in Casual Descriptions; triggers belong in Detailed Descriptions.`);
       }
     }
     for (const goal of activeGoals.filter(({ scopeStatus }) => scopeStatus === "Supported by baseline")) {

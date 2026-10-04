@@ -18,7 +18,7 @@ For SRS work, consult `docs/srs-construction-workflow.md` for the state and prev
 
 Phase 2 uses schema-based preview placement and shared perspective, actor, goal, and use-case records. Extend those records in later phases instead of creating duplicate catalogs; see the workflow guide for exact paths.
 
-Phase 3 extends the same use cases, with shared relationships, figures, requirements, and the existing issue register. Diagram payloads stay in saved data; AI prompts receive metadata only. Stage record filters must agree across forms, previews, completion, and prompts without deleting stored records.
+Phase 3 extends the same use cases, with shared relationships, figures, requirements, and the existing issue register. Stored diagram payloads stay in saved data and never enter AI prompts. Ordinary prompts receive metadata only; dedicated diagram-section/figure prompts request one semantic dsrs-diagram JSON graph from selected evidence. The app owns layout and converts it to the existing DrawIO file payload; see docs/ai-diagrams.md. Stage record filters must agree across forms, previews, completion, and prompts without deleting stored records.
 
 Phase 4 keeps functional, quality, and interface obligations in `records.requirements`; use `requirement-records.ts` for their kind filters and ID namespaces. Constraints and assumptions enrich existing scope decisions. See the workflow guide before extending these records or assembling later previews.
 

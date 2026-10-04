@@ -69,7 +69,7 @@ Phase 2 is implemented under `phase-two/`: `stakeholder-perspectives.ts`, `actor
 |---|---|---|
 | Stakeholder Perspectives | `records.perspectives` (`SRS-VPT-*`) | 2.3 User Classes and Characteristics |
 | Actors & Goals | `records.actors` (`SRS-ACT-*`), `records.goals` (`SRS-GOL-*`) | 3.1 Actors and Goals |
-| Candidate Processes | `records.useCases` (`SRS-UC-*`) | 3.2 Use-Case Model |
+| Use Cases (02.3) | `records.useCases` (`SRS-UC-*`): identity, participants, goals, disposition and optional relationships | 3.2 Use-Case Model |
 
 Collections are under `softwareRequirementsSpecification`; scalar reviews remain in the existing `actorGoalDiscovery` stage states. Normalization supplies the new collections without dropping undeclared saved keys. Phase 3 must enrich `records.useCases` and retain its IDs, not copy candidates into a second catalog. Deferred/excluded records retain their disposition; removal retires records through the existing stable-ID behavior.
 
@@ -105,22 +105,22 @@ Manual verification (not run):
 
 ## Phase 3 implementation and handoff
 
-`phase-three/stages.ts` registers all six stages in the existing workflow order. `shared.ts` builds declarative section descriptors; generic components own rendering and state interaction. The scope is guided by Chapter 4's use-case/activity modeling sequence, the Sunland casual/detailed descriptions, and the course template's requirement for labeled diagrams within the document.
+`phase-three/stages.ts` supplies the original six stage descriptors. The active simplified workflow in `workflow/phases.ts` moves the catalog into 02.3 Use Cases and registers the remaining five Phase 3 stages, starting with 03.1 Casual Descriptions. `shared.ts` builds declarative section descriptors; generic components own rendering and state interaction. The scope is guided by Chapter 4's use-case/activity modeling sequence, the Sunland casual/detailed descriptions, and the course template's requirement for labeled diagrams within the document.
 
 | Stage | Shared content | Document placement |
 |---|---|---|
-| Use-Case Catalog | Existing `records.useCases`; `records.useCaseRelationships` (`SRS-REL-*`) | 3.2 Use-Case Model |
-| Casual Descriptions | Preconditions, guarantees, short stories, and questions on the same use cases | 3.3.1 Casual Descriptions |
+| Use Cases (02.3, Phase 2) | Existing `records.useCases`; `records.useCaseRelationships` (`SRS-REL-*`) | 3.2 Use-Case Model |
+| Casual Descriptions (03.1) | Author/refine `briefDescription` on the same use cases; names and primary actors are carried context | 3.3.1 Casual Descriptions |
 | Use-Case Map | `records.artifacts`, filtered to `use-case-map` | 3.2.3 Use-Case Figures |
 | Activity Workflows | The same artifact register, filtered to `activity-workflow` | 6.1 Activity Models |
 | Detailed Descriptions | Normal, subflow, alternative/exceptional paths and figure references on the same use cases | 3.3.2 Detailed Descriptions |
 | Functional Requirements | `records.requirements` (`SRS-FR-*`); existing `records.evidenceIssues` (`SRS-ISS-*`) | 3.4 Functional Requirements; shared issues in 8.2.1 |
 
-Catalog edits remain visible in Phase 2. Description stages cannot add or remove cases; they show active candidates and preserve deferred/excluded cases in the source catalog. Preconditions and guarantees are edited in place across descriptions. Flow text uses explicit numbered steps/path labels so requirements can cite them. Relationships store directed source/target IDs; diagram metadata does not create relationships automatically.
+Phase 2 identifies and organizes behavior; Phase 3 describes behavior. 02.3 omits `briefDescription` from authoring and completion, while 03.1 requires it for every eligible existing case. Previously saved descriptions remain intact; no migration or duplicate catalog is introduced. Description stages cannot add or remove cases; they show active candidates and preserve deferred/excluded cases in the source catalog. Preconditions and guarantees are edited in place across descriptions. Flow text uses explicit numbered steps/path labels so requirements can cite them. Relationships store directed source/target IDs; diagram metadata does not create relationships automatically.
 
-Figures use one `FIG-0001` sequence across the two diagram stages. Each artifact stores the file once in its `file` field, plus title, caption, covered IDs, and review findings. Batch uploads accept DrawIO/XML and PNG/JPEG; replacement preserves the record ID, and retirement preserves the payload and ID. Existing limits remain 2 MB per file and 3 MB across the shared register (including retired files). The official online diagrams.net viewer renders XML. Multi-page DrawIO files print the currently selected preview page; use separate figures when every page must be included. Printing waits for media and copies the rendered SVG rather than the interactive viewer/source XML.
+Figures use one `FIG-0001` sequence across the two diagram stages. Each artifact stores the file once in its `file` field, plus title, caption, covered IDs, and review findings. Batch uploads accept DrawIO/XML and PNG/JPEG. Figure/section copy prompts can also produce a compact semantic dsrs-diagram graph; Import AI diagram validates it, resolves saved labels and generates editable DrawIO XML into the same file field (see `ai-diagrams.md`). The transient graph is not saved; replacement preserves the record ID, and retirement preserves the payload and ID. Existing limits remain 2 MB per file and 3 MB across the shared register (including retired files). The official online diagrams.net viewer renders XML. Multi-page DrawIO files print the currently selected preview page; use separate figures when every page must be included. Printing waits for media and copies the rendered SVG rather than the interactive viewer/source XML.
 
-`behavior-review.ts` checks recorded links, include/specialization cycles, missing stories/flows, figure references, and use-case/requirement coverage. It does not read meaning from a diagram or certify semantic correctness. `evidence.ts` provides prior-stage context; file metadata is summarized centrally and binary/XML contents are excluded from prompts.
+`behavior-review.ts` checks recorded links, include/specialization cycles, missing stories/flows, figure references, and use-case/requirement coverage. It does not read meaning from a diagram or certify semantic correctness. `evidence.ts` provides prior-stage context; ordinary prompts summarize file metadata centrally and exclude binary/XML contents. Dedicated diagram-generation prompts use only selected semantic evidence, omitting file metadata and unrelated form fields.
 
 Phase 4 must extend the shared records and traceability rather than copy these catalogs. Full SRS assembly remains Phase 7. The original Phase 3 implementation left runtime/browser/print verification to the user. Current handoff checks and remaining-phase contracts are documented in `srs-phase-three-four-review.md`.
 

@@ -6,10 +6,11 @@ import { isDataModel, recordItems, valueAtPath } from "../../core/schema/data-mo
 import { diagramPayloadError } from "../../core/artifacts/diagram-files.ts";
 import { DiagramUploadControl } from "./DiagramUploadControl.ts";
 import { DiagramMedia } from "./DiagramMedia.ts";
+import { DiagramAiImportControl } from './DiagramAiImportControl.ts';
 
 export const DiagramFileField = defineComponent({
   name: "DiagramFileField",
-  components: { DiagramUploadControl, DiagramMedia },
+  components: { DiagramUploadControl, DiagramMedia, DiagramAiImportControl },
   emits: ["update:modelValue"],
   props: {
     field: { type: Object as PropType<Field>, required: true }, modelValue: { type: Object as PropType<DataModel | null>, default: null },
@@ -42,7 +43,8 @@ export const DiagramFileField = defineComponent({
     <div>
       <p class="form-label">{{ field.label }}</p>
       <div class="d-flex flex-wrap gap-3 align-items-start">
-        <diagram-upload-control :files="files" :replacing="modelValue" :label="modelValue ? 'Replace file (keep figure ID)' : 'Upload diagram'" @uploaded="$emit('update:modelValue', $event[0])"></diagram-upload-control>
+        <diagram-upload-control :files="files" :replacing="modelValue" :label="modelValue ? 'Replace DrawIO/XML/PNG/JPEG (keep figure ID)' : 'Upload DrawIO/XML/PNG/JPEG'" @uploaded="$emit('update:modelValue', $event[0])"></diagram-upload-control>
+        <diagram-ai-import-control :config="field.diagram" :document-model="documentModel" :files="files" :replacing="modelValue" @uploaded="$emit('update:modelValue', $event[0])"></diagram-ai-import-control>
         <button v-if="downloadable" class="btn btn-outline-secondary btn-sm" type="button" @click="download">Download source</button>
       </div>
       <p v-if="modelValue" class="small text-body-secondary mt-2">{{ modelValue.sourceFileName }}</p>

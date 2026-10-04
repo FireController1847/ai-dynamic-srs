@@ -1,3 +1,4 @@
+import type { DiagramConfig } from '../artifacts/diagram-graph.ts';
 /** Saved values are deliberately open: schemas own vocabulary, not the persistence layer. */
 export type DataModel = Record<string, unknown>;
 export type DocumentModel = Record<string, DataModel>;
@@ -18,6 +19,7 @@ export interface Field {
   rows?: number; min?: number; max?: number; step?: string | number;
   minimum?: number; itemLabel?: string; addLabel?: string; emptyText?: string;
   collectionPath?: DataPath; artifactField?: string; dateDocument?: string;
+  diagram?: DiagramConfig;
   referenceFormat?: string; format?: string; preserveWhenHidden?: boolean;
   documentNumber?: string;
 }
