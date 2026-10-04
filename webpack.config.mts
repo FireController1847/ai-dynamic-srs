@@ -39,7 +39,13 @@ export default (_env: unknown, argv: { mode?: Configuration['mode'] }): Configur
     },
     devtool: production ? false : 'source-map',
     // Existing Vue components and the HTML shell compile templates at runtime.
-    resolve: { alias: { vue$: 'vue/dist/vue.esm-bundler.js' } },
+    resolve: {
+      alias: { vue$: 'vue/dist/vue.esm-bundler.js' },
+      extensionAlias: {
+        '.js': ['.ts', '.js'],
+        '.mjs': ['.mts', '.mjs']
+      }
+    },
     module: {
       rules: [
         { test: /\.ts$/, exclude: /node_modules/, loader: 'ts-loader', options: { configFile: 'tsconfig.app.json', compilerOptions: { noEmit: false, rewriteRelativeImportExtensions: true } } },
