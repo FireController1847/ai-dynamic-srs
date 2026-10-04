@@ -22,7 +22,7 @@ Primary references:
 - Neutral surfaces establish hierarchy. Blue is reserved for the primary action, current selection, focus/accent states and meaningful links. Green, amber and red communicate semantic success, warning and danger states.
 - Keep one visually primary action in a local action group. Secondary and utility actions use neutral, subtle, or transparent appearances.
 - Desktop authoring controls use a 40px shared height where practical. The compact app bar may use smaller chrome controls; coarse-pointer/touch layouts retain at least 44px interactive targets.
-- Shared controls use 4px corners; containers use 8px corners. Elevation is purposeful: ordinary workspace surfaces are stroked and flat, while the live paper preview and floating utilities may use low elevation.
+- Shared controls use 4px corners; containers use 8px corners. Authoring icons use a 20px default glyph inside 36px icon controls, with 16px reserved for secondary indicators and 44px touch targets on coarse pointers. Use stroked SVG icons rather than text glyphs for help/action affordances. Elevation is purposeful: ordinary workspace surfaces are stroked and flat, while the live paper preview and floating utilities may use low elevation.
 - Motion must explain state or movement, not decorate. Use short transitions and respect `prefers-reduced-motion`.
 - Keyboard focus must remain clearly visible. Preserve labels and helper text instead of relying on placeholders, and keep semantic status colors readable without making color the only cue.
 
@@ -32,6 +32,7 @@ Primary references:
 | --- | --- |
 | Semantic colors, typography, spacing, radii, motion, elevation | `src/styles/tokens.css` |
 | Shared buttons, inputs, cards, badges, tables, focus and reduced motion | `src/styles/base.css` |
+| Shared icon sizing and icon-button geometry | `src/styles/iconography.css` |
 | App bar, workspace status, top-level tabs, responsive chrome | `src/styles/shell.css` |
 | Forms, nested tabs, progress, guides, evidence, diagrams, Notes, CBA, live preview | `src/styles/fluent-workspace.css` |
 | Feature-specific layout or visualization | Existing feature stylesheet such as `cba.css`, `notes.css`, or `diagram-artifacts.css` |

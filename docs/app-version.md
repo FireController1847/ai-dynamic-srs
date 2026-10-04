@@ -64,6 +64,10 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.5.2-alpha` keeps the Fluent visual system while restoring a more comfortable authoring scale for the reading- and form-heavy workspace. Body text returns to 16/24, standard desktop controls grow to 40px, headings and helper text are larger, and form/card interiors use more generous spacing. The compact app bar and Fluent color, focus, surface, radius, motion and elevation language remain unchanged. Workspace format and application behavior are unchanged.
 
+## Fluent icon scale correction
+
+`0.5.3-alpha` normalizes authoring icons after the comfortable-density pass. Primary workspace icons use a shared 20px glyph size inside 36px icon controls, secondary completion marks use 16px, and touch targets expand to 44px. Copy, help, guide, preview/sidebar navigation and related badges now share consistent geometry; text question marks are replaced with stroked help icons. Application behavior and workspace format remain unchanged.
+
 ## Manual review
 
-Open the application and confirm `v0.5.2-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.5.2-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.5.3-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.5.3-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.

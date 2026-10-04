@@ -1,0 +1,90 @@
+/* Shared Fluent icon geometry for the authoring workspace. */
+.section-copy-trigger,
+.section-help-trigger {
+  width: var(--fluent-icon-button-size);
+  min-width: var(--fluent-icon-button-size);
+  height: var(--fluent-icon-button-size);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--fluent-radius-medium);
+  background: transparent;
+  color: var(--fluent-color-neutral-foreground-2);
+}
+
+.section-copy-trigger svg,
+.section-help-trigger svg,
+.workspace-utility-button svg,
+.page-guide-icon svg {
+  width: var(--fluent-icon-size);
+  height: var(--fluent-icon-size);
+  flex: 0 0 var(--fluent-icon-size);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.75;
+}
+
+.section-copy-trigger:hover,
+.section-copy-trigger:focus-visible,
+.section-help-trigger:hover,
+.section-help-trigger:focus-visible {
+  border-color: var(--fluent-color-neutral-stroke-2);
+  background: var(--fluent-color-neutral-background-hover);
+  color: var(--fluent-color-neutral-foreground-1);
+}
+
+.section-copy-trigger.copied {
+  border-color: var(--fluent-color-success-stroke-1);
+  background: var(--fluent-color-success-background-2);
+  color: var(--fluent-color-success-foreground-1);
+}
+
+.completion-copy-trigger {
+  width: var(--fluent-icon-button-size);
+  height: var(--fluent-icon-button-size);
+}
+
+.completion-copy-trigger svg,
+.tab-completion-check {
+  width: var(--fluent-icon-size-small);
+  height: var(--fluent-icon-size-small);
+}
+
+.page-guide-icon {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 0;
+  border-radius: var(--fluent-radius-circular);
+  background: var(--fluent-color-brand-background);
+  color: #fff;
+  font-size: 0;
+}
+
+.workspace-utility-button {
+  gap: var(--fluent-space-80);
+}
+
+.section-number {
+  font-size: 13px;
+}
+
+.workflow-structure-badge,
+.markdown-field-badge,
+.optional-label,
+.notes-follow-up-badge {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@media (pointer: coarse) {
+  .section-copy-trigger,
+  .section-help-trigger {
+    width: var(--fluent-touch-target);
+    min-width: var(--fluent-touch-target);
+    height: var(--fluent-touch-target);
+  }
+}

@@ -10,7 +10,7 @@ For any AI workflow change, read `docs/ai-prompts.md` first. It is the authorita
 
 | Request | Primary files | Read shared code only if needed |
 |---|---|---|
-| Change Fluent visual system, shared controls, or global workspace presentation | `docs/design.md`, `styles/{tokens,base,shell,fluent-workspace}.css`, `src/html/index.html` | Feature stylesheet only when the visual behavior is genuinely feature-specific; preserve print styling in `responsive-print.css` and document CSS |
+| Change Fluent visual system, shared controls, or global workspace presentation | `docs/design.md`, `styles/{tokens,base,shell,fluent-workspace,iconography}.css`, `src/html/index.html` | Feature stylesheet only when the visual behavior is genuinely feature-specific; preserve print styling in `responsive-print.css` and document CSS |
 | Change application semantic version or its fixed label | `core/application-version.ts`, `src/html/index.html`, `styles/shell.css`, `docs/app-version.md` | `core/workspace/workspace-format.ts` consumes the canonical version for saved metadata; update `AGENTS.md` only when policy changes |
 | Change webpack, npm scripts, deployment base, or emitted assets | `webpack.config.mts`, `package.json`, `package-lock.json`, `src/html/index.html` | `src/app/app.ts` for CSS/runtime imports; `core/printing/print-document.ts` for copied iframe assets; `docs/architecture.md` |
 | Add, remove, or rename a field | Relevant `src/features/*/schema.ts` or feasibility section | `core/schema/state-factory.ts` |

@@ -72,7 +72,13 @@ export const SectionInfo = defineComponent({
           type="button"
           :aria-label="'About the ' + title + ' section'"
           @keydown.esc="$event.currentTarget.blur()"
-        >?</button>
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M9.8 9.25a2.45 2.45 0 0 1 4.7.95c0 1.75-2.5 2.05-2.5 4"></path>
+            <path d="M12 17.25h.01"></path>
+          </svg>
+        </button>
       </span>
     </span>
   `

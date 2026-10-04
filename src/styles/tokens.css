@@ -58,6 +58,9 @@
   --fluent-control-height: 40px;
   --fluent-control-height-large: 48px;
   --fluent-touch-target: 44px;
+  --fluent-icon-size: 20px;
+  --fluent-icon-size-small: 16px;
+  --fluent-icon-button-size: 36px;
 
   --fluent-shadow-2: 0 1px 2px rgb(0 0 0 / 6%);
   --fluent-shadow-4: 0 2px 4px rgb(0 0 0 / 8%);
