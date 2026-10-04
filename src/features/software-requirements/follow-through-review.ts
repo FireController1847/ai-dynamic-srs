@@ -45,7 +45,7 @@ export function followThroughReview(documentModel: DocumentModel, phase: number 
     ["actorsAndGoals", "actorReviewStatus", "actorReviewNotes", "Actors & Goals"]
   ]) {
     const local = asDataModel(discovery[stateKey]);
-    if (["Reviewed with open questions", "Needs stakeholder clarification", "Needs boundary clarification"].includes(local[statusKey])) question(label, local[notesKey] || "Earlier review has unanswered questions");
+    if (["Reviewed with open questions", "Needs stakeholder clarification", "Needs boundary clarification"].includes(String(local[statusKey] || ""))) question(label, local[notesKey] || "Earlier review has unanswered questions");
   }
   const processes = asDataModel(discovery.candidateProcesses);
   if (["Ready with visible questions", "Needs actor, goal, or scope revision"].includes(String(processes.processReadiness))) {
