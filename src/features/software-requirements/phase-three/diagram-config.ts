@@ -16,6 +16,13 @@ const labels: NonNullable<DiagramConfig['labels']> = [{ id: '@system', paths: [
 
 export const useCaseDiagramConfig: DiagramConfig = {
   type: 'use-case', scope: { source: 'cases', field: 'useCaseReferences' }, labels,
+  batch: { metadata: [
+    { field: 'title', required: true },
+    { field: 'caption' },
+    { field: 'useCaseReferences', required: true, source: 'cases', nodeKind: 'use-case' },
+    { field: 'actorReferences', source: 'actors', nodeKind: 'actor' },
+    { field: 'relationshipReferences', source: 'relationships' }
+  ] },
   sources: [cases(['name', 'primaryActorId', 'supportingActorReferences']), actors, {
     key: 'relationships', reference: { dataPath: [...recordsPath, 'useCaseRelationships'], displayId: { prefix: 'SRS-REL-', padding: 3 }, labelField: 'relationship' },
     fields: ['fromUseCaseId', 'relationship', 'toUseCaseId', 'condition'],
@@ -25,5 +32,12 @@ export const useCaseDiagramConfig: DiagramConfig = {
 
 export const activityDiagramConfig: DiagramConfig = {
   type: 'activity', scope: { source: 'cases', field: 'useCaseReferences' }, recordFields: ['scenario'], labels,
+  batch: { metadata: [
+    { field: 'title', required: true },
+    { field: 'caption' },
+    { field: 'useCaseReferences', required: true, source: 'cases' },
+    { field: 'actorReferences', source: 'actors' },
+    { field: 'scenario', required: true }
+  ] },
   sources: [cases(['name', 'primaryActorId', 'supportingActorReferences', 'briefDescription', 'trigger', 'preconditions', 'successGuarantee', 'failureGuarantee', 'normalFlow', 'subflows', 'alternativeFlows', 'specialConditions']), actors]
 };
