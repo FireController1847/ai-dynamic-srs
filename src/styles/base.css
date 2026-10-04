@@ -15,7 +15,7 @@ body {
   margin: 0;
   background: var(--fluent-color-neutral-background-3);
   color: var(--fluent-color-neutral-foreground-1);
-  font: 14px/20px var(--fluent-font-family);
+  font: 16px/24px var(--fluent-font-family);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -35,12 +35,12 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: normal;
 }
 
-h1, .h1 { font-size: 32px; line-height: 40px; }
-h2, .h2 { font-size: 28px; line-height: 36px; }
-h3, .h3 { font-size: 24px; line-height: 32px; }
-h4, .h4 { font-size: 20px; line-height: 26px; }
-h5, .h5 { font-size: 16px; line-height: 22px; }
-h6, .h6 { font-size: 14px; line-height: 20px; }
+h1, .h1 { font-size: 36px; line-height: 44px; }
+h2, .h2 { font-size: 32px; line-height: 40px; }
+h3, .h3 { font-size: 28px; line-height: 36px; }
+h4, .h4 { font-size: 24px; line-height: 32px; }
+h5, .h5 { font-size: 20px; line-height: 28px; }
+h6, .h6 { font-size: 16px; line-height: 24px; }
 
 a {
   color: var(--fluent-color-brand-foreground-1);
@@ -63,8 +63,8 @@ a:hover {
 
 .small,
 small {
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .card {
@@ -76,7 +76,7 @@ small {
 }
 
 .card-body {
-  padding: var(--fluent-space-200);
+  padding: var(--fluent-space-240);
 }
 
 .shadow-sm {
@@ -89,9 +89,9 @@ small {
   justify-content: center;
   gap: var(--fluent-space-80);
   min-height: var(--fluent-control-height);
-  padding: 5px 12px;
+  padding: 9px 16px;
   border-radius: var(--fluent-radius-medium);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 20px;
   transition:
@@ -102,9 +102,9 @@ small {
 }
 
 .btn-sm {
-  min-height: 28px;
-  padding: 3px 10px;
-  font-size: 12px;
+  min-height: 32px;
+  padding: 5px 12px;
+  font-size: 14px;
   line-height: 20px;
 }
 
@@ -155,7 +155,7 @@ small {
 .form-label {
   margin-bottom: 4px;
   color: var(--fluent-color-neutral-foreground-1);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 20px;
 }
@@ -189,7 +189,7 @@ small {
 }
 
 textarea.form-control {
-  min-height: 88px;
+  min-height: 112px;
   resize: vertical;
 }
 

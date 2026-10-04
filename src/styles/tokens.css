@@ -55,8 +55,8 @@
   --fluent-space-400: 40px;
   --fluent-space-480: 48px;
 
-  --fluent-control-height: 32px;
-  --fluent-control-height-large: 40px;
+  --fluent-control-height: 40px;
+  --fluent-control-height-large: 48px;
   --fluent-touch-target: 44px;
 
   --fluent-shadow-2: 0 1px 2px rgb(0 0 0 / 6%);
@@ -93,8 +93,8 @@
   --dsrs-workspace-tabs-height: 44px;
 
   --bs-body-font-family: var(--fluent-font-family);
-  --bs-body-font-size: 0.875rem;
-  --bs-body-line-height: 1.4286;
+  --bs-body-font-size: 1rem;
+  --bs-body-line-height: 1.5;
   --bs-body-color: var(--fluent-color-neutral-foreground-1);
   --bs-body-bg: var(--fluent-color-neutral-background-3);
   --bs-secondary-color: var(--fluent-color-neutral-foreground-2);

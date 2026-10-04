@@ -941,3 +941,272 @@
     }
   }
 }
+
+
+/* Comfortable workspace density: preserve Fluent styling without compacting reading-heavy authoring UI. */
+@media screen {
+  .subpage-workspace-heading {
+    margin-bottom: var(--fluent-space-320);
+  }
+
+  .subpage-workspace-heading .section-kicker,
+  .section-kicker {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .subpage-workspace-heading h2 {
+    margin-bottom: var(--fluent-space-80) !important;
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .subpage-workspace-heading > .text-body-secondary,
+  .subpage-workspace-note {
+    font-size: 15px;
+    line-height: 22px;
+  }
+
+  .subpage-workspace-note {
+    margin-top: var(--fluent-space-160);
+    padding: var(--fluent-space-160) var(--fluent-space-200);
+  }
+
+  .subpage-tabs-shell {
+    margin-bottom: var(--fluent-space-240);
+  }
+
+  .subpage-tabs,
+  .subpage-tabs .nav-link {
+    min-height: 44px;
+  }
+
+  .subpage-tabs .nav-link {
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 22px;
+  }
+
+  .subpage-level-heading {
+    gap: var(--fluent-space-200);
+    margin-bottom: var(--fluent-space-240);
+    padding: var(--fluent-space-200) var(--fluent-space-240);
+  }
+
+  .subpage-level-progress {
+    min-width: 72px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .subpage-level-progress strong {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .section-summary .card-body {
+    padding: var(--fluent-space-240);
+  }
+
+  .section-summary h2,
+  .section-summary h3 {
+    margin-bottom: var(--fluent-space-80);
+  }
+
+  .form-completion-box {
+    margin-top: var(--fluent-space-200);
+    padding: var(--fluent-space-160);
+  }
+
+  .form-completion-heading {
+    margin-bottom: var(--fluent-space-120);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .section-links {
+    gap: var(--fluent-space-40);
+    margin-top: var(--fluent-space-240) !important;
+  }
+
+  .section-links a {
+    min-height: 40px;
+    padding: 9px 12px;
+    font-size: 15px;
+    line-height: 22px;
+  }
+
+  .workspace-utility-button {
+    min-height: 36px;
+    padding: 7px 12px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .form-section {
+    margin-bottom: var(--fluent-space-240);
+    padding: var(--fluent-space-320);
+  }
+
+  .repeatable-item,
+  .nested-records-field,
+  .nested-record-card {
+    padding: var(--fluent-space-240);
+  }
+
+  .section-heading {
+    margin-bottom: var(--fluent-space-240);
+    padding-bottom: var(--fluent-space-160);
+  }
+
+  .section-heading,
+  .nested-records-heading,
+  .nested-record-card-heading,
+  .notes-summary-heading {
+    gap: var(--fluent-space-160);
+  }
+
+  .section-title-row {
+    gap: var(--fluent-space-120);
+  }
+
+  .section-title-row .h5,
+  .section-title-row h3,
+  .section-title-row h4 {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .section-number {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .field-help-text,
+  .nested-records-description,
+  .nested-records-empty,
+  .notes-add-row small,
+  .notes-entry-meta {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .page-guide {
+    margin-bottom: var(--fluent-space-240) !important;
+  }
+
+  .page-guide-summary {
+    min-height: 52px;
+    padding: 12px 16px;
+  }
+
+  .page-guide-summary strong {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .page-guide-summary small {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .page-guide-body {
+    padding: 12px 20px 20px 56px;
+  }
+
+  .workspace-evidence-heading {
+    min-height: 56px;
+    padding: var(--fluent-space-160) var(--fluent-space-200);
+  }
+
+  .workspace-evidence-sources {
+    gap: var(--fluent-space-160);
+    padding: var(--fluent-space-200);
+  }
+
+  .workspace-evidence-source-heading,
+  .workspace-evidence-group-heading,
+  .diagram-artifact-heading {
+    padding: var(--fluent-space-160) var(--fluent-space-200);
+  }
+
+  .diagram-empty-state {
+    padding: var(--fluent-space-320);
+  }
+
+  .cba-kpi-grid,
+  .cba-document-kpis,
+  .notes-kpi-grid {
+    gap: var(--fluent-space-120);
+  }
+
+  .cba-kpi-grid div,
+  .notes-kpi-grid div,
+  .cba-document-kpis div {
+    padding: var(--fluent-space-160);
+  }
+
+  .cba-kpi-grid dt,
+  .notes-kpi-grid dt,
+  .cba-document-kpis dt {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .cba-kpi-grid dd,
+  .notes-kpi-grid dd,
+  .cba-document-kpis dd {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .cba-chart-card,
+  .notes-entry-card,
+  .workflow-stage-relationships {
+    padding: var(--fluent-space-240);
+  }
+
+  .workflow-stage-meta,
+  .workflow-stage-relationships h4 {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .workflow-stage-relationships ul {
+    font-size: 15px;
+    line-height: 22px;
+  }
+
+  .document-preview-section {
+    margin-top: var(--fluent-space-400);
+    padding-top: var(--fluent-space-320);
+  }
+
+  .preview-toolbar {
+    gap: var(--fluent-space-160);
+    margin-bottom: var(--fluent-space-160);
+  }
+
+  .preview-toolbar h2,
+  .preview-toolbar h3 {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  @media (max-width: 575.98px) {
+    .form-section,
+    .repeatable-item,
+    .nested-records-field,
+    .nested-record-card,
+    .section-summary .card-body {
+      padding: var(--fluent-space-200);
+    }
+
+    .page-guide-body {
+      padding: var(--fluent-space-160);
+    }
+  }
+}

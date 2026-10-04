@@ -17,11 +17,11 @@ Primary references:
 
 ## Design contract
 
-- Use the Segoe UI/native platform font stack. Normal interface text follows Fluent Body 1 at 14/20; supporting text uses 12/16; headings stay restrained and semibold.
+- Use the Segoe UI/native platform font stack. Dynamic SRS uses a roomier authoring density than Fluent's compact defaults: normal workspace text is 16/24, supporting text is generally 14/20, and headings stay restrained and semibold.
 - Use the four-pixel spacing rhythm. Prefer proximity and whitespace over decorative dividers or stacks of floating cards.
 - Neutral surfaces establish hierarchy. Blue is reserved for the primary action, current selection, focus/accent states and meaningful links. Green, amber and red communicate semantic success, warning and danger states.
 - Keep one visually primary action in a local action group. Secondary and utility actions use neutral, subtle, or transparent appearances.
-- Desktop controls use a 32px shared height where practical. Coarse-pointer/touch layouts raise interactive targets to at least 44px.
+- Desktop authoring controls use a 40px shared height where practical. The compact app bar may use smaller chrome controls; coarse-pointer/touch layouts retain at least 44px interactive targets.
 - Shared controls use 4px corners; containers use 8px corners. Elevation is purposeful: ordinary workspace surfaces are stroked and flat, while the live paper preview and floating utilities may use low elevation.
 - Motion must explain state or movement, not decorate. Use short transitions and respect `prefers-reduced-motion`.
 - Keyboard focus must remain clearly visible. Preserve labels and helper text instead of relying on placeholders, and keep semantic status colors readable without making color the only cue.
