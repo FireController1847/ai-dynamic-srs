@@ -4,7 +4,7 @@ import { asDataModel, dataModelForSection, isDataModel } from "../../../core/sch
 import { documentOutlineIndex } from "../../../core/schema/schema-tree.ts";
 import { softwareRequirementsDocument } from "../document-outline.ts";
 
-const outlineIndex = documentOutlineIndex(softwareRequirementsDocument.outline);
+const outlineIndex = documentOutlineIndex(softwareRequirementsDocument.outline || []);
 
 export function outlineNumber(targetKey: string) {
   return outlineIndex.get(targetKey)?.number || "";
@@ -77,7 +77,7 @@ function referencesRecordId(decision: DataModel, recordId: string) {
 export function latestFeatureDecision(decisions: readonly DataModel[], recordId: string): DataModel | undefined {
   return [...decisions].reverse().find((decision) => (
     decision.status === "Confirmed"
-    && ["Include", "Exclude", "Defer"].includes(decision.decisionType)
+    && ["Include", "Exclude", "Defer"].includes(String(decision.decisionType || ""))
     && String(decision.statement || "").trim()
     && referencesRecordId(decision, recordId)
   ));
