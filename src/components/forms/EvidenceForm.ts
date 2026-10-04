@@ -4,17 +4,19 @@ import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice
 import { DynamicForm } from "./FormWorkspace.ts";
 import { WorkspaceEvidencePanel } from "../references/WorkspaceEvidencePanel.ts";
 
+export const evidenceFormProps = {
+  copiedSection: { type: String, default: "" },
+  dataModel: { type: Object as PropType<DataModel>, required: true },
+  documentModel: { type: Object as PropType<DocumentModel>, required: true },
+  documentSchemas: { type: Array as PropType<SchemaNode[]>, required: true },
+  pageSchema: { type: Object as PropType<SchemaNode>, required: true }
+};
+
 export const EvidenceForm = defineComponent({
   name: "EvidenceForm",
   components: { DynamicForm, WorkspaceEvidencePanel },
   emits: ["copy-markdown", "navigate-workspace"],
-  props: {
-    copiedSection: { type: String, default: "" },
-    dataModel: { type: Object as PropType<DataModel>, required: true },
-    documentModel: { type: Object as PropType<DocumentModel>, required: true },
-    documentSchemas: { type: Array as PropType<SchemaNode[]>, required: true },
-    pageSchema: { type: Object as PropType<SchemaNode>, required: true }
-  },
+  props: evidenceFormProps,
   template: `
     <div>
       <workspace-evidence-panel

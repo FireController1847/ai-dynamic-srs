@@ -16,22 +16,24 @@ import { DocumentCoverPage } from "./DocumentCoverPage.ts";
 import { PreviewWatermark } from "./PreviewWatermark.ts";
 import { DiagramMedia } from "../diagrams/DiagramMedia.ts";
 
+export const documentPreviewProps = {
+  dataModel: { type: Object as PropType<DataModel>, required: true },
+  documentConfig: { type: Object as PropType<DocumentConfig | null>, default: null },
+  documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) },
+  documentSchemas: { type: Array as PropType<SchemaNode[]>, default: () => [] },
+  isPrinting: { type: Boolean, default: false },
+  pageSchema: { type: Object as PropType<SchemaNode>, required: true },
+  printPageId: { type: String, default: "" },
+  printDateLabel: { type: String, required: true },
+  projectContext: { type: Object as PropType<DataModel>, required: true },
+  sectionContext: { type: Object as PropType<SectionContext | null>, default: null },
+  partial: { type: Boolean, default: false }
+};
+
 export const DocumentPreview = defineComponent({
   components: { MarkdownText, DocumentCoverPage, PreviewWatermark, PrintDocumentButton, DiagramMedia },
   emits: ["print"],
-  props: {
-    dataModel: { type: Object as PropType<DataModel>, required: true },
-    documentConfig: { type: Object as PropType<DocumentConfig | null>, default: null },
-    documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) },
-    documentSchemas: { type: Array as PropType<SchemaNode[]>, default: () => [] },
-    isPrinting: { type: Boolean, default: false },
-    pageSchema: { type: Object as PropType<SchemaNode>, required: true },
-    printPageId: { type: String, default: "" },
-    printDateLabel: { type: String, required: true },
-    projectContext: { type: Object as PropType<DataModel>, required: true },
-    sectionContext: { type: Object as PropType<SectionContext | null>, default: null },
-    partial: { type: Boolean, default: false }
-  },
+  props: documentPreviewProps,
   computed: {
     configuration(): DocumentConfig {
       return this.documentConfig || this.pageSchema.document || {};

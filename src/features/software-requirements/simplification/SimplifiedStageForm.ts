@@ -3,10 +3,10 @@ import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import type { Field, Section, SchemaNode, DataModel, DocumentModel, ParentChoice, DocumentConfig, SectionContext, MetadataEntry, Help, RecordReview, Evidence } from '../../../core/schema/schema-types.ts';
 import { authoringFindings } from "./authoring-findings.ts";
-import { EvidenceForm } from '../../../components/forms/EvidenceForm.ts';
+import { EvidenceForm, evidenceFormProps } from '../../../components/forms/EvidenceForm.ts';
 import { SupportingWork } from './SupportingWork.ts';
 export const SimplifiedStageForm = defineComponent({
-  props: EvidenceForm.props,
+  props: evidenceFormProps,
   components: { EvidenceForm, SupportingWork },
   emits: ['copy-markdown', 'navigate-workspace'],
   computed: { findings(): string[] { return authoringFindings(this.pageSchema, this.dataModel, this.documentModel); } },
