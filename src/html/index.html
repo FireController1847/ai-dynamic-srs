@@ -8,36 +8,35 @@
     <base href="<%= htmlWebpackPlugin.options.basePath %>">
   </head>
   <body>
-    <div id="app" v-cloak>
-      <header class="bg-white">
-        <div class="container py-4">
-          <div class="workspace-header d-flex flex-column flex-md-row gap-4 align-items-md-center justify-content-between">
-            <div>
-              <p class="workspace-eyebrow text-uppercase fw-semibold small mb-1">Planning workspace</p>
-              <h1 class="h3 mb-1">Dynamic SRS Builder</h1>
-              <p class="text-body-secondary mb-0">Create and organize your software requirements specification.</p>
-            </div>
-
-            <div class="workspace-actions d-flex flex-wrap gap-2 justify-content-md-end" aria-label="Workspace file actions">
-              <button class="btn btn-light" type="button" @click="newWip">New WIP</button>
-              <label class="btn btn-outline-primary mb-0" for="workspace-file">Import WIP</label>
-              <input id="workspace-file" class="visually-hidden" type="file" accept=".dsrs,application/json,application/gzip,application/x-gzip" @change="importWip">
-              <button class="btn btn-primary" type="button" @click="downloadWip">Download WIP</button>
+    <div id="app" class="app-shell" v-cloak>
+      <header class="app-header">
+        <div class="app-frame app-header-main">
+          <div class="app-brand">
+            <span class="app-brand-mark" aria-hidden="true">SRS</span>
+            <div class="app-brand-copy">
+              <span class="app-header-kicker">Planning workspace</span>
+              <h1>Dynamic SRS Builder</h1>
             </div>
           </div>
 
-          <div class="workspace-status d-flex gap-2 align-items-center mt-3" role="status" aria-live="polite">
-            <span class="workspace-status-dot" aria-hidden="true"></span>
-            <span>{{ workspaceStatus }}</span>
-            <span v-if="lastSavedLabel" class="text-body-secondary">· Last saved {{ lastSavedLabel }}</span>
-            <span class="workspace-format ms-auto">.dsrs · gzip · format v1</span>
+          <div class="workspace-actions" aria-label="Workspace file actions">
+            <button class="btn btn-light app-header-action" type="button" @click="newWip">New WIP</button>
+            <label class="btn btn-light app-header-action mb-0" for="workspace-file">Import WIP</label>
+            <input id="workspace-file" class="visually-hidden" type="file" accept=".dsrs,application/json,application/gzip,application/x-gzip" @change="importWip">
+            <button class="btn btn-primary app-header-action" type="button" @click="downloadWip">Download WIP</button>
           </div>
         </div>
 
+        <div class="app-frame workspace-status" role="status" aria-live="polite">
+          <span class="workspace-status-dot" aria-hidden="true"></span>
+          <span>{{ workspaceStatus }}</span>
+          <span v-if="lastSavedLabel">· Last saved {{ lastSavedLabel }}</span>
+          <span class="workspace-format">.dsrs · gzip · format v2</span>
+        </div>
       </header>
 
-      <nav class="workspace-tabs-sticky bg-white border-bottom" aria-label="SRS document sections">
-        <div class="container workspace-tabs-shell" tabindex="0">
+      <nav class="workspace-tabs-sticky" aria-label="SRS document sections">
+        <div class="app-frame workspace-tabs-shell" tabindex="0">
           <div class="nav nav-tabs workspace-tabs" role="tablist">
             <button
               v-for="page in pages"
@@ -58,7 +57,7 @@
         </div>
       </nav>
 
-      <main class="container py-4 py-lg-5">
+      <main class="app-frame app-main">
         <section
           v-for="page in pages"
           v-show="activePage === page.id"
@@ -106,7 +105,7 @@
                 :class="{ 'is-collapsed': !formSidebarVisible }"
                 :aria-hidden="!formSidebarVisible"
               >
-                <div class="card border-0 shadow-sm sticky-lg-top section-summary">
+                <div class="card sticky-lg-top section-summary">
                   <div class="card-body">
                     <div class="form-sidebar-heading">
                       <p class="section-kicker mb-2">{{ page.form?.kicker || page.code }}</p>
@@ -168,7 +167,7 @@
             </div>
           </template>
 
-          <div v-else class="card border-0 shadow-sm">
+          <div v-else class="card">
             <div class="card-body p-4 p-md-5">
               <h2 class="h4">{{ page.label }}</h2>
               <p class="text-body-secondary mb-0">{{ page.description }}</p>
@@ -193,6 +192,5 @@
 
       <span class="app-version">v{{ applicationVersion }}</span>
     </div>
-
   </body>
 </html>

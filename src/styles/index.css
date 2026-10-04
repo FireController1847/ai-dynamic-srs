@@ -1,4 +1,5 @@
 @import "./tokens.css";
+@import "./base.css";
 @import "./shell.css";
 @import "./navigation.css";
 @import "./forms.css";
@@ -7,6 +8,7 @@
 @import "./cba.css";
 @import "./notes.css";
 @import "./preview.css";
+@import "./fluent-workspace.css";
 @import "./responsive-print.css";
 @import "./compact-documents.css";
 @import "./markdown.css";

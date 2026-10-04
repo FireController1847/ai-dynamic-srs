@@ -1,34 +1,109 @@
+/* Fluent 2-inspired semantic tokens. Feature CSS consumes the dsrs aliases below. */
 :root {
-  --dsrs-app-background: #f4f6f9;
-  --dsrs-ink: #263544;
-  --dsrs-muted-ink: #617080;
-  --dsrs-strong-ink: #33485c;
-  --dsrs-border: #cfd8e2;
-  --dsrs-soft-border: #e1e7ed;
-  --dsrs-surface: #fff;
-  --dsrs-soft-surface: #f7f9fb;
-  --dsrs-accent: #2f6fa8;
-  --dsrs-accent-strong: #245781;
-  --dsrs-accent-soft: #eaf2f9;
-  --dsrs-accent-border: #bfd3e5;
-  --dsrs-secondary: #3f7775;
-  --dsrs-secondary-strong: #315f5d;
-  --dsrs-secondary-soft: #edf5f4;
-  --dsrs-secondary-border: #c7ddda;
-  --dsrs-highlight: #b9823a;
-  --dsrs-highlight-strong: #7e5928;
-  --dsrs-highlight-soft: #fbf5ea;
-  --dsrs-highlight-border: #e4cfad;
-  --dsrs-card-shadow: 0 0.2rem 0.65rem rgba(31, 55, 78, 0.055);
-  --dsrs-workspace-tabs-height: 2.75rem;
+  color-scheme: light;
+
+  --fluent-font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --fluent-font-monospace: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --fluent-color-neutral-background-1: #ffffff;
+  --fluent-color-neutral-background-2: #fafafa;
+  --fluent-color-neutral-background-3: #f5f5f5;
+  --fluent-color-neutral-background-4: #f0f0f0;
+  --fluent-color-neutral-background-hover: #f5f5f5;
+  --fluent-color-neutral-background-pressed: #e0e0e0;
+  --fluent-color-neutral-foreground-1: #242424;
+  --fluent-color-neutral-foreground-2: #616161;
+  --fluent-color-neutral-foreground-3: #707070;
+  --fluent-color-neutral-foreground-disabled: #bdbdbd;
+  --fluent-color-neutral-stroke-1: #d1d1d1;
+  --fluent-color-neutral-stroke-2: #e0e0e0;
+  --fluent-color-neutral-stroke-subtle: #ebebeb;
+
+  --fluent-color-brand-background: #0f6cbd;
+  --fluent-color-brand-background-hover: #115ea3;
+  --fluent-color-brand-background-pressed: #0c3b5e;
+  --fluent-color-brand-background-2: #ebf3fc;
+  --fluent-color-brand-foreground-1: #0f6cbd;
+  --fluent-color-brand-foreground-2: #0f548c;
+  --fluent-color-brand-stroke-1: #0f6cbd;
+  --fluent-color-brand-stroke-2: #b4d6fa;
+
+  --fluent-color-success-background-2: #f1faf5;
+  --fluent-color-success-foreground-1: #0e700e;
+  --fluent-color-success-stroke-1: #9fd89f;
+  --fluent-color-warning-background-2: #fff7e8;
+  --fluent-color-warning-foreground-1: #8a3707;
+  --fluent-color-warning-stroke-1: #f2c661;
+  --fluent-color-danger-background-2: #fdf3f4;
+  --fluent-color-danger-foreground-1: #b10e1e;
+  --fluent-color-danger-stroke-1: #eeacb2;
+
+  --fluent-radius-small: 2px;
+  --fluent-radius-medium: 4px;
+  --fluent-radius-large: 8px;
+  --fluent-radius-xlarge: 12px;
+  --fluent-radius-circular: 9999px;
+
+  --fluent-space-20: 2px;
+  --fluent-space-40: 4px;
+  --fluent-space-80: 8px;
+  --fluent-space-120: 12px;
+  --fluent-space-160: 16px;
+  --fluent-space-200: 20px;
+  --fluent-space-240: 24px;
+  --fluent-space-320: 32px;
+  --fluent-space-400: 40px;
+  --fluent-space-480: 48px;
+
+  --fluent-control-height: 32px;
+  --fluent-control-height-large: 40px;
+  --fluent-touch-target: 44px;
+
+  --fluent-shadow-2: 0 1px 2px rgb(0 0 0 / 6%);
+  --fluent-shadow-4: 0 2px 4px rgb(0 0 0 / 8%);
+  --fluent-shadow-8: 0 4px 8px rgb(0 0 0 / 10%);
+  --fluent-shadow-16: 0 8px 16px rgb(0 0 0 / 12%);
+  --fluent-shadow-28: 0 14px 28px rgb(0 0 0 / 16%);
+
+  --fluent-motion-fast: 100ms;
+  --fluent-motion-normal: 200ms;
+  --fluent-ease-out: cubic-bezier(0.1, 0.9, 0.2, 1);
+
+  --dsrs-app-background: var(--fluent-color-neutral-background-3);
+  --dsrs-ink: var(--fluent-color-neutral-foreground-1);
+  --dsrs-muted-ink: var(--fluent-color-neutral-foreground-2);
+  --dsrs-strong-ink: var(--fluent-color-neutral-foreground-1);
+  --dsrs-border: var(--fluent-color-neutral-stroke-1);
+  --dsrs-soft-border: var(--fluent-color-neutral-stroke-2);
+  --dsrs-surface: var(--fluent-color-neutral-background-1);
+  --dsrs-soft-surface: var(--fluent-color-neutral-background-2);
+  --dsrs-accent: var(--fluent-color-brand-background);
+  --dsrs-accent-strong: var(--fluent-color-brand-foreground-2);
+  --dsrs-accent-soft: var(--fluent-color-brand-background-2);
+  --dsrs-accent-border: var(--fluent-color-brand-stroke-2);
+  --dsrs-secondary: #107c10;
+  --dsrs-secondary-strong: var(--fluent-color-success-foreground-1);
+  --dsrs-secondary-soft: var(--fluent-color-success-background-2);
+  --dsrs-secondary-border: var(--fluent-color-success-stroke-1);
+  --dsrs-highlight: #986f0b;
+  --dsrs-highlight-strong: var(--fluent-color-warning-foreground-1);
+  --dsrs-highlight-soft: var(--fluent-color-warning-background-2);
+  --dsrs-highlight-border: var(--fluent-color-warning-stroke-1);
+  --dsrs-card-shadow: none;
+  --dsrs-workspace-tabs-height: 44px;
+
+  --bs-body-font-family: var(--fluent-font-family);
+  --bs-body-font-size: 0.875rem;
+  --bs-body-line-height: 1.4286;
+  --bs-body-color: var(--fluent-color-neutral-foreground-1);
+  --bs-body-bg: var(--fluent-color-neutral-background-3);
+  --bs-secondary-color: var(--fluent-color-neutral-foreground-2);
+  --bs-border-color: var(--fluent-color-neutral-stroke-2);
+  --bs-primary: var(--fluent-color-brand-background);
+  --bs-success: var(--fluent-color-success-foreground-1);
+  --bs-danger: var(--fluent-color-danger-foreground-1);
 }
 
 [v-cloak] {
   display: none;
-}
-
-body {
-  min-height: 100vh;
-  background-color: var(--dsrs-app-background);
-  color: var(--dsrs-ink);
 }
