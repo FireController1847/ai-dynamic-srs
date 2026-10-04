@@ -28,10 +28,6 @@ export function diagramContext(config: DiagramConfig | undefined, document: Data
       .filter(record => !record._retired && !record.retired
         && (!reference.recordFilter || fieldVisible({ showWhen: reference.recordFilter }, record)))
       .map((record, index) => ({ id: formatRecordDisplayId(reference.displayId, record, index), record }));
-    for (const entry of entries) {
-      const label = text(entry.record[reference.labelField]);
-      if (label) labels.set(entry.id, label);
-    }
     if (config?.scope?.source === source.key) {
       const scope = new Set(records.flatMap(record => ids(record[config.scope!.field])));
       if (scope.size) entries = entries.filter(entry => scope.has(entry.id));
@@ -49,6 +45,10 @@ export function diagramContext(config: DiagramConfig | undefined, document: Data
         const allowed = new Set(parents.flatMap(entry => link.fields.flatMap(key => ids(entry.record[key]))));
         entries = entries.filter(entry => allowed.has(entry.id));
       }
+    }
+    for (const entry of entries) {
+      const label = text(entry.record[reference.labelField]);
+      if (label) labels.set(entry.id, label);
     }
     selected.set(source.key, entries);
     evidence[source.key] = { fields: ['id', ...source.fields], rows: entries.map(entry => [entry.id, ...source.fields.map(key => text(entry.record[key]))]) };
