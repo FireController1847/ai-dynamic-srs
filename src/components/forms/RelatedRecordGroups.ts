@@ -6,7 +6,8 @@ import { SectionInfo } from "../controls/FormControls.ts";
 import { dataModelForSection, mutableRecords } from "../../core/schema/data-models.ts";
 import { sectionRecords } from "../../core/schema/section-records.ts";
 import { createRepeaterItem } from "../../core/schema/state-factory.ts";
-import { nextNumericId, hasNonDefaultValue } from "../../core/records/record-values.ts";
+import { hasNonDefaultValue } from "../../core/records/record-values.ts";
+import { nextRepeaterRecordId, removeRepeaterRecord } from "../../core/records/record-lifecycle.ts";
 import { parentRecordGroups, parentScopedSection } from "../../core/records/parent-records.ts";
 import { buildFormPrompt } from "../../core/ai/prompt-builder.ts";
 import { addEvidenceContextToPrompt } from "../../core/ai/evidence-context.ts";
@@ -42,7 +43,7 @@ export const RelatedRecordGroups = defineComponent({
       const empty = sectionRecords(repeater, this.sectionModel).find(item => !item[this.config.fieldKey]
         && repeater.fields.every(field => !hasNonDefaultValue(item[field.key], field.default)));
       if (empty && value) { empty[this.config.fieldKey] = value; return; }
-      records.push(createRepeaterItem(repeater, nextNumericId(records), { [this.config.fieldKey]: value }));
+      records.push(createRepeaterItem(repeater, nextRepeaterRecordId(repeater, records, this.documentModel), { [this.config.fieldKey]: value }));
     },
     move({ item, value }: { item: DataModel; value: string }) {
       if ((value === "" && this.config.allowUngrouped) || this.model.parents.some(parent => parent.value === value)) item[this.config.fieldKey] = value;
@@ -52,13 +53,8 @@ export const RelatedRecordGroups = defineComponent({
     },
     remove(item: DataModel) {
       if (!this.removable) return;
-      // Configured shared collections use stable IDs; never cascade from parents.
-      if (this.section.repeatable.stableIds) item._retired = true;
-      else {
-        const items = mutableRecords(this.sectionModel, this.section.repeatable.dataKey);
-        const index = items.indexOf(item);
-        if (index >= 0) items.splice(index, 1);
-      }
+      const items = mutableRecords(this.sectionModel, this.section.repeatable.dataKey);
+      removeRepeaterRecord(this.section.repeatable, items, item, this.documentModel);
     },
     copyKey(parent: ParentChoice) { return `${this.pageSchema.id}:${this.section.key}-parent-${parent.value}`; },
     prompt(parent: ParentChoice) {

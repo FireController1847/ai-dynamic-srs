@@ -24,7 +24,7 @@ This review concerns repeated entry of an existing parent/context link, not crea
 ## Implementation entry points
 
 - `src/core/records/parent-records.ts`: read-only grouping of canonical records and parent-scoped section descriptors. It preserves each section's original filter.
-- `src/components/forms/RelatedRecordGroups.ts`: add, move, retire, and scoped copy actions; used by `DynamicForm` only when a section opts in.
+- `src/components/forms/RelatedRecordGroups.ts`: add, move, reference-aware remove, and scoped copy actions; used by `DynamicForm` only when a section opts in.
 - `src/components/forms/RelatedRecordItem.ts`: ordinary fields plus an optional name-based reassignment control. No repeated parent field in normal grouped editing.
 - `repeatable.parent` in the relevant feature schema: owns domain vocabulary, relationship field, parent source, eligibility, and ungrouped behavior.
 - `core/ai/prompt-schema.ts`, `form-prompt.ts`, and `prompt-contract.ts`: render complete child contracts and scoped outputs, provide available parent contexts, and keep automatic links as context. [AI prompt contract](ai-prompts.md) defines the shared workflow.
@@ -33,11 +33,11 @@ Generic components do not import feature modules. Parent grouping is a display p
 
 ## Preservation and edge cases
 
-- Add beneath a parent sets only the existing relationship field. IDs come from the full collection, including retired entries.
+- Add beneath a parent sets only the existing relationship field. New records use the lowest available positive ID; retired IDs and IDs still referenced elsewhere in the workspace remain reserved.
 - Reassignment changes that field only; the child's ID, other answers, and incoming references stay intact. Later consistency reviews expose any semantic mismatch caused by a move.
 - Retired/ineligible/missing parents do not delete children. Those children appear in the ungrouped recovery area. Source/primary actor eligibility uses the feature schema; stored records remain untouched.
 - Case collections now use `minimum: 0` and `completionMinimum: 1`; empty new workspaces do not create unattached placeholders. Untouched legacy placeholders can be reused when adding under a parent.
-- System Request requirements and benefits now retire on removal so existing links retain their stable IDs. Existing record IDs and authored content are preserved; no format version change is required.
+- Stable-ID records retire on removal when another saved value still references their display ID. Unreferenced records are removed outright, releasing their numeric ID for reuse; referenced record IDs and authored content stay preserved without a format-version change.
 - Optional interface actors stay optional when the boundary is qualified. Shared/project-wide benefits remain valid without one requirement owner.
 - Free-text benefit relationships are never parsed into guessed parents. Only an exact existing ID groups automatically. Free-text/multiple links remain in the separate area; its explicit Save relationship action prevents regrouping midway through typing. Choosing a single parent explicitly replaces the saved link.
 - No normalization, completion, or preview consumer should treat the visible groups as separate saved collections. Parent fields are marked `completion: false` because the form fills them.

@@ -26,7 +26,14 @@ export function resolveContextValue(localState: DataModel | undefined, contextSt
 }
 
 export function nextNumericId(records: DataModel[] = []) {
-  return Math.max(0, ...records.map((record) => Number(record?.id) || 0)) + 1;
+  const usedIds = new Set(
+    records
+      .map((record) => Number(record?.id))
+      .filter((id) => Number.isSafeInteger(id) && id > 0)
+  );
+  let nextId = 1;
+  while (usedIds.has(nextId)) nextId += 1;
+  return nextId;
 }
 
 export function formatDisplayId(config: DisplayId | undefined, index: number) {

@@ -15,7 +15,8 @@ import { resolveReferenceField } from "../../../core/records/reference-fields.ts
 import { sectionRecords } from "../../../core/schema/section-records.ts";
 import { buildFormPrompt } from "../../../core/ai/prompt-builder.ts";
 import { addEvidenceContextToPrompt } from "../../../core/ai/evidence-context.ts";
-import { formatRecordDisplayId, nextNumericId, hasNonDefaultValue } from "../../../core/records/record-values.ts";
+import { formatRecordDisplayId, hasNonDefaultValue } from "../../../core/records/record-values.ts";
+import { nextRepeaterRecordId, removeRepeaterRecord } from "../../../core/records/record-lifecycle.ts";
 import { ActorGoalEditor } from "./ActorGoalEditor.ts";
 import type { ActorChoice } from "./ActorGoalEditor.ts";
 
@@ -58,16 +59,11 @@ export const ActorsGoalsForm = defineComponent({
     },
     addItem(section: RepeatableSection) {
       const records = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
-      records.push(createRepeaterItem(section.repeatable, nextNumericId(records)));
+      records.push(createRepeaterItem(section.repeatable, nextRepeaterRecordId(section.repeatable, records, this.documentModel)));
     },
     removeItem(section: RepeatableSection, item: DataModel) {
-      if (section.repeatable.stableIds) {
-        item._retired = true;
-        return;
-      }
       const records = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
-      const index = records.indexOf(item);
-      if (index >= 0) records.splice(index, 1);
+      removeRepeaterRecord(section.repeatable, records, item, this.documentModel);
     },
     copyKey(section: Section, record?: DataModel, path: readonly (string | number)[] = []): string {
       return `${this.pageSchema.id}:${section.key}:${record ? 'record-' + record.id : 'section'}:${JSON.stringify(path)}`;
@@ -105,7 +101,7 @@ export const ActorsGoalsForm = defineComponent({
         empty.actorId = this.actorId(actor);
         return;
       }
-      records.push(createRepeaterItem(this.goalSection.repeatable, nextNumericId(records), { actorId: this.actorId(actor) }));
+      records.push(createRepeaterItem(this.goalSection.repeatable, nextRepeaterRecordId(this.goalSection.repeatable, records, this.documentModel), { actorId: this.actorId(actor) }));
     },
     moveGoal({ goal, actorId }: { goal: DataModel; actorId: string }) {
       if (this.actorChoices.some(actor => actor.referenceId === actorId)) goal.actorId = actorId;

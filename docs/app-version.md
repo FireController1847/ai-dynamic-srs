@@ -44,6 +44,10 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.4.1-alpha` removes individual-input copy buttons. Section, group, record and nested-item prompts still include all applicable fields and child contracts. Stored data and workspace format are unchanged.
 
+## Reusable unreferenced record IDs
+
+`0.4.2-alpha` makes record deletion and allocation reference-aware. Removing a record with no remaining references releases its numeric ID, and new records fill the lowest safe gap. If any saved value still references the display ID, the record is retired instead and its ID remains reserved. Workspace format remains 2.
+
 ## Manual review
 
-Open the application and confirm `v0.4.1-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.4.1-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.4.2-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.4.2-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.

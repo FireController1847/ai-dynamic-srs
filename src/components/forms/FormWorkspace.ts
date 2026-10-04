@@ -7,7 +7,8 @@ import { completion } from "../../core/schema/form-completion.ts";
 import { dataModelForSection, isDataModel, mutableRecords } from "../../core/schema/data-models.ts";
 import { fieldVisible } from "../../core/schema/field-visibility.ts";
 import { createRepeaterItem } from "../../core/schema/state-factory.ts";
-import { formatRecordDisplayId, nextNumericId } from "../../core/records/record-values.ts";
+import { formatRecordDisplayId } from "../../core/records/record-values.ts";
+import { nextRepeaterRecordId, removeRepeaterRecord } from "../../core/records/record-lifecycle.ts";
 import { resolveReferenceField } from "../../core/records/reference-fields.ts";
 import { sectionRecords } from "../../core/schema/section-records.ts";
 import { DiagramUploadControl } from "../diagrams/DiagramUploadControl.ts";
@@ -50,7 +51,7 @@ export const DynamicForm = defineComponent({
     addItem(section: RepeatableSection) {
       const sectionModel = this.sectionModel(section);
       const items = mutableRecords(sectionModel, section.repeatable.dataKey);
-      items.push(createRepeaterItem(section.repeatable, nextNumericId(items)));
+      items.push(createRepeaterItem(section.repeatable, nextRepeaterRecordId(section.repeatable, items, this.documentModel)));
     },
     copyKey(section: Section, record?: DataModel, path: readonly (string | number)[] = []): string {
       return `${this.pageSchema.id}:${section.key}:${record ? 'record-' + record.id : 'section'}:${JSON.stringify(path)}`;
@@ -79,7 +80,7 @@ export const DynamicForm = defineComponent({
       if (!artifactField) return;
       const records = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
       for (const file of files) {
-        records.push(createRepeaterItem(section.repeatable, nextNumericId(records), {
+        records.push(createRepeaterItem(section.repeatable, nextRepeaterRecordId(section.repeatable, records, this.documentModel), {
           title: file.title, [artifactField]: file
         }));
       }
@@ -113,15 +114,7 @@ export const DynamicForm = defineComponent({
     },
     removeItem(section: RepeatableSection, item: DataModel) {
       const items = mutableRecords(this.sectionModel(section), section.repeatable.dataKey);
-      if (section.repeatable.stableIds) {
-        item._retired = true;
-        return;
-      }
-
-      const index = items.indexOf(item);
-      if (index >= 0) {
-        items.splice(index, 1);
-      }
+      removeRepeaterRecord(section.repeatable, items, item, this.documentModel);
     },
     sectionModel(section: Section): DataModel {
       return dataModelForSection(section, this.dataModel, this.documentModel);
