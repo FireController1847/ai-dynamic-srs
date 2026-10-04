@@ -23,7 +23,7 @@
             <button class="btn btn-light app-header-action" type="button" @click="newWip">New WIP</button>
             <label class="btn btn-light app-header-action mb-0" for="workspace-file">Import WIP</label>
             <input id="workspace-file" class="visually-hidden" type="file" accept=".dsrs,application/json,application/gzip,application/x-gzip" @change="importWip">
-            <button class="btn btn-primary app-header-action" type="button" @click="downloadWip">Download WIP</button>
+            <workspace-download-control @download-wip="downloadWip" @download-md="downloadMd"></workspace-download-control>
           </div>
         </div>
 

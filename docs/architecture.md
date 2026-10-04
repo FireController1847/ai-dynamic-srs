@@ -68,7 +68,7 @@ app ───────────────────────→ cor
 - `src/core/printing`: isolated printable-document creation.
 - `src/core/records`: value and record-ID primitives.
 - `src/core/schema`: state construction, visibility, completion, and shared schema options.
-- `src/core/workspace`: `.dsrs` construction, validation, storage, import, and download.
+- `src/core/workspace`: `.dsrs` construction, validation, storage, import, download and navigation-organized Markdown context export.
 - `src/components`: generic schema-driven Vue components.
 - `src/features`: page schemas and specialized feature behavior.
 - `src/styles`: styles split by broad rendering responsibility.
@@ -88,6 +88,8 @@ There is no migration layer. Schemas define the current authoring contract; norm
 ## UI ownership
 
 Vue owns page selection, subpage selection, forms, previews, autosave status, and transient copied/printing state. Bootstrap supplies visual utilities plus tooltip/popover positioning through Vue directives. Direct DOM access is restricted to browser workflows such as scrolling, printing, clipboard fallback, and file download.
+
+The Vue split download control keeps Download WIP as the primary action and offers Download MD in its arrow disclosure. The Markdown exporter reads the current snapshot and supplied page schemas, organizes saved values under navigation headings, and deduplicates canonical field paths. Shared record IDs connect later-stage additions; unknown saved answers and Notes history remain represented. Figure file bytes are omitted. This context export is independent of finished SRS construction and preserves workspace format 2. See [Markdown workspace context](workspace-markdown.md).
 
 ## Planning documents
 

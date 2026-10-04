@@ -1,5 +1,7 @@
 import { errorMessage } from "../formatting/errors.ts";
 import { parseWorkspace, validateWorkspace } from "./workspace-validation.ts";
+import type { SchemaNode } from "../schema/schema-types.ts";
+import { workspaceMarkdown } from "./workspace-markdown.ts";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_DECOMPRESSED_SIZE = 20 * 1024 * 1024;
@@ -43,11 +45,25 @@ export async function downloadWorkspace(workspace: unknown) {
   const compressed = source.stream().pipeThrough(new CompressionStream("gzip"));
   const compressedBytes = await readStreamWithLimit(compressed, MAX_FILE_SIZE, "Compressed workspace");
   const blob = new Blob([compressedBytes], { type: "application/gzip" });
+  downloadBlob(blob, `${safeFileName(validated.document.title)}.dsrs`);
+}
+
+export function downloadWorkspaceMarkdown(workspace: unknown, pages: readonly SchemaNode[]) {
+  const validated = validateWorkspace(workspace);
+  const markdown = workspaceMarkdown(pages, validated.document.sections, {
+    title: validated.document.title || "Untitled Dynamic SRS",
+    applicationVersion: validated.application?.version,
+    exportedAt: validated.document.updatedAt
+  });
+  downloadBlob(new Blob([markdown], { type: "text/markdown;charset=utf-8" }), `${safeFileName(validated.document.title)}.md`);
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
 
   link.href = url;
-  link.download = `${safeFileName(validated.document.title)}.dsrs`;
+  link.download = fileName;
   document.body.append(link);
   link.click();
   link.remove();

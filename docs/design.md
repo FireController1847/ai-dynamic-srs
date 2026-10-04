@@ -42,7 +42,7 @@ Bootstrap CSS remains installed because the application already uses its grid/ut
 
 ## Shell and navigation
 
-The header is a compact app bar with identity on the left and workspace actions on the right. Only **Download WIP** is visually primary; New and Import are neutral actions. Autosave state and file-format information sit in a quiet status strip rather than competing with the application title.
+The header is a compact app bar with identity on the left and workspace actions on the right. Only **Download WIP** is visually primary; New and Import are neutral actions. A secondary arrow beside Download WIP opens Download MD beneath it, using the shared neutral surface, focus and elevation tokens. Header actions may wrap on narrow screens so the dropdown remains reachable without clipping. Autosave state and file-format information sit in a quiet status strip rather than competing with the application title.
 
 Top-level documents and nested workflow categories remain tablists because they switch closely related content in place. Active tabs use a restrained brand underline and semibold text. Dense tab sets may scroll on constrained layouts rather than wrapping labels into multiple rows; labels remain short and sentence case.
 

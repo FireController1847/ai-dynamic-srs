@@ -14,7 +14,8 @@ import { isFormComplete } from "../core/schema/form-completion.ts";
 import { createDocumentState } from "../core/schema/state-factory.ts";
 import { createWorkspaceSnapshot } from "../core/workspace/workspace-format.ts";
 import { clearLastWorkspace, createWorkspaceId, loadLastWorkspace, saveLastWorkspace } from "../core/workspace/workspace-storage.ts";
-import { downloadWorkspace, readWorkspaceFile } from "../core/workspace/workspace-files.ts";
+import { downloadWorkspace, downloadWorkspaceMarkdown, readWorkspaceFile } from "../core/workspace/workspace-files.ts";
+import { WorkspaceDownloadControl } from "../components/controls/WorkspaceDownloadControl.ts";
 import { SubpageWorkspace } from "../components/navigation/SubpageWorkspace.ts";
 import { FormSidebarToggle } from "../components/navigation/FormSidebarToggle.ts";
 import { PreviewNavigationControl } from "../components/navigation/PreviewNavigationControl.ts";
@@ -58,7 +59,8 @@ const app = createApp({
     PageGuide,
     PreviewNavigationControl,
     SubpageWorkspace,
-    TabCompletionCheck
+    TabCompletionCheck,
+    WorkspaceDownloadControl
   },
   data() {
     const sections = createDocumentState(pages);
@@ -332,6 +334,15 @@ const app = createApp({
         this.workspaceStatus = `Downloaded compressed ${workspace.document.title}.dsrs`;
       } catch (error) {
         this.workspaceStatus = `Download failed: ${errorMessage(error)}`;
+      }
+    },
+    downloadMd() {
+      try {
+        const workspace = this.buildWorkspace();
+        downloadWorkspaceMarkdown(workspace, this.pages);
+        this.workspaceStatus = `Downloaded Markdown context for ${workspace.document.title}`;
+      } catch (error) {
+        this.workspaceStatus = `Markdown download failed: ${errorMessage(error)}`;
       }
     },
     newWip() {

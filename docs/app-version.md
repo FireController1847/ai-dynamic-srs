@@ -70,4 +70,8 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 ## Manual review
 
-Open the application and confirm `v0.5.3-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.5.3-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.6.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.6.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+
+## Markdown workspace context
+
+`0.6.0-alpha` adds Download MD beneath the Download WIP arrow. It exports all nonempty saved workspace answers under navigation-based Markdown headings, with canonical field deduplication, stable record IDs, nested Notes sources/history and preserved legacy answers. Figure metadata is included while file bytes remain in the WIP backup. This new export capability leaves `.dsrs` format 2 unchanged. See [Markdown workspace context](workspace-markdown.md).

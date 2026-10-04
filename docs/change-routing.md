@@ -57,6 +57,7 @@ For any AI workflow change, read `docs/ai-prompts.md` first. It is the authorita
 | Change autosave or workspace status | `app/autosave-controller.ts`, `app/app.ts` | `core/workspace/workspace-storage.ts` |
 | Change `.dsrs` structure | `core/workspace/workspace-format.ts` | validation and normalization |
 | Change import/download | `core/workspace/workspace-files.ts` | validation and normalization |
+| Change Markdown workspace export | `core/workspace/{workspace-markdown,markdown-index,markdown-values}.ts`, `components/controls/WorkspaceDownloadControl.ts` | `docs/workspace-markdown.md`, `core/workspace/workspace-files.ts`, `app/app.ts`, `styles/shell.css`; use navigation schemas, not document previews |
 | Change printing behavior | `app/print-controller.ts`, `core/printing/print-document.ts` | `styles/responsive-print.css` |
 | Change human guides or helper tips | `features/planning/help-content.ts`, `features/software-requirements/simplification/help-content.ts`; Notes/EB schemas | `components/forms/PageGuide.ts`, `components/controls/FormControls.ts`, `core/bootstrap/overlay-directives.ts`; AI instructions stay separate |
 
