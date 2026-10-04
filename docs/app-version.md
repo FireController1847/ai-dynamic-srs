@@ -48,6 +48,10 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.4.2-alpha` makes record deletion and allocation reference-aware. Removing a record with no remaining references releases its numeric ID, and new records fill the lowest safe gap. If any saved value still references the display ID, the record is retired instead and its ID remains reserved. Workspace format remains 2.
 
+## Fluent UI redesign
+
+`0.4.3-alpha` replaces the Bootstrap-led visual language with an application-wide Fluent 2-inspired design system. It introduces semantic Fluent tokens, Segoe/native typography, Fluent control sizing and states, a compact app bar and status strip, Fluent-style tab navigation, calmer form/evidence/diagram/Notes/CBA surfaces, and a low-elevation live document preview. The redesign is presentation and accessibility work only: workspace format, IDs, prompts, calculations, and saved-data behavior are unchanged.
+
 ## Manual review
 
-Open the application and confirm `v0.4.2-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.4.2-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.4.3-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.4.3-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
