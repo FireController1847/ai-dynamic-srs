@@ -91,7 +91,7 @@ The importer validates the entire response before changing form state. It reject
 
 Select and checkbox values are normalized to the schema's stored option values. Live record references are resolved against the current document model. `record-links` accepts either a JSON array of valid IDs or the app's comma-separated stored representation. Period values support `null` per year to preserve an existing value.
 
-`diagram-file` is explicitly outside this protocol. AI-generated diagrams continue to use the separate `dsrs-diagram` graph format and existing diagram import pipeline.
+`diagram-file` is explicitly outside this protocol. AI-generated diagrams use their separate artifact pipeline: `dsrs-diagram` for one figure and `dsrs-diagrams` for an ordered repeatable-section batch. Neither response is a `dsrs-form` payload.
 
 The parser accepts raw JSON and a single surrounding `json` or `dsrs-form` code fence for clipboard robustness. Unknown envelope keys and unsupported format versions are rejected instead of being ignored.
 
