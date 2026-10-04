@@ -185,7 +185,7 @@ function normalizeSimple(field: Field, value: unknown, documentModel: DataModel,
 function ensureEditable(field: Field, path: string) {
   if (field.includeInPrompt === false) importError(`${path} is excluded from AI form responses.`);
   if (field.editable === false || field.hidden) importError(`${path} is app-managed/read-only and cannot be imported.`);
-  if (field.type === 'diagram-file') importError(`${path} is a diagram; use the dsrs-diagram import path instead.`);
+  if (field.type === 'diagram-file') importError(`${path} is a diagram; use the dedicated AI diagram import path instead of dsrs-form.`);
 }
 
 function nestedRecordInput(value: unknown, path: string) {
