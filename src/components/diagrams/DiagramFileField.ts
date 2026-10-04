@@ -12,7 +12,7 @@ export const DiagramFileField = defineComponent({
   components: { DiagramUploadControl, DiagramMedia },
   emits: ["update:modelValue"],
   props: {
-    field: { type: Object as PropType<Field>, required: true }, modelValue: { type: null as unknown as PropType<unknown>, default: null },
+    field: { type: Object as PropType<Field>, required: true }, modelValue: { type: Object as PropType<DataModel | null>, default: null },
     documentModel: { type: Object as PropType<DocumentModel>, default: () => ({}) }
   },
   data() { return { showPreview: false }; },

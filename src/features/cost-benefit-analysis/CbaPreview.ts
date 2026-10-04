@@ -1,4 +1,6 @@
 import type { BenefitCashFlow, CashFlow } from './model-types.ts';
+
+type EstimateDetail = DataModel & { referenceId: string; populated: boolean; isIntangible?: boolean };
 import { recordItems } from "../../core/schema/data-models.ts";
 import type { ParentConfig, OutlineSection, EvidenceView, Repeater } from '../../core/schema/schema-types.ts';
 import { defineComponent } from 'vue';
@@ -65,11 +67,11 @@ export const CbaPreview = defineComponent({
     populatedOngoingCosts(): CashFlow[] {
       return this.model.ongoingCosts.filter((item) => item.populated);
     },
-    estimateDetails(): Array<(BenefitCashFlow | CashFlow) & { referenceId: string }> {
+    estimateDetails(): EstimateDetail[] {
       return [
-        ...this.model.benefits.map(item => ({ ...item, referenceId: `CBA-BEN-${String(item.id).padStart(3, '0')}` })),
-        ...this.model.oneTimeCosts.map(item => ({ ...item, referenceId: `CBA-OTC-${String(item.id).padStart(3, '0')}` })),
-        ...this.model.ongoingCosts.map(item => ({ ...item, referenceId: `CBA-OGC-${String(item.id).padStart(3, '0')}` }))
+        ...this.model.benefits.map((item): EstimateDetail => ({ ...item, referenceId: `CBA-BEN-${String(item.id).padStart(3, '0')}` })),
+        ...this.model.oneTimeCosts.map((item): EstimateDetail => ({ ...item, referenceId: `CBA-OTC-${String(item.id).padStart(3, '0')}` })),
+        ...this.model.ongoingCosts.map((item): EstimateDetail => ({ ...item, referenceId: `CBA-OGC-${String(item.id).padStart(3, '0')}` }))
       ].filter(item => item.populated && (item.assumptions || item.sourceIds || (!item.isIntangible && item.description)));
     },
     populatedSources(): DataModel[] {
