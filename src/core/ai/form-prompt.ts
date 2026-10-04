@@ -73,7 +73,7 @@ export function buildFormPrompt(
   if (invalid) return `# Form prompt: ${title}\n\nThe requested target is unavailable or outside this stage's eligible records. Do not fill a different scope.\n\n## Needs information\n\n- A current eligible record or field target is needed; no substitute has been selected.\n`;
   const diagram = diagramPromptField(scoped?.fields || fields);
   if (diagram && (!scoped || scoped.active)) {
-    return buildDiagramPrompt(section, diagram, scoped ? [scoped.model] : record ? [record] : section.repeatable ? records : [model], documentModel);
+    return buildDiagramPrompt(section, diagram, scoped ? [scoped.model] : record ? [record] : section.repeatable ? records : [model], documentModel, { batch: !scoped && !record && Boolean(section.repeatable) });
   }
   const scope = scoped ? `Only the named ${typeof target.fieldPath?.at(-1) === 'number' ? 'nested item' : 'field or nested collection'}: ${scoped.labels.join(' / ')}. Other supplied values are context only.`
     : record ? `Only ${recordTitle}; supply its complete applicable editable inputs. Do not add or answer other records.`
