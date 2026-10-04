@@ -45,7 +45,7 @@ export const DiagramAiImportControl = defineComponent({
     <div class="diagram-ai-import-control">
       <button ref="trigger" type="button" class="btn btn-outline-primary btn-sm" :aria-expanded="open" :aria-controls="inputId + '-panel'" :disabled="busy" @click="toggle">Import AI diagram</button>
       <div v-if="open" :id="inputId + '-panel'" class="border rounded p-3 mt-2">
-        <p class="small text-body-secondary">Copy the section or figure’s diagram prompt, then paste the AI’s single dsrs-diagram response below. The app creates an editable DrawIO file. {{ replacing ? 'Importing replaces this file and keeps its figure ID.' : 'The imported diagram uses the same preview and save workflow as an uploaded file.' }}</p>
+        <p class="small text-body-secondary">Copy the section or figure’s diagram prompt, then paste the AI’s single dsrs-diagram response or copy just the JSON from its code block. The app creates an editable DrawIO file. {{ replacing ? 'Importing replaces this file and keeps its figure ID.' : 'The imported diagram uses the same preview and save workflow as an uploaded file.' }}</p>
         <label class="form-label small" :for="inputId">AI diagram response</label>
         <textarea ref="response" :id="inputId" v-model="response" class="form-control font-monospace" rows="7" spellcheck="false" :disabled="busy" :aria-invalid="!!error" :aria-describedby="error ? inputId + '-error' : undefined"></textarea>
         <p v-if="error" :id="inputId + '-error'" class="small text-danger mt-2" role="alert">{{ error }}</p>

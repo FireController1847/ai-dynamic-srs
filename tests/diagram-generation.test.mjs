@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { parseDiagramResponse } from '../src/core/artifacts/diagram-ir.ts';
 import { diagramContext } from '../src/core/artifacts/diagram-context.ts';
 import { diagramDrawioXml } from '../src/core/artifacts/diagram-drawio.ts';
@@ -40,9 +41,54 @@ test('compact references resolve saved labels and render deterministic native ce
   assert.doesNotMatch(xml, /dsrs-diagram|SRS-UC-007/);
 });
 
+test('code-block JSON and fenced responses use the same validation for both diagram types', () => {
+  for (const input of [useCase, activity]) {
+    const raw = '\n  ' + JSON.stringify(input) + '\n';
+    assert.deepEqual(parseDiagramResponse(raw, emptyContext, input.t), parseDiagramResponse(fence(input), emptyContext, input.t));
+    assert.throws(() => parseDiagramResponse(JSON.stringify({ ...input, styles: {} }), emptyContext), /only t, g, n and e/);
+    assert.throws(() => parseDiagramResponse(raw, emptyContext, input.t === 'activity' ? 'use-case' : 'activity'), /expects/);
+    assert.throws(() => parseDiagramResponse(JSON.stringify({ ...input, n: [...input.n, input.n[0]] }), emptyContext), /duplicate local ID/);
+    assert.throws(() => parseDiagramResponse(JSON.stringify({ ...input, e: [['missing', input.n[0][0]]] }), emptyContext), /unknown node/);
+  }
+  const context = { ...emptyContext, prefixes: ['SRS-UC-'] };
+  assert.throws(() => parseDiagramResponse(JSON.stringify({ ...useCase, n: [['u', 'use-case', 'SRS-UC-999', 'system']] }), context), /not a current named reference/);
+  assert.throws(() => parseDiagramResponse(JSON.stringify({ ...useCase, n: [['a', 'actor', 'Customer', { x: 0, y: 0 }]] }), context), /strings/);
+  assert.throws(() => parseDiagramResponse(JSON.stringify({ ...activity, e: activity.e.map(edge => edge[0] === 'check' ? edge.slice(0, 2) : edge) }), emptyContext), /guards/);
+});
+
+test('reported 12-actor, 47-use-case JSON retains references and relationships in native DrawIO', () => {
+  const response = readFileSync(new URL('./fixtures/reported-use-case-diagram.json', import.meta.url), 'utf8');
+  const input = JSON.parse(response);
+  const record = row => ({ id: Number(row[2].split('-').at(-1)), name: `Saved label for ${row[0]}`, disposition: 'Candidate' });
+  const document = { clientRequirements: { projectName: 'Reported system' }, softwareRequirementsSpecification: { records: {
+    actors: input.n.filter(row => row[1] === 'actor').map(record),
+    useCases: input.n.filter(row => row[1] === 'use-case').map(record)
+  } } };
+  const context = diagramContext(useCaseDiagramConfig, document);
+  const graph = parseDiagramResponse(response, context, 'use-case');
+  assert.deepEqual(graph, parseDiagramResponse(fence(input), context, 'use-case'));
+  assert.equal(graph.nodes.length, 59);
+  assert.equal(graph.edges.length, input.e.length);
+  assert.equal(graph.groups[0].label, 'Reported system');
+  assert.equal(graph.nodes.find(node => node.id === 'a13').label, 'Saved label for a13');
+  assert.equal(graph.nodes.find(node => node.id === 'u47').label, 'Saved label for u47');
+  assert.equal(graph.edges.filter(edge => edge.kind === 'generalization').length, 6);
+  const xml = diagramDrawioXml(graph);
+  assert.equal(xml, diagramDrawioXml(parseDiagramResponse(fence(input), context, 'use-case')));
+  assert.match(xml, /id="v-u47"[^>]*parent="v-sys"/);
+  assert.match(xml, /source="v-u10" target="v-u9"/);
+  assert.match(xml, /«extend»/);
+  assert.match(xml, /source="v-u43" target="v-u34"/);
+  assert.match(xml, /endArrow=block;endFill=0/);
+  assert.doesNotMatch(xml, /SRS-ACT-|SRS-UC-/);
+});
+
 test('bad response envelopes, unknown references and supplied layout are rejected', () => {
   const context = { ...emptyContext, prefixes: ['SRS-UC-'] };
-  for (const response of ['Here is your diagram:\n' + fence(useCase), JSON.stringify(useCase), '```dsrs-diagram\n{broken}\n```']) {
+  for (const response of ['Here is your diagram:\n' + fence(useCase), 'Here is your diagram:\n' + JSON.stringify(useCase),
+    JSON.stringify(useCase) + '\nDone.', JSON.stringify(useCase) + '\n' + JSON.stringify(useCase),
+    fence(useCase) + '\n' + fence(useCase), '```json\n' + JSON.stringify(useCase) + '\n```',
+    '```dsrs-diagram\n{broken}\n```', '{broken}', '']) {
     assert.throws(() => parseDiagramResponse(response, context));
   }
   assert.throws(() => parseDiagramResponse(fence({ ...useCase, styles: {} }), context), /only t, g, n and e/);

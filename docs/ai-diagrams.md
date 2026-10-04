@@ -2,11 +2,11 @@
 
 Every editable `diagram-file` keeps Upload DrawIO/XML/PNG/JPEG and adds **Import AI diagram**. Figure collections also offer import next to batch upload. A section or figure’s existing copy control produces a dedicated diagram-generation prompt. Select use-case links and, for an activity figure, its scenario before copying to narrow the evidence. An empty link selection covers all eligible cases. The section control generates one combined diagram; a figure control narrows it to that figure’s scope.
 
-Paste the entire AI response into Import AI diagram, then import. A successful import creates the same editable DrawIO `file` payload as an upload. Field-level import replaces only the file and preserves the FIG ID, title, caption and links; collection-level import creates a figure through the existing stable-ID path. Errors leave the saved file intact. Figure metadata remains manually editable. Inspect the resulting diagram and correct its source records when semantics differ.
+Paste the entire AI response into Import AI diagram, or use the AI code block’s copy button to paste just its JSON object, then import. Both formats go through the same graph, reference and file validation. A successful import creates the same editable DrawIO `file` payload as an upload. Field-level import replaces only the file and preserves the FIG ID, title, caption and links; collection-level import creates a figure through the existing stable-ID path. Errors leave the saved file intact. Figure metadata remains manually editable. Inspect the resulting diagram and correct its source records when semantics differ.
 
 ## Semantic response contract
 
-The response must be exactly one fenced `dsrs-diagram` JSON block, without prose. The object has exactly four keys:
+Copy prompts request exactly one fenced `dsrs-diagram` JSON block, without prose. The importer also accepts that block’s bare JSON object to support code-block copy buttons. Surrounding prose, multiple objects/blocks and unrelated code fences are rejected. The object has exactly four keys:
 
 | Key | Compact entries |
 |---|---|
@@ -54,7 +54,7 @@ The generator emits uncompressed, editable `mxfile`/`mxGraphModel` XML using the
 1. Upload DrawIO/XML, PNG and JPEG; batch upload across both stages. Confirm existing behavior and FIG IDs still work.
 2. Select a map’s cases, copy its figure prompt and inspect the evidence. It should contain just the selected cases, linked actors, applicable directed relationships and system label. Paste a valid response; inspect actor shapes, boundary, use-case ellipses and relationship arrow directions.
 3. Select an activity case and scenario. Copy, generate and import a workflow with guarded alternatives, lanes and a supported fork/join. Inspect path order, guard labels, non-overlapping shapes and loop routing where applicable.
-4. Paste prose, malformed JSON, layout/style entries, duplicate IDs, unknown references, wrong types, missing endpoints or unguarded decisions. Confirm useful errors and preservation of the existing file. Correct the text and retry.
+4. Import the same graph as a fenced dsrs-diagram response and as bare JSON copied from its code block; both should create the same diagram. Paste prose, multiple objects/blocks, malformed JSON, layout/style entries, duplicate IDs, unknown references, wrong types, missing endpoints or unguarded decisions. Confirm useful errors and preservation of the existing file. Correct the text and retry.
 5. Replace an uploaded/generated file through both upload and import. Confirm the same FIG ID, caption and links, refreshed preview and downloadable editable `.drawio` source.
 6. Approach the shared 3 MB limit using figures from both stages, including retired figures. Confirm both import and upload reject additions that exceed it, while valid replacement excludes the replaced file.
 7. Save/reopen `.dsrs` and inspect partial/document preview and print. Confirm the generated file renders through the existing DrawIO viewer and retains its source. Download and open it in diagrams.net to confirm editable shapes/connectors. Existing multi-page upload/print behavior remains.
