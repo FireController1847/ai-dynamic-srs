@@ -21,6 +21,7 @@ For any AI workflow change, read `docs/ai-prompts.md` first. It is the authorita
 | Change conditional visibility | `core/schema/field-visibility.ts` | Relevant schema |
 | Change completion calculation | `core/schema/form-completion.ts` | Relevant schema completion flags |
 | Change AI prompts or recursive form contracts | `core/ai/{interview-prompt,form-prompt,prompt-schema,prompt-builder,prompt-contract}.ts` | `docs/ai-prompts.md`, `docs/guided-interviews.md`; relevant schema `ai` guidance/definitions; `core/ai/evidence-context.ts` for form evidence only; SRS `workflow/{prompt-tasks,prompt-definitions}.ts`; CBA `financial-evidence.ts` for form financial context |
+| Change structured AI form JSON parsing/import | `core/ai/{form-response,form-response-import}.ts` | `docs/ai-form-responses.md`, active schema fields/repeaters/references; keep `dsrs-diagram` on the separate artifact path |
 | Change scoped AI copy controls | `components/controls/FormControls.ts`, `components/fields/SchemaField.ts` | Generic form/group/record editors, specialized feature editor only when used; pass complete scope through the shared builder rather than a custom prompt template |
 | Change CBA formulas | `features/cost-benefit-analysis/calculations.ts` | CBA schema |
 | Change CBA chart | `features/cost-benefit-analysis/chart-model.ts`, `CbaSummary.ts` | `styles/cba.css` |
