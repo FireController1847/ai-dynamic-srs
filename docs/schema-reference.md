@@ -73,7 +73,7 @@ Sections using `PlacedStagePreview` declare `documentTarget` and optional `docum
 
 The current-tab inventory includes every eligible record, including blank added entries, with full current answers and child inventories. It is not truncated to save tokens. Earlier connected-project evidence and calculated financial enrichment are omitted from interviews; form prompts retain complete selected evidence and CBA/FSA results. Neither tooltip text nor diagram payloads enter a prompt.
 
-Reference rules constrain proposed AI answers, not stored data: there is no AI import parser or new input rejection. Unsupported required form inputs stay blank with a separate Needs information note; only the guided interview asks questions. Preserve user-authored values and use existing consistency reviews for corrections. Optional findings require no invented prose, and missing evidence never establishes non-applicability or a no-change outcome. See [guided-interviews.md](guided-interviews.md) for manual cases.
+Reference rules constrain the current manual-entry AI answers, not stored data. A schema-driven `dsrs-form` v1 parser/import backend now exists for a later structured paste workflow, but current copy controls are not connected to it yet; see [structured AI form responses](ai-form-responses.md). Unsupported required inputs in today's formatted-answer prompts stay blank with a separate Needs information note; only the guided interview asks questions. Preserve user-authored values and use existing consistency reviews for corrections. Optional findings require no invented prose, and missing evidence never establishes non-applicability or a no-change outcome. See [guided-interviews.md](guided-interviews.md) for manual cases.
 
 
 ## Grouped canonical record editing
