@@ -22,6 +22,10 @@ Generated HTML and bundled CSS/JavaScript
 
 The application semantic version is release metadata and is independent of the `.dsrs` workspace `FORMAT_VERSION` and npm package metadata. See [app-version.md](app-version.md) for the bump policy and history-derived alpha baseline.
 
+## Visual system
+
+Dynamic SRS uses a Fluent 2-inspired native CSS layer rather than a Fluent component dependency. `styles/tokens.css` owns semantic palette, typography, spacing, radius, motion, elevation and compatibility aliases; `styles/base.css` normalizes shared HTML/Bootstrap controls; `styles/shell.css` owns the app bar, status strip and top-level tabs; `styles/fluent-workspace.css` applies the system consistently across forms, nested workflow navigation, evidence, diagrams, CBA, Notes and live document previews. Feature styles retain layout or domain-specific rendering and resolve colors through semantic tokens. See [design.md](design.md) before changing application presentation.
+
 ## Bundled and print assets
 
 Runtime dependencies come from npm and are pinned in `package.json` and `package-lock.json`. The previous checked-in `lib/` copies and `server.mjs` have been removed. The subsequent TypeScript migration retained the same runtime architecture and plain Vue component model while converting application and build source to strict TypeScript.

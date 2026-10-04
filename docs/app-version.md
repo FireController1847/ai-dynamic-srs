@@ -56,6 +56,10 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.5.0-alpha` adds a shared semantic graph-generation prompt and Import AI diagram alongside upload for every editable diagram-file field. The application validates the graph, resolves canonical labels and creates native editable DrawIO XML. Generated diagrams use the existing file payload, FIG IDs, preview/print/download and size limits. No IR is saved and workspace format remains 2. See [AI-generated diagrams](ai-diagrams.md).
 
+## Fluent UI redesign
+
+`0.5.1-alpha` replaces the Bootstrap-led visual language with an application-wide Fluent 2-inspired design system. It introduces semantic Fluent tokens, Segoe/native typography, Fluent control sizing and states, a compact app bar and status strip, Fluent-style tab navigation, calmer form/evidence/diagram/Notes/CBA surfaces, and a low-elevation live document preview. The redesign is presentation and accessibility work only: workspace format, IDs, prompts, calculations, diagram generation, and saved-data behavior are unchanged.
+
 ## Manual review
 
-Open the application and confirm `v0.5.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.5.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.5.1-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.5.1-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
