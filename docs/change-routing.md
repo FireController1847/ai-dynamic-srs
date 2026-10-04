@@ -10,7 +10,7 @@ For any AI workflow change, read `docs/ai-prompts.md` first. It is the authorita
 
 | Request | Primary files | Read shared code only if needed |
 |---|---|---|
-| Change Fluent visual system, shared controls, or global workspace presentation | `docs/design.md`, `styles/{tokens,base,shell,fluent-workspace,iconography}.css`, `src/html/index.html` | Feature stylesheet only when the visual behavior is genuinely feature-specific; preserve print styling in `responsive-print.css` and document CSS |
+| Change Fluent visual system, shared controls, or global workspace presentation | `docs/design.md`, `styles/{tokens,base,shell,fluent-workspace,iconography,workspace-layout}.css`, `src/html/index.html` | Feature stylesheet only when the visual behavior is genuinely feature-specific; preserve print styling in `responsive-print.css` and document CSS |
 | Change application semantic version or its fixed label | `core/application-version.ts`, `src/html/index.html`, `styles/shell.css`, `docs/app-version.md` | `core/workspace/workspace-format.ts` consumes the canonical version for saved metadata; update `AGENTS.md` only when policy changes |
 | Change webpack, npm scripts, deployment base, or emitted assets | `webpack.config.mts`, `package.json`, `package-lock.json`, `src/html/index.html` | `src/app/app.ts` for CSS/runtime imports; `core/printing/print-document.ts` for copied iframe assets; `docs/architecture.md` |
 | Add, remove, or rename a field | Relevant `src/features/*/schema.ts` or feasibility section | `core/schema/state-factory.ts` |
@@ -54,7 +54,8 @@ For any AI workflow change, read `docs/ai-prompts.md` first. It is the authorita
 | Change connected evidence references or earlier-answer views | `core/evidence/evidence-model.ts`, `components/references/WorkspaceEvidencePanel.ts` | `core/ai/evidence-context.ts` shares the resolver; relevant feature evidence descriptors, `styles/workspace-evidence.css`, `docs/connected-evidence.md` |
 | Change the finished SRS outline or placement | `features/software-requirements/document-outline.ts` | `core/schema/schema-tree.ts`, generic preview |
 | Change generic nested navigation | `components/navigation/SubpageWorkspace.ts` | `styles/navigation.css` |
-| Change application header/tabs | `src/html/index.html`, `styles/shell.css`, `styles/navigation.css` | `app/app.ts` |
+| Change document rail, SRS phase/stage hierarchy, or application page headers | `src/html/index.html`, `components/navigation/SubpageWorkspace.ts`, `styles/workspace-layout.css` | `styles/{shell,navigation,fluent-workspace}.css`; preserve schema/state and tab selection contracts |
+| Change application header/actions | `src/html/index.html`, `styles/shell.css` | `app/app.ts` |
 | Change autosave or workspace status | `app/autosave-controller.ts`, `app/app.ts` | `core/workspace/workspace-storage.ts` |
 | Change `.dsrs` structure | `core/workspace/workspace-format.ts` | validation and normalization |
 | Change import/download | `core/workspace/workspace-files.ts` | validation and normalization |

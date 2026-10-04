@@ -35,14 +35,18 @@
         </div>
       </header>
 
-      <nav class="workspace-tabs-sticky" aria-label="SRS document sections">
-        <div class="app-frame workspace-tabs-shell" tabindex="0">
-          <div class="nav nav-tabs workspace-tabs" role="tablist">
+      <div class="app-workspace-layout">
+        <aside class="workspace-nav-rail">
+          <div class="workspace-nav-heading" aria-hidden="true">
+            <span>Workspace</span>
+            <strong>Documents</strong>
+          </div>
+          <nav class="workspace-nav-list" aria-label="Document workspaces">
             <button
               v-for="page in pages"
               :id="page.id + '-tab'"
               :key="page.id"
-              class="nav-link"
+              class="workspace-nav-item"
               :class="{ active: activePage === page.id, 'is-form-complete': pageIsComplete(page) }"
               type="button"
               role="tab"
@@ -50,14 +54,16 @@
               :aria-selected="activePage === page.id"
               @click="selectPage(page.id, $event)"
             >
-              <span :class="{ 'tab-label-complete': pageIsComplete(page) }">{{ page.label }}</span>
-              <tab-completion-check v-if="pageIsComplete(page)"></tab-completion-check>
+              <span class="workspace-nav-code">{{ page.code }}</span>
+              <span class="workspace-nav-label" :class="{ 'tab-label-complete': pageIsComplete(page) }">{{ page.label }}</span>
+              <span v-if="pageIsComplete(page)" class="workspace-nav-complete" aria-hidden="true">
+                <tab-completion-check></tab-completion-check>
+              </span>
             </button>
-          </div>
-        </div>
-      </nav>
+          </nav>
+        </aside>
 
-      <main class="app-frame app-main">
+        <main class="app-main">
         <section
           v-for="page in pages"
           v-show="activePage === page.id"
@@ -88,6 +94,11 @@
           ></subpage-workspace>
 
           <template v-else-if="page.sections.length">
+            <header class="page-workspace-heading">
+              <p class="section-kicker mb-1">{{ page.code }}</p>
+              <h2>{{ page.title }}</h2>
+              <p>{{ page.description }}</p>
+            </header>
             <preview-navigation-control
               :form-id="page.id + '-form-top'"
               :target-id="page.id + '-preview'"
@@ -188,7 +199,8 @@
             ></component>
           </template>
         </section>
-      </main>
+        </main>
+      </div>
 
       <span class="app-version">v{{ applicationVersion }}</span>
     </div>

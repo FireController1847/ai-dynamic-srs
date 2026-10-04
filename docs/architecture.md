@@ -26,6 +26,10 @@ The application semantic version is release metadata and is independent of the `
 
 Dynamic SRS uses a Fluent 2-inspired native CSS layer rather than a Fluent component dependency. `styles/tokens.css` owns semantic palette, typography, spacing, radius, motion, elevation and compatibility aliases; `styles/base.css` normalizes shared HTML/Bootstrap controls; `styles/shell.css` owns the app bar, status strip and top-level tabs; `styles/fluent-workspace.css` applies the system consistently across forms, nested workflow navigation, evidence, diagrams, CBA, Notes and live document previews. Feature styles retain layout or domain-specific rendering and resolve colors through semantic tokens. See [design.md](design.md) before changing application presentation.
 
+## Workspace navigation hierarchy
+
+The application shell separates navigation levels structurally. `src/html/index.html` owns the top-level document rail and page panels. `components/navigation/SubpageWorkspace.ts` owns nested schema navigation: SRS phase children render as a vertical phase stepper, while the selected phase's stage children remain a horizontal tablist. `styles/workspace-layout.css` owns this spatial hierarchy and its responsive collapse; selection state still comes from the existing `activePage` / `activeSubpages` contracts and no navigation-only state is saved. Form section links remain tertiary navigation inside the current stage.
+
 ## Bundled and print assets
 
 Runtime dependencies come from npm and are pinned in `package.json` and `package-lock.json`. The previous checked-in `lib/` copies and `server.mjs` have been removed. The subsequent TypeScript migration retained the same runtime architecture and plain Vue component model while converting application and build source to strict TypeScript.

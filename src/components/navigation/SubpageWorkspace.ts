@@ -45,6 +45,9 @@ export const SubpageNode = defineComponent({
       return this.nodeSchema.subpages?.find(({ id }) => id === this.activeChildId)
         || this.nodeSchema.subpages?.[0];
     },
+    childNavigationKind(): string {
+      return this.nodeSchema.subpages?.[0]?.workflow?.kind || "";
+    },
     activeChildData(): DataModel {
       return this.activeChild ? asDataModel(this.dataModel[this.activeChild.stateKey]) : {};
     },
@@ -158,9 +161,25 @@ export const SubpageNode = defineComponent({
     }
   },
   template: `
-    <div class="subpage-node" :class="'subpage-depth-' + depth">
+    <div
+      class="subpage-node"
+      :class="[
+        'subpage-depth-' + depth,
+        {
+          'has-phase-navigation': childNavigationKind === 'phase',
+          'has-stage-navigation': childNavigationKind === 'stage'
+        }
+      ]"
+    >
       <template v-if="nodeSchema.subpages?.length">
-        <header v-if="depth > 0" class="subpage-level-heading">
+        <header
+          v-if="depth > 0"
+          class="subpage-level-heading"
+          :class="{
+            'phase-workspace-header': nodeSchema.workflow?.kind === 'phase',
+            'stage-workspace-header': nodeSchema.workflow?.kind === 'stage'
+          }"
+        >
           <div>
             <p class="section-kicker mb-1">{{ nodePositionLabel }}</p>
             <h3 class="h5 mb-1">{{ nodeSchema.title }}</h3>
@@ -172,27 +191,49 @@ export const SubpageNode = defineComponent({
           </div>
         </header>
 
-        <nav class="subpage-tabs-shell" :aria-label="nodeSchema.title + ' sections'" tabindex="0">
+        <nav
+          class="subpage-tabs-shell"
+          :class="{
+            'workflow-phase-navigation': childNavigationKind === 'phase',
+            'workflow-stage-navigation': childNavigationKind === 'stage'
+          }"
+          :aria-label="nodeSchema.title + ' sections'"
+          tabindex="0"
+        >
           <div class="nav nav-tabs subpage-tabs" role="tablist">
-          <button
-            v-for="child in nodeSchema.subpages"
-            :id="child.id + '-subtab'"
-            :key="child.id"
-            class="nav-link"
-            :class="{ active: activeChildId === child.id, 'is-form-complete': childIsComplete(child) }"
-            type="button"
-            role="tab"
-            :aria-controls="child.id + '-subpanel'"
-            :aria-selected="activeChildId === child.id"
-            :tabindex="activeChildId === child.id ? 0 : -1"
-            @click="selectChild(child.id, $event)"
-            @keydown.left.prevent="moveTab(-1)"
-            @keydown.right.prevent="moveTab(1)"
-          >
-            <span v-if="child.workflow?.sequence" class="workflow-tab-index">{{ String(child.workflow.sequence).padStart(2, '0') }}</span>
-            <span :class="{ 'tab-label-complete': childIsComplete(child) }">{{ child.label }}</span>
-            <tab-completion-check v-if="childIsComplete(child)"></tab-completion-check>
-          </button>
+            <button
+              v-for="child in nodeSchema.subpages"
+              :id="child.id + '-subtab'"
+              :key="child.id"
+              class="nav-link"
+              :class="{ active: activeChildId === child.id, 'is-form-complete': childIsComplete(child) }"
+              type="button"
+              role="tab"
+              :aria-controls="child.id + '-subpanel'"
+              :aria-selected="activeChildId === child.id"
+              :tabindex="activeChildId === child.id ? 0 : -1"
+              @click="selectChild(child.id, $event)"
+              @keydown.left.prevent="moveTab(-1)"
+              @keydown.right.prevent="moveTab(1)"
+              @keydown.up.prevent="childNavigationKind === 'phase' && moveTab(-1)"
+              @keydown.down.prevent="childNavigationKind === 'phase' && moveTab(1)"
+            >
+              <template v-if="childNavigationKind === 'phase'">
+                <span class="workflow-phase-marker">
+                  <tab-completion-check v-if="childIsComplete(child)"></tab-completion-check>
+                  <span v-else>{{ String(child.workflow?.sequence || '').padStart(2, '0') }}</span>
+                </span>
+                <span class="workflow-phase-copy">
+                  <span class="workflow-phase-meta">Phase {{ child.workflow?.sequence }}</span>
+                  <span class="workflow-phase-label">{{ child.label }}</span>
+                </span>
+              </template>
+              <template v-else>
+                <span v-if="child.workflow?.sequence" class="workflow-tab-index">{{ String(child.workflow.sequence).padStart(2, '0') }}</span>
+                <span :class="{ 'tab-label-complete': childIsComplete(child) }">{{ child.label }}</span>
+                <tab-completion-check v-if="childIsComplete(child)"></tab-completion-check>
+              </template>
+            </button>
           </div>
         </nav>
 
@@ -360,10 +401,15 @@ export const SubpageWorkspace = defineComponent({
   template: `
     <div class="subpage-workspace">
       <header class="subpage-workspace-heading">
-        <p class="section-kicker mb-1">{{ pageSchema.workspace?.kicker || pageSchema.code + ' workspace' }}</p>
-        <h2 class="h4 mb-1">{{ pageSchema.workspace?.title || pageSchema.title }}</h2>
-        <p class="text-body-secondary mb-0">{{ pageSchema.workspace?.summary || pageSchema.description }}</p>
-        <p v-if="pageSchema.workspace?.note" class="subpage-workspace-note mb-0">{{ pageSchema.workspace.note }}</p>
+        <div class="subpage-workspace-heading-copy">
+          <p class="section-kicker mb-1">{{ pageSchema.workspace?.kicker || pageSchema.code + ' workspace' }}</p>
+          <h2 class="mb-1">{{ pageSchema.workspace?.title || pageSchema.title }}</h2>
+          <p class="text-body-secondary mb-0">{{ pageSchema.workspace?.summary || pageSchema.description }}</p>
+        </div>
+        <details v-if="pageSchema.workspace?.note" class="workspace-context-note">
+          <summary>How this workflow is organized</summary>
+          <p>{{ pageSchema.workspace.note }}</p>
+        </details>
       </header>
       <subpage-node
         :active-subpages="activeSubpages"

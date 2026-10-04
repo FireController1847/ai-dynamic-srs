@@ -4,7 +4,7 @@ This is a Vue 3 application using strict TypeScript ES modules and webpack. Inst
 
 Before changing code, use `docs/change-routing.md` to identify the smallest relevant file set. Do not scan every schema for a feature-local request.
 
-For any application UI or styling change, read `docs/design.md` first. Dynamic SRS uses a Fluent 2-inspired native CSS system: keep semantic visual values in `src/styles/tokens.css`, shared component primitives in `base.css`, app chrome in `shell.css`, and cross-feature workspace presentation in `fluent-workspace.css`. Feature styles may extend those tokens but must not introduce a competing palette, typography system, control geometry, or Bootstrap-default visual language. Bootstrap remains available for layout utilities and isolated overlays, not as the product's design system.
+For any application UI or styling change, read `docs/design.md` first. Dynamic SRS uses a Fluent 2-inspired native CSS system: keep semantic visual values in `src/styles/tokens.css`, shared component primitives in `base.css`, app chrome in `shell.css`, structural document/phase/stage hierarchy in `workspace-layout.css`, and cross-feature form/content presentation in `fluent-workspace.css`. Feature styles may extend those tokens but must not introduce a competing palette, typography system, control geometry, or Bootstrap-default visual language. Bootstrap remains available for layout utilities and isolated overlays, not as the product's design system.
 
 For any AI prompt, schema, or copy-control change, read `docs/ai-prompts.md`, the authoritative app-wide AI contract:
 

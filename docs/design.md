@@ -33,8 +33,9 @@ Primary references:
 | Semantic colors, typography, spacing, radii, motion, elevation | `src/styles/tokens.css` |
 | Shared buttons, inputs, cards, badges, tables, focus and reduced motion | `src/styles/base.css` |
 | Shared icon sizing and icon-button geometry | `src/styles/iconography.css` |
-| App bar, workspace status, top-level tabs, responsive chrome | `src/styles/shell.css` |
-| Forms, nested tabs, progress, guides, evidence, diagrams, Notes, CBA, live preview | `src/styles/fluent-workspace.css` |
+| App bar and workspace status | `src/styles/shell.css` |
+| Document rail, page hierarchy, phase stepper, stage tabs and responsive navigation collapse | `src/styles/workspace-layout.css` |
+| Forms, progress, guides, evidence, diagrams, Notes, CBA, live preview | `src/styles/fluent-workspace.css` |
 | Feature-specific layout or visualization | Existing feature stylesheet such as `cba.css`, `notes.css`, or `diagram-artifacts.css` |
 | Browser print/PDF behavior | `src/styles/responsive-print.css`, `compact-documents.css`, preview/print helpers |
 
@@ -44,9 +45,9 @@ Bootstrap CSS remains installed because the application already uses its grid/ut
 
 The header is a compact app bar with identity on the left and workspace actions on the right. Only **Download WIP** is visually primary; New and Import are neutral actions. A secondary arrow beside Download WIP opens Download MD beneath it, using the shared neutral surface, focus and elevation tokens. Header actions may wrap on narrow screens so the dropdown remains reachable without clipping. Autosave state and file-format information sit in a quiet status strip rather than competing with the application title.
 
-Top-level documents and nested workflow categories remain tablists because they switch closely related content in place. Active tabs use a restrained brand underline and semibold text. Dense tab sets may scroll on constrained layouts rather than wrapping labels into multiple rows; labels remain short and sentence case.
+Navigation depth must be visible through layout rather than repeated tab styling. On wide screens, top-level document workspaces (CR, SR, CBA, FSA, SRS, Effort Breakdown and Notes) live in the left document rail. Inside the SRS, construction phases use a second-level vertical stepper within the content area. Only the active phase's immediate stages use a horizontal tablist. Do not reintroduce a full-width top document tab row or a horizontal phase row on desktop. Responsive layouts may collapse either rail into a horizontally scrollable selector when there is not enough width.
 
-The form progress sidebar acts as a passive inline information surface. It stays visually flat and uses neutral section links rather than looking like a separate floating application.
+The active page or phase owns the primary content heading. Explanatory workflow notes use a compact disclosure instead of a large callout competing with the work. The form progress/sidebar is tertiary navigation: it stays visually flat and uses neutral section links rather than looking like another application shell.
 
 ## Forms and information surfaces
 
