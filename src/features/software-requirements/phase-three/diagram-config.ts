@@ -20,7 +20,7 @@ export const useCaseDiagramConfig: DiagramConfig = {
     { field: 'title', required: true },
     { field: 'caption' },
     { field: 'useCaseReferences', required: true, source: 'cases', nodeKind: 'use-case' },
-    { field: 'actorReferences', source: 'actors', nodeKind: 'actor' },
+    { field: 'actorReferences', required: true, source: 'actors', nodeKind: 'actor' },
     { field: 'relationshipReferences', source: 'relationships' }
   ] },
   sources: [cases(['name', 'primaryActorId', 'supportingActorReferences']), actors, {
