@@ -74,7 +74,7 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 ## Collapsible navigation rails
 
-`0.6.3-alpha` makes the document rail and SRS phase rail independently collapsible so the spatial hierarchy does not permanently consume authoring width. Each rail has a compact hide control and an always-available restore control; visibility preferences are remembered in browser local storage only and are not written into `.dsrs` workspaces. Stage tabs and form navigation are unchanged. Workspace format remains 2.
+`0.6.2-alpha` makes the document rail and SRS phase rail independently collapsible so the spatial hierarchy does not permanently consume authoring width. Each rail has a compact hide control and an always-available restore control; visibility preferences are remembered in browser local storage only and are not written into `.dsrs` workspaces. Stage tabs and form navigation are unchanged. Workspace format remains 2.
 
 ## AI diagram workflow repair
 
