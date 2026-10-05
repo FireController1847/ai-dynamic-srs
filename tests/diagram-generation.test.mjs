@@ -220,6 +220,31 @@ test('activity decisions, lanes and joins produce non-overlapping deterministic 
   assert.throws(() => parseDiagramResponse(fence({ ...activity, n: [...activity.n, ['orphan', 'action', 'Unsupported action']] }), emptyContext), /reachable/);
 });
 
+test('activity batch metadata is not capped by semantic graph label limits', () => {
+  const scenario = 'A detailed established activity scenario. '.repeat(40);
+  assert(scenario.length > 500);
+  const document = {
+    clientRequirements: { projectName: 'Appointments' },
+    softwareRequirementsSpecification: { records: {
+      actors: [],
+      useCases: [{ id: 7, name: 'Book appointment', disposition: 'Candidate' }]
+    } }
+  };
+  const response = JSON.stringify({ figures: [{
+    title: 'Book Appointment Workflow',
+    caption: 'Detailed workflow',
+    useCaseReferences: 'SRS-UC-007',
+    scenario,
+    graph: activity
+  }] });
+  const [figure] = parseDiagramBatchResponse(response, activityDiagramConfig, document);
+  assert.equal(figure.metadata.scenario, scenario.trim());
+
+  const overlongGraphLabel = { ...activity, n: activity.n.map(node =>
+    node[0] === 'ask' ? [node[0], node[1], 'x'.repeat(501), node[3]] : node) };
+  assert.throws(() => parseDiagramResponse(JSON.stringify(overlongGraphLabel), emptyContext, 'activity'), /500 characters/);
+});
+
 test('activity forks/joins and object flows share the same graph and XML path', () => {
   const graph = parseDiagramResponse(fence({ t: 'activity', g: [], n: [
     ['s', 'start', ''], ['fork', 'fork', ''], ['a', 'action', 'Reserve'], ['b', 'action', 'Notify'],
