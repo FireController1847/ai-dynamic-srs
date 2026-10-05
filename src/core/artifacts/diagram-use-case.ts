@@ -206,7 +206,7 @@ function caseGrid(
     }
   }
 
-  const maxRow = Math.max(0, ...positions.values().map(position => position.row));
+  const maxRow = Math.max(0, ...[...positions.values()].map(position => position.row));
   return { positions, columns, rows: maxRow + 1 };
 }
 
