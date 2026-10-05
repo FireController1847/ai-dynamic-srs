@@ -41,13 +41,13 @@ function fixtureDocument(input) {
     clientRequirements: { projectName: 'CommunityApp' },
     softwareRequirementsSpecification: { records: {
       actors: input.n.filter(row => row[1] === 'actor').map(row => ({
-        id: Number(row[2].split('-').at(-1)), name: `Actor ${row[2]}`
+        id: Number(row[2].split('-').at(-1)), name: `Actor ${row[0]}`
       })),
       useCases: input.n.filter(row => row[1] === 'use-case').map(row => {
         const refs = actorLinks.get(row[0]) || [];
         return {
           id: Number(row[2].split('-').at(-1)),
-          name: `Use Case ${row[2]}`,
+          name: `Use Case ${row[0]}`,
           disposition: 'Candidate',
           primaryActorId: refs[0] || '',
           supportingActorReferences: refs.slice(1).join(', ')
@@ -117,7 +117,7 @@ function assertReadableUseCaseLayout(graph) {
 
 test('compact references resolve saved labels and render deterministic native cells', () => {
   const document = { clientRequirements: { projectName: 'Appointments & care' }, softwareRequirementsSpecification: { records: {
-    actors: [{ id: 3, name: 'Customer & family' }], useCases: [{ id: 7, name: 'Book <appointment>', disposition: 'Candidate' }]
+    actors: [{ id: 3, name: 'Customer & family' }], useCases: [{ id: 7, name: 'Book <appointment>', disposition: 'Candidate', primaryActorId: 'SRS-ACT-003' }]
   } } };
   const context = diagramContext(useCaseDiagramConfig, document);
   const response = { ...useCase, n: [['actor', 'actor', 'SRS-ACT-003'], ['book', 'use-case', 'SRS-UC-007', 'system']] };
@@ -160,8 +160,8 @@ test('reported 12-actor, 47-use-case JSON retains references and relationships i
   assert.equal(graph.nodes.length, 59);
   assert.equal(graph.edges.length, input.e.length);
   assert.equal(graph.groups[0].label, 'Reported system');
-  assert.equal(graph.nodes.find(node => node.id === 'a13').label, 'Actor SRS-ACT-013');
-  assert.equal(graph.nodes.find(node => node.id === 'u47').label, 'Use Case SRS-UC-047');
+  assert.equal(graph.nodes.find(node => node.id === 'a13').label, 'Actor a13');
+  assert.equal(graph.nodes.find(node => node.id === 'u47').label, 'Use Case u47');
   assert.equal(graph.edges.filter(edge => edge.kind === 'generalization').length, 6);
   const xml = diagramDrawioXml(graph);
   assert.equal(xml, diagramDrawioXml(parseDiagramResponse(fence(input), context, 'use-case')));
