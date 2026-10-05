@@ -19,8 +19,8 @@ function fail(message: string): never {
 function text(value: unknown, where: string): string {
   if (typeof value !== 'string') fail(`${where} must be a string.`);
   const normalized = value.trim();
-  if (normalized.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/u.test(normalized)) {
-    fail(`${where} must be plain text of at most 500 characters.`);
+  if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/u.test(normalized)) {
+    fail(`${where} must be plain text without control characters.`);
   }
   return normalized;
 }
