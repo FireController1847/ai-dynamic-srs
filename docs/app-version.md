@@ -80,9 +80,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.6.3-alpha` repairs repeatable-section AI diagram generation. Section prompts now return an ordered `dsrs-diagrams` batch that preserves established figure partitions, semantic titles and canonical links; the importer validates the complete batch before creating stable-ID figure records. Individual figure generation remains on `dsrs-diagram` and replaces only that figure's file. Use-Case Diagram layout is now relationship-aware, distributes actors across both sides, reserves connector gutters and keeps specialization/generalization pairs spatially coherent. Upload behavior, saved artifact payloads and workspace format 2 remain unchanged.
 
+## Diagram batch metadata length correction
+
+`0.6.4-alpha` removes the accidental 500-character limit from `dsrs-diagrams` figure metadata. Narrative metadata such as an activity `scenario` may now use its natural authored length; the separate semantic graph label/guard limit, control-character validation, overall response-size limit, saved artifact format and workspace format 2 are unchanged.
+
 ## Manual review
 
-Open the application and confirm `v0.6.3-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.6.3-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.6.4-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.6.4-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 
