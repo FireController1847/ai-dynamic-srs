@@ -41,7 +41,7 @@ A repeatable diagram section prompt requests exactly one fenced `dsrs-diagrams` 
 }
 ```
 
-The root contains only `figures`. Figure metadata is declared by the active diagram config rather than hard-coded into the generic parser. Use-case figures currently support `title`, optional `caption`, `useCaseReferences`, `actorReferences`, and optional `relationshipReferences`. Activity figures declare their own compact metadata, including scenario where required.
+The root contains only `figures`. Figure metadata is declared by the active diagram config rather than hard-coded into the generic parser. Use-case figures currently support `title`, optional `caption`, `useCaseReferences`, `actorReferences`, and optional `relationshipReferences`. Activity figures declare their own compact metadata, including scenario where required. Authored figure metadata is not subject to the semantic graph's 500-character label/guard limit; narrative metadata such as an activity scenario may use its natural authored length. The overall pasted response-size limit and control-character validation still apply.
 
 The section prompt includes current saved figure metadata and the selected semantic evidence. It must preserve figure partitions already established by the interview/conversation or current records: one agreed figure becomes one returned figure, in the same order, with title capitalization preserved. It must not collapse all eligible cases into one graph, nor invent extra figures merely to reduce graph size. Intentional overlap between figures is allowed when it expresses the model—for example, repeating parent use cases in a delegated-management figure so generalization pairs are visible.
 
