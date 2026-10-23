@@ -1,4 +1,4 @@
-import { computed, defineComponent, h, onBeforeUnmount, ref, watch, type PropType } from 'vue';
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch, type PropType } from 'vue';
 import { MAX_IMPORT_BYTES, serializeDsrs, type PortableRecord } from '../../core/workspace/dsrs-format.ts';
 import {
   addBriefItem, downloadOriginal, fileSource, readFileBase64, removeBriefItem,
@@ -33,7 +33,12 @@ export const ClientRequirements = defineComponent({
   },
   setup(props, { emit }) {
     const state = useClientBrief(props.workspace);
-    const view = ref<'edit' | 'preview'>('edit');
+    const narrowView = window.matchMedia('(max-width: 900px)');
+    const view = ref<'edit' | 'split' | 'preview'>(narrowView.matches ? 'edit' : 'split');
+    function viewportChanged(event: MediaQueryListEvent) {
+      if (event.matches && view.value === 'split') view.value = 'edit';
+    }
+    onMounted(() => narrowView.addEventListener('change', viewportChanged));
     const capabilityDraft = ref('');
     const boundaryDraft = ref('');
     const sourceDraft = ref('');
@@ -52,7 +57,10 @@ export const ClientRequirements = defineComponent({
     });
 
     watch(state.dirty, value => emit('dirty-change', value), { immediate: true });
-    onBeforeUnmount(() => emit('dirty-change', false));
+    onBeforeUnmount(() => {
+      narrowView.removeEventListener('change', viewportChanged);
+      emit('dirty-change', false);
+    });
 
     function change(field: BriefField, value: string): void {
       state.update({ ...state.draft.value, [field]: value });
@@ -239,7 +247,7 @@ export const ClientRequirements = defineComponent({
         h('div', { class: 'cr-preview-heading' }, [
           h('div', [
             h('h3', { id: 'cr-preview-heading' }, 'Document preview'),
-            h('p', 'Reflects your edits as you make them'),
+            h('p', 'Live · populated sections only'),
           ]),
           h('span', { class: 'cr-preview-label' }, 'CR'),
         ]),
@@ -247,8 +255,7 @@ export const ClientRequirements = defineComponent({
           h('p', { class: 'cr-paper-kicker' }, 'CLIENT BRIEF'),
           h('h3', 'Client Requirements'),
           !present ? h('div', { class: 'cr-paper-empty' }, [
-            h('p', 'Your client brief will appear here as you add information.'),
-            h('p', 'Only sections you fill in will be included.'),
+            h('p', 'Your brief will appear as you enter client information.'),
           ]) : [
             hasText(brief.organization) ? h('h4', { class: 'cr-paper-client' }, brief.organization.trim()) : null,
             hasText(brief.context) ? h('p', { class: 'cr-paper-context' }, brief.context.trim()) : null,
@@ -292,52 +299,52 @@ export const ClientRequirements = defineComponent({
       const current = state.draft.value;
       const sources = sourceData.value;
       return h('div', { class: 'cr-workspace', 'data-view': view.value }, [
-        h('div', { class: 'cr-intro-bar' }, [
-          h('p', 'Capture the client’s expressed request. Leave unanswered details blank; analysis belongs in the other documents.'),
-          h('div', { class: 'cr-mobile-views', role: 'group', 'aria-label': 'Client Requirements view' }, [
+        h('div', { class: 'cr-toolbar' }, [
+          h('div', { class: 'cr-view-toggle', role: 'group', 'aria-label': 'Document layout' },
+            ([
+              ['edit', 'Editor'],
+              ['split', 'Split'],
+              ['preview', 'Preview'],
+            ] as const).map(([value, label]) => h('button', {
+              type: 'button',
+              class: ['cr-view-button', view.value === value ? 'is-active' : ''],
+              'aria-pressed': view.value === value,
+              onClick: () => {
+                view.value = value;
+                document.getElementById('document-content')?.scrollTo(0, 0);
+              },
+            }, label))),
+          h('div', { class: 'cr-save-actions' }, [
+            h('span', {
+              class: ['cr-save-status', state.dirty.value ? 'is-unsaved' : ''],
+              role: 'status', 'aria-live': 'polite',
+            }, !state.ready.value ? 'Loading brief…'
+              : state.busy.value ? 'Saving…'
+              : state.conflict.value ? 'Save conflict'
+              : state.problem.value && state.dirty.value ? 'Save failed — see message'
+              : state.dirty.value ? 'Unsaved edits · Save to keep changes'
+              : 'Saved in this browser'),
             h('button', {
-              type: 'button', class: ['quiet-button', view.value === 'edit' ? 'is-active' : ''],
-              'aria-pressed': view.value === 'edit',
-              onClick: () => { view.value = 'edit'; },
-            }, 'Edit'),
-            h('button', {
-              type: 'button', class: ['quiet-button', view.value === 'preview' ? 'is-active' : ''],
-              'aria-pressed': view.value === 'preview',
-              onClick: () => { view.value = 'preview'; },
-            }, 'Preview'),
+              type: 'button', class: 'card-primary-button',
+              disabled: !state.writable.value || !state.dirty.value,
+              onClick: () => { void state.save(); },
+            }, state.busy.value ? 'Saving…' : 'Save brief'),
           ]),
         ]),
+        state.problem.value ? h('div', { class: 'cr-warning', role: 'alert' }, [
+          h('p', state.problem.value),
+          h('button', {
+            type: 'button', class: 'quiet-button',
+            onClick: () => { void state.reload(); },
+          }, 'Load saved brief'),
+        ]) : null,
         h('div', { class: 'cr-layout' }, [
           h('section', { class: 'cr-editor', 'aria-label': 'Client Requirements editor' }, [
-            h('div', { class: 'cr-save-bar' }, [
-              h('span', { class: ['cr-save-status', state.dirty.value ? 'is-unsaved' : ''] },
-                !state.ready.value ? 'Loading brief…' : state.conflict.value ? 'Save conflict' :
-                  state.dirty.value ? 'Unsaved changes' : 'Saved'),
-              h('div', { class: 'cr-save-actions' }, [
-                state.dirty.value ? h('button', {
-                  type: 'button', class: 'quiet-button',
-                  disabled: state.busy.value,
-                  onClick: () => { void state.reload(); },
-                }, 'Discard edits') : null,
-                h('button', {
-                  type: 'button', class: 'card-primary-button',
-                  disabled: !state.writable.value || !state.dirty.value,
-                  onClick: () => { void state.save(); },
-                }, state.busy.value ? 'Saving…' : 'Save brief'),
-              ]),
-            ]),
-            state.problem.value ? h('div', { class: 'cr-warning', role: 'alert' }, [
-              h('p', state.problem.value),
-              h('button', {
-                type: 'button', class: 'quiet-button',
-                onClick: () => { void state.reload(); },
-              }, 'Load saved brief'),
-            ]) : null,
             h('section', { class: 'cr-editor-card' }, [
               h('div', { class: 'cr-card-heading' }, [
                 h('span', { class: 'cr-card-number' }, '01'),
                 h('div', [h('h3', 'Client context'),
-                  h('p', 'Who is asking, and what does the organization do?')]),
+                  h('p', 'Who is requesting the system?')]),
               ]),
               field('Client or organization', 'organization', 'Organization name'),
               field('About the organization', 'context', 'A short description, if supplied', 2),
@@ -345,16 +352,16 @@ export const ClientRequirements = defineComponent({
             h('section', { class: 'cr-editor-card' }, [
               h('div', { class: 'cr-card-heading' }, [
                 h('span', { class: 'cr-card-number' }, '02'),
-                h('div', [h('h3', 'The request'), h('p', 'The reason and solution expressed by the client.')]),
+                h('div', [h('h3', 'The request'), h('p', 'Only what the client has stated.')]),
               ]),
-              field('Problem or opportunity', 'problem', 'What needs to change?', 2),
-              field('Desired solution', 'solution', 'What kind of system does the client want?', 2),
+              field('Problem or opportunity (optional)', 'problem', 'Only if the client expressed one', 2),
+              field('Desired solution', 'solution', 'What kind of system does the client envision?', 2),
             ]),
             h('section', { class: 'cr-editor-card' }, [
               h('div', { class: 'cr-card-heading' }, [
                 h('span', { class: 'cr-card-number' }, '03'),
                 h('div', [h('h3', 'Requested capabilities'),
-                  h('p', 'One high-level client request per entry. Arrange them in the order you prefer.')]),
+                  h('p', 'One high-level request per entry.')]),
               ]),
               ...listEditor('capabilities'),
             ]),
@@ -412,7 +419,6 @@ export const ClientRequirements = defineComponent({
                 sourceMessage.value ? h('p', { class: 'cr-success', role: 'status' }, sourceMessage.value) : null,
               ]),
             ]),
-            state.message.value ? h('p', { class: 'cr-success', role: 'status' }, state.message.value) : null,
           ]),
           preview(current),
         ]),
