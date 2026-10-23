@@ -40,6 +40,8 @@ export const ClientRequirements = defineComponent({
       }
     });
 
+    const aiPrompt = computed(() => aiInterpretationPrompt(records.value.value.sources));
+
     const canWrite = computed(() =>
       props.workspace.ready.value && !props.workspace.busy.value && !working.value &&
       !records.value.error);
@@ -113,7 +115,7 @@ export const ClientRequirements = defineComponent({
       if (records.value.value.sources.length === 0) return;
       clearMessage();
       try {
-        await navigator.clipboard.writeText(aiInterpretationPrompt(records.value.value.sources));
+        await navigator.clipboard.writeText(aiPrompt.value);
         feedback.value = 'Prompt copied. Paste it into your AI chat and attach any listed documents.';
       } catch (error) {
         errorMessage(error);
@@ -228,7 +230,7 @@ export const ClientRequirements = defineComponent({
               h('textarea', {
                 class: 'cr-textarea', rows: 5, readonly: true,
                 'aria-label': 'AI interpretation prompt',
-                value: aiInterpretationPrompt(data.sources),
+                value: aiPrompt.value,
               }),
             ]) : null,
             h('label', { class: 'cr-field-label', for: 'cr-ai-response' }, 'AI response (optional)'),
