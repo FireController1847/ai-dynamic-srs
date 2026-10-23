@@ -50,7 +50,11 @@ The document navigation drawer contains **Download .dsrs** and **Import .dsrs** 
 
 This redesign starts with `.dsrs` format **version 1**, independent of the IndexedDB schema version. The old Dynamic SRS format v2 is *not* yet supported by the new import contract. See [workspace format and persistence](docs/workspace-data.md).
 
-## Optional CR interpretation\n\nWithin Client Requirements, **Copy AI prompt** prepares a short request to identify business needs, client goals, and unanswered questions. You can use an external AI chat and paste its response into CR as an explicitly labeled draft. No text or documents are automatically sent to an AI provider. Text-based originals are copied into the prompt; uploaded PDF/Word documents must be attached separately to the chat for the AI to read them. Interview answers can be added later without modifying the original material.\n\n## Deployment
+## Client Requirements editing
+
+The structured Client Requirements brief autosaves to IndexedDB after a brief pause in editing. A small indicator shows when changes are pending, being saved, or saved, and a failed or conflicting save is reported instead of silently replacing data. The Editor / Split / Preview control provides an optional live document preview. In Editor mode, the editor is centered for comfortable reading; on small screens the editor is shown first. Switching documents flushes pending edits. Original client attachments remain separate from the structured brief. No AI or interview features are present in CR.
+
+## Deployment
 
 `.github/workflows/verify-build.yml` runs on every push. `.github/workflows/deploy-pages.yml` deploys manually through GitHub Actions after a production build. The build supports GitHub Pages' configured base path. Neither a deployment nor a finished application is implied by this redesign branch.
 
