@@ -38,7 +38,7 @@ export const notesSchema: SchemaNode = {
       { term: "Edit history", definition: "A dated explanation of a meaningful revision that actually occurred." }
     ],
     draftingGuidance: "Format the complete requested note bodies and supported reference records. Keep one coherent subject per note, preserve meaningful user wording and distinguish facts from interpretations and open questions. Attach each source only to the note it supports. Do not fabricate citations, dates or authors. Creation dates and edit-history records are managed by the app; the optional change explanation is entered separately when editing.",
-    interviewGuidance: "Review every current note and all its reference records using the supplied tab inventory and reliable earlier conversation or memory. Clarify missing meaning or source details that affect interpretation, then identify useful new notes that have no better canonical home. References are optional; do not turn missing optional citations into a blocker or duplicate the requirements catalog."
+    interviewGuidance: "Reuse existing notes and reliable earlier context. Ask only when a note has materially unclear meaning, conflicting evidence or a necessary new subject. Sources are optional; do not repeat requirements or demand unnecessary citations."
   },
   document: {
     titleField: "projectName",
