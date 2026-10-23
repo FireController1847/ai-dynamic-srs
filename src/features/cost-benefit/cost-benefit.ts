@@ -14,7 +14,7 @@ import {
 import { useCostBenefit, type CbaWorkspace } from './use-cost-benefit.ts';
 
 export interface CostBenefitHandle { flushSave(): Promise<boolean> }
-type InputNode = VNode;
+type InputNode = VNode | null;
 
 function cash(value: number, currency: string): string {
   return new Intl.NumberFormat(undefined, {
@@ -55,15 +55,15 @@ export const CostBenefitEditor = defineComponent({
     onBeforeUnmount(() => { emit('dirty-change', false); });
 
     function update(patch: Partial<CostBenefitAnalysis>) {
-      state.update({ ...state.draft.value, ...patch });
+      state.update({ ...state.draft.value, ...patch } as CostBenefitAnalysis);
     }
     function updateBenefit(id: string, patch: Partial<FinancialBenefit>) {
       const current = state.draft.value;
-      update({ benefits: current.benefits.map(item => item.id === id ? { ...item, ...patch } : item) });
+      update({ benefits: current.benefits.map(item => item.id === id ? { ...item, ...patch } as FinancialBenefit : item) });
     }
     function updateCost(id: string, patch: Partial<FinancialCost>) {
       const current = state.draft.value;
-      update({ costs: current.costs.map(item => item.id === id ? { ...item, ...patch } : item) });
+      update({ costs: current.costs.map(item => item.id === id ? { ...item, ...patch } as FinancialCost : item) });
     }
     function addBenefit() {
       update({ benefits: [...state.draft.value.benefits, newBenefit()] });
