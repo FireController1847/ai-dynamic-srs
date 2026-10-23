@@ -38,6 +38,7 @@ Original phase schemas retain descriptors/defaults used to build the simplified 
 - Interface requirements: put the required exchange/contract and necessary failure behavior in the statement, linking earlier obligations where appropriate. Separate overlapping contract inputs are retired.
 - Environment: one concise description. Constraints and assumptions retain their original records; supporting qualifications are optional. Validation state is still distinct from decision confirmation.
 - Questions: one shared register accessible from any stage. Answer and update the affected source; do not create a second backlog. Resolved questions and accepted exceptions are hidden from the Shared questions list but remain saved and available in Evidence Intake.
+- Phase 6 Step 5 AI Cleanup is optional: use workspace evidence to propose concise, meaning-preserving wording for existing SRS narratives. Preview and select each change; do not create another catalog or require cleanup to mark Phase 6 complete. See `docs/ai-cleanup.md`.
 
 Existing provenance remains stored and can accompany field prompts without requiring re-entry. Typed source locators remain available for external evidence. Known actor, goal, use-case and figure links use name-based selectors while preserving the saved comma-separated ID representation. Unavailable links remain visible until explicitly corrected.
 
