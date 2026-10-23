@@ -1,288 +1,421 @@
-import { computed, defineComponent, h, ref, type PropType } from 'vue';
-import type { WorkspaceController } from '../../app/workspace.ts';
+import { computed, defineComponent, h, onBeforeUnmount, ref, watch, type PropType } from 'vue';
 import { MAX_IMPORT_BYTES, serializeDsrs, type PortableRecord } from '../../core/workspace/dsrs-format.ts';
 import {
-  CR_AI_KIND, CR_INTERVIEW_KIND, aiInterpretationPrompt, clientRecords, createNote,
-  createSourceFile, createSourceText, downloadOriginalFile, readFileBase64,
-  type ClientEntry, type ClientRecords,
+  addBriefItem, downloadOriginal, fileSource, readFileBase64, removeBriefItem,
+  reorderBriefItem, sourceEntries, textSource, updateBriefItem,
+  type BriefField, type BriefItem, type BriefList, type ClientBrief,
+  type SourceEntry,
 } from './model.ts';
+import { useClientBrief, type ClientWorkspace } from './use-client-brief.ts';
 
-function formatDate(value: string): string {
-  return new Date(value).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+function dateLabel(value: string): string {
+  return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function formatFileSize(size: number): string {
-  return size < 1024 ? size + ' bytes' : size < 1024 * 1024
-    ? (size / 1024).toFixed(1) + ' KB' : (size / (1024 * 1024)).toFixed(1) + ' MB';
+function fileSize(bytes: number): string {
+  return bytes < 1024 ? bytes + ' bytes' :
+    bytes < 1024 * 1024 ? (bytes / 1024).toFixed(1) + ' KB' :
+      (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
+function hasText(value: string): boolean {
+  return value.trim().length > 0;
+}
+
+/** CR captures the client's expressed brief, not analyst notes or formal SRS requirements. */
 export const ClientRequirements = defineComponent({
   name: 'ClientRequirements',
   props: {
-    workspace: { type: Object as PropType<WorkspaceController>, required: true },
+    workspace: { type: Object as PropType<ClientWorkspace>, required: true },
   },
-  setup(props) {
-    const originalDraft = ref('');
-    const aiDraft = ref('');
-    const interviewDraft = ref('');
-    const fileInput = ref<HTMLInputElement | null>(null);
-    const working = ref(false);
-    const feedback = ref('');
-    const problem = ref('');
+  emits: {
+    'dirty-change': (_dirty: boolean) => true,
+  },
+  setup(props, { emit }) {
+    const state = useClientBrief(props.workspace);
+    const view = ref<'edit' | 'preview'>('edit');
+    const capabilityDraft = ref('');
+    const boundaryDraft = ref('');
+    const sourceDraft = ref('');
+    const filePicker = ref<HTMLInputElement | null>(null);
+    const savingSource = ref(false);
+    const sourceProblem = ref('');
+    const sourceMessage = ref('');
 
-    const records = computed((): { value: ClientRecords; error: string } => {
-      const empty: ClientRecords = { sources: [], interpretations: [], interviews: [] };
+    const sourceData = computed((): { entries: SourceEntry[]; error: string } => {
       const snapshot = props.workspace.current.value;
-      if (!snapshot) return { value: empty, error: '' };
-      try { return { value: clientRecords(snapshot.file.records), error: '' }; }
+      if (!snapshot) return { entries: [], error: '' };
+      try { return { entries: sourceEntries(snapshot.file.records), error: '' }; }
       catch (error) {
-        return { value: empty, error: error instanceof Error ? error.message : String(error) };
+        return { entries: [], error: error instanceof Error ? error.message : String(error) };
       }
     });
 
-    const aiPrompt = computed(() => aiInterpretationPrompt(records.value.value.sources));
+    watch(state.dirty, value => emit('dirty-change', value), { immediate: true });
+    onBeforeUnmount(() => emit('dirty-change', false));
 
-    const canWrite = computed(() =>
-      props.workspace.ready.value && !props.workspace.busy.value && !working.value &&
-      !records.value.error);
-
-    function clearMessage() { feedback.value = ''; problem.value = ''; }
-    function errorMessage(error: unknown) {
-      problem.value = error instanceof Error ? error.message : String(error);
+    function change(field: BriefField, value: string): void {
+      state.update({ ...state.draft.value, [field]: value });
     }
 
-    async function addText(): Promise<void> {
-      if (!originalDraft.value.trim() || !canWrite.value) return;
-      clearMessage();
-      working.value = true;
-      try {
-        await saveWhileWorking(createSourceText(originalDraft.value));
-        originalDraft.value = '';
-        feedback.value = 'Original client statement saved unchanged.';
-      } catch (error) { errorMessage(error); }
-      finally { working.value = false; }
+    function changeItem(list: BriefList, id: string, text: string): void {
+      state.update(updateBriefItem(state.draft.value, list, id, text));
     }
 
-    // Writing locks the UI during async operations, but storage readiness is checked
-    // against the current committed workspace immediately before the database write.
-    async function saveWhileWorking(record: PortableRecord): Promise<void> {
+    function addItem(list: BriefList): void {
+      const value = list === 'capabilities' ? capabilityDraft : boundaryDraft;
+      if (!state.writable.value || !hasText(value.value)) return;
+      state.update(addBriefItem(state.draft.value, list, value.value));
+      value.value = '';
+    }
+
+    function moveItem(list: BriefList, position: number, delta: number): void {
+      if (state.writable.value) state.update(reorderBriefItem(state.draft.value, list, position, delta));
+    }
+
+    function dropItem(list: BriefList, id: string): void {
+      if (state.writable.value) state.update(removeBriefItem(state.draft.value, list, id));
+    }
+
+    async function addOriginal(record: PortableRecord): Promise<void> {
       const snapshot = props.workspace.current.value;
-      if (!props.workspace.ready.value || props.workspace.busy.value || records.value.error || !snapshot) {
+      if (!props.workspace.ready.value || props.workspace.busy.value || !snapshot) {
         throw new Error('Workspace storage is unavailable.');
       }
-      const next = { ...snapshot.file, records: [...snapshot.file.records, record] };
-      if (new Blob([serializeDsrs(next)]).size > MAX_IMPORT_BYTES) {
-        throw new Error('This document would make the .dsrs backup too large to restore. Use a smaller source file.');
+      const records = [...snapshot.file.records, record];
+      if (new Blob([serializeDsrs({ ...snapshot.file, records })]).size > MAX_IMPORT_BYTES) {
+        throw new Error('This attachment would make the .dsrs backup too large to restore.');
       }
       await props.workspace.database.put(record, null, snapshot.storageId);
     }
 
-    async function addFile(event: Event): Promise<void> {
-      if (!(event.target instanceof HTMLInputElement)) return;
-      const file = event.target.files?.[0];
-      event.target.value = '';
-      if (!file || !canWrite.value) return;
-      clearMessage();
-      working.value = true;
+    async function saveTextSource(): Promise<void> {
+      if (!hasText(sourceDraft.value) || savingSource.value) return;
+      sourceProblem.value = '';
+      sourceMessage.value = '';
+      savingSource.value = true;
       try {
-        // The portable format has a 128 MiB import safeguard. Refuse an individual
-        // attachment that could never fit a restorable backup.
-        if (Math.ceil(file.size / 3) * 4 > MAX_IMPORT_BYTES) {
-          throw new Error('This file is too large for a restorable .dsrs backup.');
-        }
-        const base64 = await readFileBase64(file);
-        await saveWhileWorking(createSourceFile(file, base64));
-        feedback.value = 'Original file saved intact: ' + file.name;
-      } catch (error) { errorMessage(error); }
-      finally { working.value = false; }
-    }
-
-    async function addNote(kind: typeof CR_AI_KIND | typeof CR_INTERVIEW_KIND): Promise<void> {
-      const draft = kind === CR_AI_KIND ? aiDraft : interviewDraft;
-      if (!draft.value.trim() || !canWrite.value) return;
-      clearMessage();
-      working.value = true;
-      try {
-        await saveWhileWorking(createNote(kind, draft.value));
-        draft.value = '';
-        feedback.value = kind === CR_AI_KIND ? 'AI interpretation saved as a separate draft.' :
-          'Interview note saved separately from the original client material.';
-      } catch (error) { errorMessage(error); }
-      finally { working.value = false; }
-    }
-
-    async function copyPrompt(): Promise<void> {
-      if (records.value.value.sources.length === 0) return;
-      clearMessage();
-      try {
-        await navigator.clipboard.writeText(aiPrompt.value);
-        feedback.value = 'Prompt copied. Paste it into your AI chat and attach any listed documents.';
+        await addOriginal(textSource(sourceDraft.value));
+        sourceDraft.value = '';
+        sourceMessage.value = 'Original client text preserved.';
       } catch (error) {
-        errorMessage(error);
-        problem.value += ' You can also select and copy the prompt from the preview below.';
+        sourceProblem.value = error instanceof Error ? error.message : String(error);
+      } finally {
+        savingSource.value = false;
       }
     }
 
-    function sourceCard(item: ClientRecords['sources'][number]) {
-      const source = item.data;
-      return h('li', { key: item.id, class: 'cr-entry' }, [
-        h('div', { class: 'cr-entry-top' }, [
-          h('strong', source.type === 'text' ? 'Pasted client statement' : source.name),
-          h('time', { datetime: source.createdAt }, formatDate(source.createdAt)),
-        ]),
-        source.type === 'text'
-          ? h('pre', { class: 'cr-verbatim' }, source.body)
-          : h('div', { class: 'cr-file-entry' }, [
-            h('span', { class: 'cr-muted' }, 'Original file · ' + formatFileSize(source.size)),
-            h('button', {
-              type: 'button', class: 'quiet-button',
-              onClick: () => {
-                clearMessage();
-                try { downloadOriginalFile(source); }
-                catch (error) { errorMessage(error); }
-              },
-            }, 'Download original'),
-          ]),
+    async function uploadSource(event: Event): Promise<void> {
+      if (!(event.target instanceof HTMLInputElement)) return;
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      if (!file || savingSource.value) return;
+      sourceProblem.value = '';
+      sourceMessage.value = '';
+      savingSource.value = true;
+      try {
+        if (Math.ceil(file.size / 3) * 4 > MAX_IMPORT_BYTES) {
+          throw new Error('This document is too large for a portable workspace backup.');
+        }
+        const base64 = await readFileBase64(file);
+        await addOriginal(fileSource(file, base64));
+        sourceMessage.value = 'Original document preserved: ' + file.name;
+      } catch (error) {
+        sourceProblem.value = error instanceof Error ? error.message : String(error);
+      } finally {
+        savingSource.value = false;
+      }
+    }
+
+    function field(label: string, key: BriefField, placeholder: string, rows?: number) {
+      const value = state.draft.value[key];
+      const id = 'cr-field-' + key;
+      return h('div', { class: 'cr-field' }, [
+        h('label', { for: id }, label),
+        rows
+          ? h('textarea', {
+            id, class: 'cr-input cr-input--multiline', rows,
+            placeholder, value, disabled: !state.writable.value,
+            onInput: (event: Event) => {
+              if (event.target instanceof HTMLTextAreaElement) change(key, event.target.value);
+            },
+          })
+          : h('input', {
+            id, class: 'cr-input', type: 'text',
+            placeholder, value, disabled: !state.writable.value,
+            onInput: (event: Event) => {
+              if (event.target instanceof HTMLInputElement) change(key, event.target.value);
+            },
+          }),
       ]);
     }
 
-    function noteCard(item: ClientEntry) {
-      if (item.kind === 'cr.source') return null;
-      return h('li', { key: item.id, class: 'cr-entry' }, [
-        h('div', { class: 'cr-entry-top' }, [
-          h('strong', item.kind === CR_AI_KIND ? 'AI interpretation · unverified' : 'Interview note · client follow-up'),
-          h('time', { datetime: item.data.createdAt }, formatDate(item.data.createdAt)),
+    function listEditor(list: BriefList) {
+      const items: BriefItem[] = state.draft.value[list];
+      const label = list === 'capabilities' ? 'capability' : 'boundary';
+      const currentDraft = list === 'capabilities' ? capabilityDraft : boundaryDraft;
+      return [
+        items.length
+          ? h('ol', { class: 'cr-items', 'aria-label': list === 'capabilities' ? 'Requested capabilities' : 'Expressed boundaries' },
+            items.map((item, index) => h('li', { class: 'cr-item', key: item.id }, [
+              h('span', { class: 'cr-item-number', 'aria-hidden': 'true' }, String(index + 1)),
+              h('input', {
+                class: 'cr-input cr-item-input', type: 'text',
+                'aria-label': 'Client-stated ' + label + ' ' + (index + 1),
+                value: item.text, disabled: !state.writable.value,
+                onInput: (event: Event) => {
+                  if (event.target instanceof HTMLInputElement) changeItem(list, item.id, event.target.value);
+                },
+              }),
+              h('div', { class: 'cr-item-actions' }, [
+                h('button', {
+                  type: 'button', class: 'icon-button',
+                  title: 'Move up', 'aria-label': 'Move ' + label + ' ' + (index + 1) + ' up',
+                  disabled: !state.writable.value || index === 0,
+                  onClick: () => moveItem(list, index, -1),
+                }, '↑'),
+                h('button', {
+                  type: 'button', class: 'icon-button',
+                  title: 'Move down', 'aria-label': 'Move ' + label + ' ' + (index + 1) + ' down',
+                  disabled: !state.writable.value || index === items.length - 1,
+                  onClick: () => moveItem(list, index, 1),
+                }, '↓'),
+                h('button', {
+                  type: 'button', class: 'icon-button delete-button',
+                  title: 'Remove', 'aria-label': 'Remove ' + label + ' ' + (index + 1),
+                  disabled: !state.writable.value,
+                  onClick: () => dropItem(list, item.id),
+                }, '×'),
+              ]),
+            ])))
+          : h('p', { class: 'cr-small-note' },
+            list === 'capabilities' ? 'No capabilities recorded yet.' : 'No boundaries have been expressed.'),
+        h('div', { class: 'cr-add-row' }, [
+          h('input', {
+            class: 'cr-input', type: 'text',
+            'aria-label': 'New client-stated ' + label,
+            placeholder: list === 'capabilities'
+              ? 'Add one requested capability…'
+              : 'Add a constraint or explicit exclusion…',
+            value: currentDraft.value,
+            disabled: !state.writable.value,
+            onInput: (event: Event) => {
+              if (event.target instanceof HTMLInputElement) currentDraft.value = event.target.value;
+            },
+            onKeydown: (event: KeyboardEvent) => {
+              if (event.key === 'Enter') { event.preventDefault(); addItem(list); }
+            },
+          }),
+          h('button', {
+            type: 'button', class: 'quiet-button',
+            disabled: !state.writable.value || !hasText(currentDraft.value),
+            onClick: () => addItem(list),
+          }, 'Add'),
         ]),
-        h('pre', { class: 'cr-verbatim' }, item.data.body),
+      ];
+    }
+
+    function previewParagraph(title: string, text: string) {
+      return hasText(text) ? h('section', { class: 'cr-preview-section' }, [
+        h('h4', title),
+        h('p', text),
+      ]) : null;
+    }
+
+    function previewList(title: string, items: readonly BriefItem[]) {
+      const visible = items.filter(item => hasText(item.text));
+      return visible.length ? h('section', { class: 'cr-preview-section' }, [
+        h('h4', title),
+        h('ul', visible.map(item => h('li', { key: item.id }, item.text.trim()))),
+      ]) : null;
+    }
+
+    function preview(brief: ClientBrief) {
+      const present = hasText(brief.organization) || hasText(brief.context) ||
+        hasText(brief.problem) || hasText(brief.solution) ||
+        brief.capabilities.some(item => hasText(item.text)) ||
+        brief.boundaries.some(item => hasText(item.text));
+      return h('section', { class: 'cr-preview-pane', 'aria-labelledby': 'cr-preview-heading' }, [
+        h('div', { class: 'cr-preview-heading' }, [
+          h('div', [
+            h('h3', { id: 'cr-preview-heading' }, 'Document preview'),
+            h('p', 'Reflects your edits as you make them'),
+          ]),
+          h('span', { class: 'cr-preview-label' }, 'CR'),
+        ]),
+        h('article', { class: 'cr-paper', 'aria-label': 'Client Requirements document preview' }, [
+          h('p', { class: 'cr-paper-kicker' }, 'CLIENT BRIEF'),
+          h('h3', 'Client Requirements'),
+          !present ? h('div', { class: 'cr-paper-empty' }, [
+            h('p', 'Your client brief will appear here as you add information.'),
+            h('p', 'Only sections you fill in will be included.'),
+          ]) : [
+            hasText(brief.organization) ? h('h4', { class: 'cr-paper-client' }, brief.organization.trim()) : null,
+            hasText(brief.context) ? h('p', { class: 'cr-paper-context' }, brief.context.trim()) : null,
+            previewParagraph('Problem or opportunity', brief.problem),
+            previewParagraph('Desired solution', brief.solution),
+            previewList('Requested capabilities', brief.capabilities),
+            previewList('Expressed boundaries', brief.boundaries),
+          ],
+        ]),
+      ]);
+    }
+
+    function sourceCard(source: SourceEntry) {
+      return h('li', { key: source.id }, [
+        h('details', { class: 'cr-original-entry' }, [
+          h('summary', [
+            h('span', source.data.type === 'file' ? source.data.name : 'Original client statement'),
+            h('span', { class: 'cr-source-date' }, dateLabel(source.data.createdAt)),
+          ]),
+          source.data.type === 'text'
+            ? h('pre', { class: 'cr-original-text' }, source.data.body)
+            : h('div', { class: 'cr-source-download' }, [
+              h('span', { class: 'cr-small-note' }, 'Preserved file · ' + fileSize(source.data.size)),
+              h('button', {
+                type: 'button', class: 'quiet-button',
+                onClick: () => {
+                  sourceProblem.value = '';
+                  try {
+                    if (source.data.type === 'file') downloadOriginal(source.data);
+                  } catch (error) {
+                    sourceProblem.value = error instanceof Error ? error.message : String(error);
+                  }
+                },
+              }, 'Download original'),
+            ]),
+        ]),
       ]);
     }
 
     return () => {
-      const data = records.value.value;
-      const usable = canWrite.value;
-      return h('div', { class: 'cr-workspace' }, [
-        h('p', { class: 'cr-intro' },
-          'Start with the client’s own words. Details can be clarified later; nothing here needs to be finalized first.'),
-        records.value.error ? h('p', { class: 'workspace-file-error', role: 'alert' }, records.value.error) : null,
-        h('section', { class: 'cr-section', 'aria-labelledby': 'cr-original-heading' }, [
-          h('header', { class: 'cr-section-heading' }, [
-            h('div', [
-              h('h3', { id: 'cr-original-heading' }, 'Original client material'),
-              h('p', 'Added as received. AI notes and later clarifications will not change it.'),
-            ]),
-            h('span', { class: 'cr-count' }, String(data.sources.length)),
-          ]),
-          h('label', { class: 'cr-field-label', for: 'cr-original-text' }, 'Paste client requirements'),
-          h('textarea', {
-            id: 'cr-original-text', class: 'cr-textarea', rows: 4,
-            placeholder: 'Paste the original statement, email, or brief exactly as provided…',
-            value: originalDraft.value,
-            disabled: !usable,
-            onInput: (event: Event) => {
-              if (event.target instanceof HTMLTextAreaElement) originalDraft.value = event.target.value;
-            },
-          }),
-          h('div', { class: 'cr-actions' }, [
+      const current = state.draft.value;
+      const sources = sourceData.value;
+      return h('div', { class: 'cr-workspace', 'data-view': view.value }, [
+        h('div', { class: 'cr-intro-bar' }, [
+          h('p', 'Capture the client’s expressed request. Leave unanswered details blank; analysis belongs in the other documents.'),
+          h('div', { class: 'cr-mobile-views', role: 'group', 'aria-label': 'Client Requirements view' }, [
             h('button', {
-              type: 'button', class: 'card-primary-button',
-              disabled: !usable || !originalDraft.value.trim(),
-              onClick: () => { void addText(); },
-            }, working.value ? 'Saving…' : 'Save original text'),
+              type: 'button', class: ['quiet-button', view.value === 'edit' ? 'is-active' : ''],
+              'aria-pressed': view.value === 'edit',
+              onClick: () => { view.value = 'edit'; },
+            }, 'Edit'),
             h('button', {
-              type: 'button', class: 'quiet-button',
-              disabled: !usable,
-              onClick: () => fileInput.value?.click(),
-            }, 'Upload document'),
-            h('input', {
-              ref: fileInput, type: 'file',
-              accept: '.txt,.md,.markdown,.pdf,.doc,.docx,.odt,.rtf,.csv,.json',
-              class: 'visually-hidden', tabindex: -1,
-              onChange: (event: Event) => { void addFile(event); },
-            }),
+              type: 'button', class: ['quiet-button', view.value === 'preview' ? 'is-active' : ''],
+              'aria-pressed': view.value === 'preview',
+              onClick: () => { view.value = 'preview'; },
+            }, 'Preview'),
           ]),
-          data.sources.length
-            ? h('ul', { class: 'cr-entries', 'aria-label': 'Original client statements' }, data.sources.map(sourceCard))
-            : h('p', { class: 'cr-muted cr-none' }, 'No client material added yet.'),
         ]),
-        h('details', { class: 'cr-section cr-disclosure' }, [
-          h('summary', { class: 'cr-disclosure-title' }, [
-            h('span', 'Optional AI interpretation'),
-            h('span', { class: 'cr-secondary' }, data.interpretations.length + ' saved'),
-          ]),
-          h('div', { class: 'cr-disclosure-content' }, [
-            h('p', { class: 'cr-muted' },
-              'Ask an AI to identify early business needs, goals, and open questions. Its response stays separate from the source. Nothing is sent automatically.'),
-            h('div', { class: 'cr-actions' }, [
+        h('div', { class: 'cr-layout' }, [
+          h('section', { class: 'cr-editor', 'aria-label': 'Client Requirements editor' }, [
+            h('div', { class: 'cr-save-bar' }, [
+              h('span', { class: ['cr-save-status', state.dirty.value ? 'is-unsaved' : ''] },
+                !state.ready.value ? 'Loading brief…' : state.conflict.value ? 'Save conflict' :
+                  state.dirty.value ? 'Unsaved changes' : 'Saved'),
+              h('div', { class: 'cr-save-actions' }, [
+                state.dirty.value ? h('button', {
+                  type: 'button', class: 'quiet-button',
+                  disabled: state.busy.value,
+                  onClick: () => { void state.reload(); },
+                }, 'Discard edits') : null,
+                h('button', {
+                  type: 'button', class: 'card-primary-button',
+                  disabled: !state.writable.value || !state.dirty.value,
+                  onClick: () => { void state.save(); },
+                }, state.busy.value ? 'Saving…' : 'Save brief'),
+              ]),
+            ]),
+            state.problem.value ? h('div', { class: 'cr-warning', role: 'alert' }, [
+              h('p', state.problem.value),
               h('button', {
                 type: 'button', class: 'quiet-button',
-                disabled: !data.sources.length,
-                onClick: () => { void copyPrompt(); },
-              }, 'Copy AI prompt'),
-              h('a', {
-                class: 'quiet-button', href: 'https://chatgpt.com/',
-                target: '_blank', rel: 'noopener noreferrer',
-              }, 'Open ChatGPT ↗'),
-            ]),
-            h('p', { class: 'cr-muted cr-small' },
-              'Paste the copied prompt into your AI chat. If you uploaded a PDF or Word file, download the original above and attach it to that chat too.'),
-            data.sources.length ? h('details', { class: 'cr-prompt-preview' }, [
-              h('summary', 'View or manually copy prompt'),
-              h('textarea', {
-                class: 'cr-textarea', rows: 5, readonly: true,
-                'aria-label': 'AI interpretation prompt',
-                value: aiPrompt.value,
-              }),
+                onClick: () => { void state.reload(); },
+              }, 'Load saved brief'),
             ]) : null,
-            h('label', { class: 'cr-field-label', for: 'cr-ai-response' }, 'AI response (optional)'),
-            h('textarea', {
-              id: 'cr-ai-response', class: 'cr-textarea', rows: 4,
-              placeholder: 'Paste the AI response here to keep it separate from the original client statement…',
-              value: aiDraft.value, disabled: !usable,
-              onInput: (event: Event) => {
-                if (event.target instanceof HTMLTextAreaElement) aiDraft.value = event.target.value;
-              },
-            }),
-            h('div', { class: 'cr-actions' }, [
-              h('button', {
-                type: 'button', class: 'quiet-button',
-                disabled: !usable || !aiDraft.value.trim(),
-                onClick: () => { void addNote(CR_AI_KIND); },
-              }, 'Save interpretation'),
+            h('section', { class: 'cr-editor-card' }, [
+              h('div', { class: 'cr-card-heading' }, [
+                h('span', { class: 'cr-card-number' }, '01'),
+                h('div', [h('h3', 'Client context'),
+                  h('p', 'Who is asking, and what does the organization do?')]),
+              ]),
+              field('Client or organization', 'organization', 'Organization name'),
+              field('About the organization', 'context', 'A short description, if supplied', 2),
             ]),
-            data.interpretations.length
-              ? h('ul', { class: 'cr-entries' }, data.interpretations.map(noteCard))
-              : null,
-          ]),
-        ]),
-        h('details', { class: 'cr-section cr-disclosure' }, [
-          h('summary', { class: 'cr-disclosure-title' }, [
-            h('span', 'Interview notes & clarifications'),
-            h('span', { class: 'cr-secondary' }, data.interviews.length + ' saved'),
-          ]),
-          h('div', { class: 'cr-disclosure-content' }, [
-            h('p', { class: 'cr-muted' },
-              'Record what the client clarified or answered later. Earlier statements are preserved; unresolved questions can stay open.'),
-            h('label', { class: 'cr-field-label', for: 'cr-interview-note' }, 'New interview note'),
-            h('textarea', {
-              id: 'cr-interview-note', class: 'cr-textarea', rows: 3,
-              placeholder: 'What did the client explain or clarify?',
-              value: interviewDraft.value, disabled: !usable,
-              onInput: (event: Event) => {
-                if (event.target instanceof HTMLTextAreaElement) interviewDraft.value = event.target.value;
-              },
-            }),
-            h('div', { class: 'cr-actions' }, [
-              h('button', {
-                type: 'button', class: 'quiet-button',
-                disabled: !usable || !interviewDraft.value.trim(),
-                onClick: () => { void addNote(CR_INTERVIEW_KIND); },
-              }, 'Save interview note'),
+            h('section', { class: 'cr-editor-card' }, [
+              h('div', { class: 'cr-card-heading' }, [
+                h('span', { class: 'cr-card-number' }, '02'),
+                h('div', [h('h3', 'The request'), h('p', 'The reason and solution expressed by the client.')]),
+              ]),
+              field('Problem or opportunity', 'problem', 'What needs to change?', 2),
+              field('Desired solution', 'solution', 'What kind of system does the client want?', 2),
             ]),
-            data.interviews.length ? h('ul', { class: 'cr-entries' }, data.interviews.map(noteCard)) : null,
+            h('section', { class: 'cr-editor-card' }, [
+              h('div', { class: 'cr-card-heading' }, [
+                h('span', { class: 'cr-card-number' }, '03'),
+                h('div', [h('h3', 'Requested capabilities'),
+                  h('p', 'One high-level client request per entry. Arrange them in the order you prefer.')]),
+              ]),
+              ...listEditor('capabilities'),
+            ]),
+            h('details', { class: 'cr-editor-card cr-optional' }, [
+              h('summary', { class: 'cr-optional-heading' }, [
+                h('span', 'Expressed boundaries'),
+                h('span', { class: 'cr-small-note' }, current.boundaries.length ?
+                  current.boundaries.length + ' recorded' : 'Optional'),
+              ]),
+              h('div', { class: 'cr-optional-body' }, [
+                h('p', { class: 'cr-small-note' }, 'Only include limitations or exclusions the client explicitly mentioned.'),
+                ...listEditor('boundaries'),
+              ]),
+            ]),
+            h('details', { class: 'cr-editor-card cr-optional' }, [
+              h('summary', { class: 'cr-optional-heading' }, [
+                h('span', 'Original client material'),
+                h('span', { class: 'cr-small-note' }, sources.entries.length ?
+                  sources.entries.length + ' saved' : 'Optional'),
+              ]),
+              h('div', { class: 'cr-optional-body' }, [
+                h('p', { class: 'cr-small-note' },
+                  'Keep original statements or documents for reference. The structured brief is edited separately; no text is extracted or changed automatically.'),
+                h('label', { class: 'cr-field-label', for: 'cr-source-text' }, 'Original statement'),
+                h('textarea', {
+                  id: 'cr-source-text', class: 'cr-input cr-input--multiline',
+                  placeholder: 'Paste the client’s wording exactly as provided', rows: 3,
+                  value: sourceDraft.value,
+                  disabled: savingSource.value || !props.workspace.ready.value || !!sources.error,
+                  onInput: (event: Event) => {
+                    if (event.target instanceof HTMLTextAreaElement) sourceDraft.value = event.target.value;
+                  },
+                }),
+                h('div', { class: 'cr-source-actions' }, [
+                  h('button', {
+                    type: 'button', class: 'quiet-button',
+                    disabled: savingSource.value || !props.workspace.ready.value || !hasText(sourceDraft.value),
+                    onClick: () => { void saveTextSource(); },
+                  }, savingSource.value ? 'Saving…' : 'Keep original text'),
+                  h('button', {
+                    type: 'button', class: 'quiet-button',
+                    disabled: savingSource.value || !props.workspace.ready.value,
+                    onClick: () => filePicker.value?.click(),
+                  }, 'Attach document'),
+                  h('input', {
+                    ref: filePicker, type: 'file',
+                    accept: '.txt,.md,.markdown,.pdf,.doc,.docx,.odt,.rtf,.csv,.json',
+                    class: 'visually-hidden', tabindex: -1,
+                    onChange: (event: Event) => { void uploadSource(event); },
+                  }),
+                ]),
+                sources.entries.length ? h('ul', { class: 'cr-originals' }, sources.entries.map(sourceCard)) : null,
+                sources.error ? h('p', { class: 'cr-error', role: 'alert' }, sources.error) : null,
+                sourceProblem.value ? h('p', { class: 'cr-error', role: 'alert' }, sourceProblem.value) : null,
+                sourceMessage.value ? h('p', { class: 'cr-success', role: 'status' }, sourceMessage.value) : null,
+              ]),
+            ]),
+            state.message.value ? h('p', { class: 'cr-success', role: 'status' }, state.message.value) : null,
           ]),
+          preview(current),
         ]),
-        feedback.value ? h('p', { class: 'cr-feedback', role: 'status' }, feedback.value) : null,
-        problem.value ? h('p', { class: 'workspace-file-error', role: 'alert' }, problem.value) : null,
       ]);
     };
   },

@@ -22,6 +22,7 @@ const App = defineComponent({
     const workspace = useWorkspace();
     const sidebarOpen = ref(false);
     const selectedId = ref<DocumentId>(documentIdFromLocation());
+    const crDirty = ref(false);
     const selectedDocument = computed(() => findDocument(selectedId.value) ?? DOCUMENTS[0]);
     const menuButton = ref<HTMLButtonElement | null>(null);
     const main = ref<HTMLElement | null>(null);
@@ -53,7 +54,13 @@ const App = defineComponent({
       });
     }
 
+    function canLeaveDocument(nextId: DocumentId): boolean {
+      return nextId === selectedId.value || !crDirty.value ||
+        window.confirm('Client Requirements has unsaved changes. Leave without saving?');
+    }
+
     function selectDocument(id: DocumentId) {
+      if (!canLeaveDocument(id)) return;
       if (selectedId.value !== id) {
         selectedId.value = id;
         window.history.pushState(null, '', '#/documents/' + id);
@@ -64,7 +71,12 @@ const App = defineComponent({
     }
 
     function syncLocation() {
-      selectedId.value = documentIdFromLocation();
+      const nextId = documentIdFromLocation();
+      if (!canLeaveDocument(nextId)) {
+        window.history.replaceState(null, '', '#/documents/' + selectedId.value);
+        return;
+      }
+      selectedId.value = nextId;
       focusDocumentOnClose = true;
       if (sidebarOpen.value) sidebarOpen.value = false;
       else focusDocument();
@@ -145,7 +157,10 @@ const App = defineComponent({
             h('div', { ref: pageHeading, tabindex: -1, class: 'document-heading-focus' }, [
               selectedId.value === 'cr'
                 ? h(DocumentView, { document: selectedDocument.value }, {
-                  default: () => h(ClientRequirements, { workspace }),
+                  default: () => h(ClientRequirements, {
+                    workspace,
+                    onDirtyChange: (value: boolean) => { crDirty.value = value; },
+                  }),
                 })
                 : h(DocumentView, { document: selectedDocument.value }),
             ]),
