@@ -4,7 +4,7 @@
 
 A browser-based workspace for exploring a better way to produce and refine software requirements specifications with AI.
 
-> **Blank-slate redesign:** This branch is a fresh technical starting point. No SRS construction workflow, domain-specific record schema, or agent orchestration has been chosen yet. The previous application is preserved on `main`.
+> **Blank-slate redesign:** This branch is a fresh, intentionally limited foundation with structured CR and SR documents. Detailed SRS construction, AI orchestration, and other document workflows remain undecided. The previous application is preserved on `main`.
 
 ## AI development disclosure
 
@@ -22,7 +22,7 @@ Dynamic SRS uses the following self-contained frontend and build conventions:
 - Fluent-inspired neutral surfaces, blue accent, responsive layout, and a local theme module with system-following light/dark settings, persisted preferences, and an accessible settings dialog.
 - Node.js 24+ and GitHub Actions build verification.
 
-The application has seven navigable document areas: Client Requirements (CR), System Request (SR), Cost-Benefit Analysis (CBA), Feasibility & Stakeholder Analysis (FSA), Software Requirements Specification (SRS), Effort Breakdown (EB), and General Notes (GN). Open the animated three-line menu and select one in the document drawer (or link to `#/documents/<id>`). Client Requirements now has a structured brief for client context, problem or opportunity, desired solution, individually managed requested capabilities, and optional expressed boundaries. A live document preview is assembled from the same structured fields. Optional original client materials can still be attached or referenced. The other document areas remain intentionally empty. No detailed requirements, diagrams, or phased workflows have been implemented. The underlying workspace is stored in IndexedDB. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
+The application has seven navigable document areas: Client Requirements (CR), System Request (SR), Cost-Benefit Analysis (CBA), Feasibility & Stakeholder Analysis (FSA), Software Requirements Specification (SRS), Effort Breakdown (EB), and General Notes (GN). Open the animated three-line menu and select one in the document drawer (or link to `#/documents/<id>`). Client Requirements now has a structured brief for client context, problem or opportunity, desired solution, individually managed requested capabilities, and optional expressed boundaries. A live document preview is assembled from the same structured fields. Optional original client materials can still be attached or referenced. System Request is also editable, with a sponsor, business need, reorderable high-level requirements, individually managed qualitative/measurable business benefits, and optional special issues. Date and preparer metadata are supported, alongside the same live preview and autosave behavior. CBA, FSA, SRS, EB, and GN remain intentionally empty. No detailed requirements, diagrams, or phased workflows have been implemented. The underlying workspace is stored in IndexedDB. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
 
 ## Run locally
 
@@ -53,6 +53,10 @@ This redesign starts with `.dsrs` format **version 1**, independent of the Index
 ## Client Requirements editing
 
 The structured Client Requirements brief autosaves to IndexedDB after a brief pause in editing. A small indicator shows when changes are pending, being saved, or saved, and a failed or conflicting save is reported instead of silently replacing data. The Editor / Split / Preview control provides an optional live document preview. In Editor mode, the editor is centered for comfortable reading; on small screens the editor is shown first. Switching documents flushes pending edits. Original client attachments remain separate from the structured brief. No AI or interview features are present in CR.
+
+## System Request editing
+
+System Request follows the five sections used in the systems analysis coursework: Project Sponsor, Business Need, Business Requirements, Business Value, and Special Issues. Its benefits can record a qualitative improvement or a measurable target without performing cost-benefit calculations. All lists are individually editable and reorderable. The same Editor / Split / Preview controls and conflict-safe autosave work here as in CR. It stores one `sr.request` record inside the workspace and never auto-copies content from CR or GN.
 
 ## Deployment
 
