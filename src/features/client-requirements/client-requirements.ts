@@ -1,4 +1,4 @@
-import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch, type PropType } from 'vue';
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, Transition, TransitionGroup, watch, type PropType } from 'vue';
 import { MAX_IMPORT_BYTES, serializeDsrs, type PortableRecord } from '../../core/workspace/dsrs-format.ts';
 import {
   addBriefItem, downloadOriginal, fileSource, readFileBase64, removeBriefItem,
@@ -22,6 +22,10 @@ function hasText(value: string): boolean {
   return value.trim().length > 0;
 }
 
+export interface ClientRequirementsHandle {
+  flushSave(): Promise<boolean>;
+}
+
 /** CR captures the client's expressed brief, not analyst notes or formal SRS requirements. */
 export const ClientRequirements = defineComponent({
   name: 'ClientRequirements',
@@ -31,8 +35,9 @@ export const ClientRequirements = defineComponent({
   emits: {
     'dirty-change': (_dirty: boolean) => true,
   },
-  setup(props, { emit }) {
+  setup(props, { emit, expose }) {
     const state = useClientBrief(props.workspace);
+    expose({ flushSave: state.flushSave } satisfies ClientRequirementsHandle);
     const narrowView = window.matchMedia('(max-width: 900px)');
     const view = ref<'edit' | 'split' | 'preview'>(narrowView.matches ? 'edit' : 'split');
     function viewportChanged(event: MediaQueryListEvent) {
@@ -164,8 +169,11 @@ export const ClientRequirements = defineComponent({
       const currentDraft = list === 'capabilities' ? capabilityDraft : boundaryDraft;
       return [
         items.length
-          ? h('ol', { class: 'cr-items', 'aria-label': list === 'capabilities' ? 'Requested capabilities' : 'Expressed boundaries' },
-            items.map((item, index) => h('li', { class: 'cr-item', key: item.id }, [
+          ? h(TransitionGroup, {
+              name: 'cr-entry', tag: 'ol', class: 'cr-items',
+              'aria-label': list === 'capabilities' ? 'Requested capabilities' : 'Expressed boundaries',
+            }, {
+              default: () => items.map((item, index) => h('li', { class: 'cr-item', key: item.id }, [
               h('span', { class: 'cr-item-number', 'aria-hidden': 'true' }, String(index + 1)),
               h('input', {
                 class: 'cr-input cr-item-input', type: 'text',
@@ -195,7 +203,8 @@ export const ClientRequirements = defineComponent({
                   onClick: () => dropItem(list, item.id),
                 }, '×'),
               ]),
-            ])))
+            ])),
+            })
           : h('p', { class: 'cr-small-note' },
             list === 'capabilities' ? 'No capabilities recorded yet.' : 'No boundaries have been expressed.'),
         h('div', { class: 'cr-add-row' }, [
@@ -314,21 +323,23 @@ export const ClientRequirements = defineComponent({
                 document.getElementById('document-content')?.scrollTo(0, 0);
               },
             }, label))),
-          h('div', { class: 'cr-save-actions' }, [
-            h('span', {
-              class: ['cr-save-status', state.dirty.value ? 'is-unsaved' : ''],
-              role: 'status', 'aria-live': 'polite',
-            }, !state.ready.value ? 'Loading brief…'
-              : state.busy.value ? 'Saving…'
-              : state.conflict.value ? 'Save conflict'
-              : state.problem.value && state.dirty.value ? 'Save failed — see message'
-              : state.dirty.value ? 'Unsaved edits · Save to keep changes'
-              : 'Saved in this browser'),
-            h('button', {
-              type: 'button', class: 'card-primary-button',
-              disabled: !state.writable.value || !state.dirty.value,
-              onClick: () => { void state.save(); },
-            }, state.busy.value ? 'Saving…' : 'Save brief'),
+          h('div', { class: 'cr-autosave', role: 'status', 'aria-live': 'polite', 'aria-label': 'Automatic save status' }, [
+            h('span', { class: ['cr-autosave-indicator', {
+              'is-pending': state.dirty.value || state.busy.value,
+              'is-error': !!state.problem.value || state.conflict.value,
+            }], 'aria-hidden': 'true' }, [
+              h('svg', {
+                width: 15, height: 15, viewBox: '0 0 24 24',
+                fill: 'none', stroke: 'currentColor', 'stroke-width': 2,
+                'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+                'aria-hidden': 'true',
+              }, [
+                h('path', { d: 'M5 12l4 4L19 6' }),
+              ]),
+            ]),
+            h(Transition, { name: 'cr-status', mode: 'out-in' }, {
+              default: () => h('span', { key: state.status.value, class: 'cr-autosave-label' }, state.status.value),
+            }),
           ]),
         ]),
         state.problem.value ? h('div', { class: 'cr-warning', role: 'alert' }, [
@@ -336,10 +347,12 @@ export const ClientRequirements = defineComponent({
           h('button', {
             type: 'button', class: 'quiet-button',
             onClick: () => { void state.reload(); },
-          }, 'Load saved brief'),
+          }, state.conflict.value ? 'Reload saved brief' : 'Retry from saved brief'),
         ]) : null,
         h('div', { class: 'cr-layout' }, [
-          h('section', { class: 'cr-editor', 'aria-label': 'Client Requirements editor' }, [
+          h(Transition, { name: 'cr-pane' }, {
+            default: () => view.value === 'preview' ? null :
+              h('section', { class: 'cr-editor', 'aria-label': 'Client Requirements editor' }, [
             h('section', { class: 'cr-editor-card' }, [
               h('div', { class: 'cr-card-heading' }, [
                 h('span', { class: 'cr-card-number' }, '01'),
@@ -419,8 +432,11 @@ export const ClientRequirements = defineComponent({
                 sourceMessage.value ? h('p', { class: 'cr-success', role: 'status' }, sourceMessage.value) : null,
               ]),
             ]),
-          ]),
-          preview(current),
+              ]),
+          }),
+          h(Transition, { name: 'cr-pane' }, {
+            default: () => view.value === 'edit' ? null : preview(current),
+          }),
         ]),
       ]);
     };
