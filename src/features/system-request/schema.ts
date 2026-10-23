@@ -7,7 +7,7 @@ export const systemRequestSchema: SchemaNode = {
   compactPreview: true, omitEmptyFields: true, formComponent: 'evidence-form',
   form: { kicker: 'Project initiation', intro: 'Build a short business case from the client’s existing answers.', showCompletion: true },
   guide: guide('Propose the project', [{ term: 'Sponsor', definition: 'The business person accountable for supporting the request.' }, { term: 'Business value', definition: 'The improvement expected from delivering a capability.' }]), ai: ai(task, [{ term: 'Sponsor', definition: 'The business person accountable for supporting the request.' }, { term: 'Business value', definition: 'The improvement expected from delivering a capability.' }], {
-    interviewGuidance: 'Reuse settled Client Requirements from available conversation or memory. Cover every current capability, benefit and special issue, clarify missing sponsor or outcome details, and check for uncovered client needs. Leave quantified costs to CBA and feasibility judgments to FSA.',
+    interviewGuidance: "Reuse settled client needs and the existing proposal. Ask only for a material missing sponsor, distinct high-level capability, benefit or issue. Leave costing to CBA and feasibility to FSA.",
     draftingGuidance: 'Format the requested sponsor, capability, benefit and special-issue records as complete form values. Group or summarize client needs into high-level capabilities with exact need links; keep benefits under their linked capability or the project-wide group. Do not rewrite the carried business problem or invent quantified benefits.'
   }),
   evidence: { title: 'Client discovery', sources: [source('client-requirements', ['business-context', 'client-needs', 'stakeholders', 'scope-constraints', 'discovery-record'])] },
