@@ -48,6 +48,16 @@ export async function downloadWorkspace(workspace: unknown) {
   downloadBlob(blob, `${safeFileName(validated.document.title)}.dsrs`);
 }
 
+/** Uncompressed complete JSON for an external AI review; separate from the WIP backup. */
+export function downloadWorkspaceJson(workspace: unknown) {
+  const validated = validateWorkspace(workspace);
+  const source = new Blob([JSON.stringify(validated, null, 2)], { type: "application/json;charset=utf-8" });
+  if (source.size > MAX_DECOMPRESSED_SIZE) {
+    throw new Error("Workspace JSON exceeds the 20 MB uncompressed-file limit.");
+  }
+  downloadBlob(source, `${safeFileName(validated.document.title)}-ai-review.json`);
+}
+
 export function downloadWorkspaceMarkdown(workspace: unknown, pages: readonly SchemaNode[]) {
   const validated = validateWorkspace(workspace);
   const markdown = workspaceMarkdown(pages, validated.document.sections, {
