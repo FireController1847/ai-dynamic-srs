@@ -49,12 +49,6 @@ export const AiFormImportPanel = defineComponent({
           {{ report.addedNestedRecords }} new nested items
         </p>
         <p v-if="report.skippedNulls" class="mb-1">{{ report.skippedNulls }} unsupported values will remain unchanged.</p>
-        <div v-if="report.needsInformation.length">
-          <strong>Still needs information</strong>
-          <ul class="mb-0">
-            <li v-for="(need, index) in report.needsInformation" :key="index">{{ need.path }}: {{ need.reason }}</li>
-          </ul>
-        </div>
       </div>
       <div class="ai-form-import-actions">
         <button type="button" class="btn btn-outline-secondary" :disabled="!text.trim()" @click="$emit('validate')">Validate JSON</button>
