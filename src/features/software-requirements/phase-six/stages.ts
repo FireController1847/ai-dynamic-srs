@@ -151,4 +151,28 @@ export const verificationStage=stage({
   task:'Verify that every requirement has a supported origin, correct linked scenario/model, objective criterion, and planned verification method without fabricating results.'
 });
 
-export const phaseSixStages=Object.freeze([coverageStage,consistencyStage,gapsStage,verificationStage]);
+/**
+ * Editorial quality pass only. No saved review disposition is required; the
+ * canonical source fields are changed solely after individual user approval.
+ */
+export const cleanupStage: SchemaNode = {
+  id:'srs-reconciliation-cleanup',stateKey:'editorialCleanup',label:'AI Cleanup (Optional)',
+  description:'Optionally shorten repeated or wordy SRS descriptions with an AI-assisted, review-first editorial pass before document assembly.',
+  documentTargets:[],formComponent:'ai-cleanup-stage-form',previewComponent:false,
+  workflow:{required:false},
+  form:{kicker:'Phase 6 · Reconcile & Verify',showCompletion:false,fullWidth:true},
+  guide:{
+    title:'Optional AI cleanup',
+    summary:'Improve readability without changing the meaning, status or traceability of established project information.',
+    steps:[
+      {title:'Copy a complete review prompt',text:'The prompt contains saved workspace context and an exact list of existing editable SRS narrative fields. It never sends figure file bytes.'},
+      {title:'Request concise replacements',text:'ChatGPT returns only fields that can be made shorter without deleting unique behavior, requirements, decisions or references. No follow-up interview is needed.'},
+      {title:'Validate and review',text:'Paste the cleanup JSON, compare each proposed replacement to the original, then select only the safe edits to apply.'},
+      {title:'Continue to assembly',text:'Skipped or rejected suggestions leave saved data untouched. Phase 7 assembles the existing canonical fields as usual.'}
+    ]
+  },
+  ai:{showInterview:false},
+  sections:[]
+};
+
+export const phaseSixStages=Object.freeze([coverageStage,consistencyStage,gapsStage,verificationStage,cleanupStage]);
