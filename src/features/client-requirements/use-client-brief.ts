@@ -15,7 +15,7 @@ export interface ClientWorkspace {
 
 /** A single CR brief is authoritative; edit state is only a local, unsaved draft. */
 export function useClientBrief(workspace: ClientWorkspace) {
-  const draft = ref<ClientBrief>(emptyBrief());
+  const draft = shallowRef<ClientBrief>(emptyBrief());
   const saved = shallowRef<ClientBrief>(emptyBrief());
   const recordRevision = ref<number | null>(null);
   const storageId = ref<string | null>(null);
