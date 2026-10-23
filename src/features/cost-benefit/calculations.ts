@@ -74,7 +74,9 @@ export function calculateProjection(analysis: CostBenefitAnalysis): FinancialPro
     if (!costComplete(item)) missing.push('Cost: ' + (item.name || '(unnamed)'));
   }
   if (!analysis.benefits.length && !analysis.costs.length) missing.push('At least one benefit or cost');
-  if (analysis.projectionYears === null) return { years: [], summary: null, missing, error: '' };
+  if (analysis.projectionYears === null || analysis.discountRatePercent === null) {
+    return { years: [], summary: null, missing, error: '' };
+  }
 
   const rate = analysis.discountRatePercent === null ? 0 : analysis.discountRatePercent / 100;
   const projected: FinancialYear[] = [];
