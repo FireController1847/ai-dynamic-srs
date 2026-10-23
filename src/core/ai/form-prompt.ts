@@ -94,7 +94,8 @@ function jsonResponseGuide(page: SchemaNode, section: Section, documentModel: Da
     ...(section.repeatable?.parent && !section.repeatable.parent.preserveFreeform
       ? ['For every new grouped record include parent with a valid available parent ID; omit parent for existing records.']
       : []),
-    'Do not include read-only, inactive, app-managed or diagram fields. Record unsupported values in needsInformation.',
+    'Do not include read-only, inactive, app-managed or diagram fields. Record consequential unsupported facts briefly in needsInformation; do not ask questions.',
+    'Keep prose/Markdown field values minimal: usually one or two short sentences; use compact bullets or numbered steps only for distinct requirements or flows. Preserve essential conditions and verifiable detail. Do not repeat the field label, other fields, earlier-stage explanations, generic rationale or examples.',
     'JSON shape: ' + JSON.stringify(envelope),
     contract.fieldTypes.length ? 'Allowed field values: ' + contract.fieldTypes.join('; ') : ''
   ].filter(Boolean).join('\n');
