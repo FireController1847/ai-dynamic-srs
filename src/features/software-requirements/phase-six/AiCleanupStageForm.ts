@@ -88,7 +88,7 @@ export const AiCleanupStageForm = defineComponent({
     preview(value: unknown): string {
       return cleanupPreview(value);
     },
-    applySelected() {
+    async applySelected() {
       if (!this.plan || this.responseText !== this.validatedResponse
         || this.sourceHash !== this.validatedHash || !this.selectedIndices.length) {
         this.error = 'The source or response changed. Validate again before applying.';
@@ -100,6 +100,8 @@ export const AiCleanupStageForm = defineComponent({
         const previous = JSON.parse(JSON.stringify(this.documentModel.softwareRequirementsSpecification || {})) as DataModel;
         applyCleanup(this.documentModel, finalPlan);
         this.undoData = previous;
+        // Let the app's document-date watcher update its derived modification stamp first.
+        await this.$nextTick();
         this.undoHash = this.sourceHash;
         this.plan = null;
         this.selectedIndices = [];
