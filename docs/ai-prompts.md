@@ -10,7 +10,7 @@ This is the authoritative contract for copied AI prompts in Dynamic SRS. It appl
 | Ordinary section, group, record, or nested-item copy prompt | Structure supported answers for the exact selected scope | One `dsrs-form` v1 JSON object using schema field keys and saved IDs, ready for validation and explicit import |
 | Diagram section copy prompt | Construct an established repeatable figure set from selected evidence | One compact fenced `dsrs-diagrams` ordered batch: semantic figure metadata plus one layout-free graph per figure |
 | Diagram figure copy prompt | Construct supported semantics for one existing figure | One compact fenced `dsrs-diagram` JSON graph, without prose or layout |
-| Optional Phase 6 AI cleanup | Review prior saved workspace context for safe editorial shortening | A separate `dsrs-cleanup` v1 JSON list of proposed edits; each validated against live SRS narrative fields and individually approved before application |
+| Optional Phase 6 AI cleanup | Review a full exported JSON workspace and propose cross-phase canonical repairs | A `dsrs-cleanup` v2 changes-only JSON with guarded add/replace/remove operations across SRS Phases 1–6; explicitly reviewed before application |
 
 An interview must not stop after one representative item. A form prompt must not restart the interview, ask follow-up questions, or return only changed fields. The same conversation can perform these jobs when the user pastes the next app prompt.
 
@@ -73,7 +73,7 @@ Concision is mandatory for both the conversation and imported content. Do not re
 
 ## Optional pre-assembly AI cleanup
 
-Phase 6 Step 06.5 is **not** another interview or `dsrs-form` request. Its copied prompt contains a complete workspace Markdown snapshot, an exact editable SRS narrative target index, and a strict `dsrs-cleanup` v1 edit contract. Return only shorter, meaning-preserving changes or an empty list. The app verifies the target and copied content snapshot, shows before/after pairs, and applies only individually selected edits to the original fields. Never modify IDs, references, numeric targets, statuses, diagrams, source documents or unique behavioral/acceptance meaning. This workflow is optional, does not contribute to completion, and never replaces semantic reconciliation. See [AI cleanup](ai-cleanup.md).
+Phase 6 Step 06.5 is **not** another interview or `dsrs-form` request. The user attaches a complete uncompressed Dynamic SRS JSON export alongside the copied AI instructions. The AI reviews the full saved workspace as evidence and returns only `dsrs-cleanup` v2 JSON Pointer changes (add, replace, remove) against canonical shared records and Phase 1–6 state. The app checks the current workspace fingerprint, validates changes on a detached copy, shows each before/after pair, and applies only reviewed selections. This pass can repair any supported content in Phases 1–6, not just shorten text. Do not fabricate decisions or verification results; human review remains essential, especially for changed IDs and references. It is optional and independent of Phase 7. See [AI cleanup](ai-cleanup.md).
 
 ## Maintenance boundary
 
