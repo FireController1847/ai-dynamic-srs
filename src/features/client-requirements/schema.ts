@@ -10,7 +10,7 @@ export const clientRequirementsSchema: SchemaNode = {
     { term: 'Stakeholder', definition: 'A person or group affected by the project or able to influence it.' },
     { term: 'Scope', definition: 'What this project includes and excludes.' }
   ]), ai: ai(task, [{ term: 'Stakeholder', definition: 'A person or group affected by the project or able to influence it.' }, { term: 'Scope', definition: 'The boundary of included and excluded project work.' }], {
-    interviewGuidance: 'Explore the current problem and desired result, then cover every current stakeholder and need and check for missing groups or outcomes. Clarify the actual boundary, material limits and discovery sources naturally. Do not design the solution, invent success targets or require an explanation for each obvious need.',
+    interviewGuidance: "Reuse the known problem, goals, stakeholders, needs and sources. Ask only about a material missing outcome, group, scope limit or conflicting evidence; do not ask for explanations of settled needs.",
     draftingGuidance: 'Format the requested project identity, concise context, stakeholder records, client needs, boundaries and supported sources. Keep one requested outcome or capability per need. Use known measures only; preserve client language and distinguish confirmed limits from assumptions.'
   }),
   document: { titleField: 'projectName', organizationField: 'clientOrganization', versionField: 'version', metadata: [
