@@ -4,11 +4,11 @@ import {
 } from 'vue';
 import { parseRequest, SR_REQUEST_ID, SR_REQUEST_KIND } from '../system-request/model.ts';
 import {
-  calculateProjection, estimatedAnnualBenefit, costComplete, type FinancialProjection,
+  calculateProjection, estimatedAnnualBenefit, estimatedCostAmount, costComplete, type FinancialProjection,
   type FinancialYear,
 } from './calculations.ts';
 import {
-  copyAnalysis, newBenefit, newCost, type BenefitMethod, type BenefitProfile,
+  newBenefit, newCost, type BenefitMethod, type BenefitProfile, type ComparisonKind, type CostMethod,
   type CostBenefitAnalysis, type CostTiming, type FinancialBenefit, type FinancialCost,
 } from './model.ts';
 import { useCostBenefit, type CbaWorkspace } from './use-cost-benefit.ts';
@@ -168,13 +168,14 @@ export const CostBenefitEditor = defineComponent({
           textField('cba-benefit-name-' + item.id, 'Benefit description', item.name,
             value => updateBenefit(item.id, { name: value }), 'e.g. Reduced printing costs'),
           choice<BenefitMethod>('cba-benefit-method-' + item.id, 'Calculation', item.method,
-            [['annual', 'Annual benefit amount'], ['drivers', 'Volume × unit value × change']] as const,
+            [['annual', 'Annual benefit amount'], ['drivers', 'Volume × unit value × change'],
+              ['comparison', 'Compare before and after']] as const,
             value => updateBenefit(item.id, { method: value })),
           ...(item.method === 'annual' ? [
             numberField('cba-benefit-amount-' + item.id, 'Full-year benefit',
               item.annualAmount, value => updateBenefit(item.id, { annualAmount: value }),
               { suffix: state.draft.value.currency }),
-          ] : [
+          ] : item.method === 'drivers' ? [
             numberField('cba-benefit-units-' + item.id, 'Annual units / customers',
               item.units, value => updateBenefit(item.id, { units: value })),
             numberField('cba-benefit-unit-' + item.id, 'Value per unit',
@@ -182,6 +183,25 @@ export const CostBenefitEditor = defineComponent({
               { suffix: state.draft.value.currency }),
             numberField('cba-benefit-change-' + item.id, 'Incremental share',
               item.changePercent, value => updateBenefit(item.id, { changePercent: value }), { suffix: '%' }),
+          ] : [
+            choice<ComparisonKind>('cba-benefit-direction-' + item.id, 'Expected improvement',
+              item.comparisonKind,
+              [['income', 'Increase in annual profit / revenue'],
+                ['savings', 'Reduction in annual expenses']] as const,
+              value => updateBenefit(item.id, { comparisonKind: value })),
+            numberField('cba-benefit-base-units-' + item.id, 'Before: annual units',
+              item.baselineUnits, value => updateBenefit(item.id, { baselineUnits: value })),
+            numberField('cba-benefit-base-value-' + item.id, 'Before: value per unit',
+              item.baselineUnitValue, value => updateBenefit(item.id, { baselineUnitValue: value }),
+              { suffix: state.draft.value.currency }),
+            numberField('cba-benefit-new-units-' + item.id, 'After: annual units',
+              item.projectedUnits, value => updateBenefit(item.id, { projectedUnits: value })),
+            numberField('cba-benefit-new-value-' + item.id, 'After: value per unit',
+              item.projectedUnitValue, value => updateBenefit(item.id, { projectedUnitValue: value }),
+              { suffix: state.draft.value.currency }),
+            numberField('cba-benefit-share-' + item.id, 'Profit margin / retained share',
+              item.contributionPercent, value => updateBenefit(item.id, { contributionPercent: value }),
+              { suffix: '%' }),
           ]),
           choice<BenefitProfile>('cba-benefit-profile-' + item.id, 'Annual realization', item.profile,
             [['level', 'Full amount every year'], ['ramp', 'Linear ramp to full amount in final year']] as const,
@@ -190,9 +210,14 @@ export const CostBenefitEditor = defineComponent({
         h('div', { class: 'cba-derived' }, [
           h('span', 'Calculated full-year benefit'),
           h('strong', estimated === null ? 'Inputs needed' : cash(estimated, state.draft.value.currency)),
+          h('small', item.method === 'comparison'
+            ? 'Full-year benefit = the change in annual units × unit value, multiplied by the profit margin or retained share. An adverse change is not classified as a benefit.'
+            : item.method === 'drivers'
+              ? 'Full-year benefit = annual units × unit value × incremental percentage.'
+              : 'Full-year benefit is entered directly.'),
           h('small', item.profile === 'ramp'
-            ? 'Annual benefit = full-year estimate × projection year ÷ total years.'
-            : 'Applied in full in each projection year.'),
+            ? 'Ramp: annual benefit = full-year estimate × projection year ÷ total years.'
+            : 'Level: applied in full in each projection year.'),
         ]),
         noteFields('cba-benefit-' + item.id, item.source, item.explanation,
           patch => updateBenefit(item.id, patch)),
@@ -210,9 +235,20 @@ export const CostBenefitEditor = defineComponent({
               ['scheduled', 'Once in selected year'],
               ['periodic', 'Every N years from selected year']] as const,
             value => updateCost(item.id, { timing: value })),
-          numberField('cba-cost-amount-' + item.id, 'Expense per occurrence',
-            item.amount, value => updateCost(item.id, { amount: value }),
-            { suffix: state.draft.value.currency }),
+          choice<CostMethod>('cba-cost-method-' + item.id, 'Cost calculation', item.method,
+            [['amount', 'Enter total amount'], ['units', 'Quantity × unit price']] as const,
+            value => updateCost(item.id, { method: value })),
+          ...(item.method === 'amount' ? [
+            numberField('cba-cost-amount-' + item.id, 'Expense per occurrence',
+              item.amount, value => updateCost(item.id, { amount: value }),
+              { suffix: state.draft.value.currency }),
+          ] : [
+            numberField('cba-cost-units-' + item.id, 'Quantity per occurrence',
+              item.units, value => updateCost(item.id, { units: value })),
+            numberField('cba-cost-unit-price-' + item.id, 'Price per unit',
+              item.unitCost, value => updateCost(item.id, { unitCost: value }),
+              { suffix: state.draft.value.currency }),
+          ]),
           ...(item.timing !== 'upfront' ? [
             numberField('cba-cost-start-' + item.id, 'First occurrence (year)',
               item.firstYear, value => { if (value !== null) updateCost(item.id, { firstYear: value }); },
@@ -223,6 +259,11 @@ export const CostBenefitEditor = defineComponent({
               item.intervalYears, value => updateCost(item.id, { intervalYears: value }),
               { integer: true }),
           ] : []),
+        ]),
+        h('div', { class: 'cba-derived' }, [
+          h('span', 'Calculated expense per occurrence'),
+          h('strong', estimatedCostAmount(item) === null ? 'Inputs needed' :
+            cash(estimatedCostAmount(item) as number, state.draft.value.currency)),
         ]),
         h('p', { class: 'cba-item-helper' },
           item.timing === 'upfront' ? 'Included in the initial investment; not discounted.' :
@@ -362,7 +403,8 @@ export const CostBenefitEditor = defineComponent({
           }) : h('p', 'None entered.')]),
         h('section', [h('h3', 'Project costs'),
           current.costs.length ? reportRows(current.costs, item =>
-            item.amount === null ? 'Incomplete' : cash(item.amount, c) + ' · ' +
+            estimatedCostAmount(item) === null ? 'Incomplete' :
+              cash(estimatedCostAmount(item) as number, c) + ' · ' +
               (item.timing === 'upfront' ? 'Year 0' :
                 item.timing === 'annual' ? 'Annual from year ' + item.firstYear :
                 item.timing === 'scheduled' ? 'Year ' + item.firstYear :
@@ -423,12 +465,12 @@ export const CostBenefitEditor = defineComponent({
           ]),
           h('p', { class: 'cba-muted' }, 'Blank assumptions remain unspecified. The initial investment is year 0; revenue and costs in later years are discounted at each year-end.'),
         ]),
-        panel('Expected benefits', 'Use an entered annual estimate or calculate it from volume, unit value and incremental share.', [
+        panel('Expected benefits', 'Enter an amount, use volume and unit value, or compare annual before/after figures.', [
           ...current.benefits.map(benefitEditor),
           !current.benefits.length ? h('p', { class: 'cba-empty' }, 'No financial benefits entered. Each benefit must have supporting assumptions.') : h('span', { class: 'cba-count' }, current.benefits.length + ' benefit items'),
         ], h('button', { class: 'quiet-button', type: 'button', disabled: !state.writable.value,
           onClick: addBenefit }, '+ Add benefit')),
-        panel('Project costs', 'Separate upfront, recurring, one-time future, and periodic replacement expenses.', [
+        panel('Project costs', 'Enter total or quantity-based costs; schedule upfront, recurring, future, and replacement expenses.', [
           ...current.costs.map(costEditor),
           !current.costs.length ? h('p', { class: 'cba-empty' }, 'No financial costs entered. Blank entries are never assumed to be free.') : h('span', { class: 'cba-count' }, current.costs.length + ' cost items'),
         ], h('button', { class: 'quiet-button', type: 'button', disabled: !state.writable.value,

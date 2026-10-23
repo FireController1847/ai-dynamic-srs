@@ -3,7 +3,9 @@ import type { JsonValue, PortableRecord } from '../../core/workspace/dsrs-format
 export const CBA_KIND = 'cba.analysis';
 export const CBA_ID = 'main';
 
-export type BenefitMethod = 'annual' | 'drivers';
+export type BenefitMethod = 'annual' | 'drivers' | 'comparison';
+export type ComparisonKind = 'income' | 'savings';
+export type CostMethod = 'amount' | 'units';
 export type BenefitProfile = 'level' | 'ramp';
 export type CostTiming = 'upfront' | 'annual' | 'scheduled' | 'periodic';
 
@@ -16,6 +18,13 @@ export interface FinancialBenefit extends Record<string, JsonValue> {
   units: number | null;
   valuePerUnit: number | null;
   changePercent: number | null;
+  // Before/after model: incremental contribution from two annual states.
+  comparisonKind: ComparisonKind;
+  baselineUnits: number | null;
+  baselineUnitValue: number | null;
+  projectedUnits: number | null;
+  projectedUnitValue: number | null;
+  contributionPercent: number | null;
   profile: BenefitProfile;
   source: string;
   explanation: string;
@@ -25,7 +34,10 @@ export interface FinancialCost extends Record<string, JsonValue> {
   id: string;
   name: string;
   timing: CostTiming;
+  method: CostMethod;
   amount: number | null;
+  units: number | null;
+  unitCost: number | null;
   // Upfront occurs at year 0. Other schedules start at a specified projection year.
   firstYear: number;
   intervalYears: number | null;
@@ -61,15 +73,19 @@ export function copyAnalysis(value: CostBenefitAnalysis): CostBenefitAnalysis {
 export function newBenefit(): FinancialBenefit {
   return {
     id: crypto.randomUUID(), name: '', method: 'annual', annualAmount: null,
-    units: null, valuePerUnit: null, changePercent: null, profile: 'level',
+    units: null, valuePerUnit: null, changePercent: null,
+    comparisonKind: 'income', baselineUnits: null, baselineUnitValue: null,
+    projectedUnits: null, projectedUnitValue: null, contributionPercent: null,
+    profile: 'level',
     source: '', explanation: '',
   };
 }
 
 export function newCost(): FinancialCost {
   return {
-    id: crypto.randomUUID(), name: '', timing: 'upfront',
-    amount: null, firstYear: 1, intervalYears: null, source: '', explanation: '',
+    id: crypto.randomUUID(), name: '', timing: 'upfront', method: 'amount',
+    amount: null, units: null, unitCost: null,
+    firstYear: 1, intervalYears: null, source: '', explanation: '',
   };
 }
 
@@ -95,7 +111,11 @@ function entryIdentity(value: Record<string, unknown>): boolean {
 }
 function benefit(value: unknown): value is FinancialBenefit {
   return object(value) && entryIdentity(value) &&
-    (value.method === 'annual' || value.method === 'drivers') &&
+    (value.method === 'annual' || value.method === 'drivers' || value.method === 'comparison') &&
+    (value.comparisonKind === undefined || value.comparisonKind === 'income' || value.comparisonKind === 'savings') &&
+    [value.baselineUnits, value.baselineUnitValue, value.projectedUnits,
+      value.projectedUnitValue, value.contributionPercent].every(v =>
+      v === undefined || nullableNonnegative(v)) &&
     (value.profile === 'level' || value.profile === 'ramp') &&
     nullableNonnegative(value.annualAmount) && nullableNonnegative(value.units) &&
     nullableNonnegative(value.valuePerUnit) && nullableNonnegative(value.changePercent);
@@ -103,6 +123,9 @@ function benefit(value: unknown): value is FinancialBenefit {
 function cost(value: unknown): value is FinancialCost {
   return object(value) && entryIdentity(value) &&
     ['upfront', 'annual', 'scheduled', 'periodic'].includes(String(value.timing)) &&
+    (value.method === undefined || value.method === 'amount' || value.method === 'units') &&
+    (value.units === undefined || nullableNonnegative(value.units)) &&
+    (value.unitCost === undefined || nullableNonnegative(value.unitCost)) &&
     nullableNonnegative(value.amount) && nonnegativeInteger(value.firstYear) &&
     (value.intervalYears === null || nonnegativeInteger(value.intervalYears));
 }
@@ -124,7 +147,24 @@ export function parseAnalysis(value: unknown): CostBenefitAnalysis {
   if (ids.length !== new Set(ids).size) {
     throw new Error('The saved Cost-Benefit Analysis has duplicate line item IDs.');
   }
-  return copyAnalysis(value as unknown as CostBenefitAnalysis);
+  const old = copyAnalysis(value as unknown as CostBenefitAnalysis);
+  // Existing v1 records written before the driver additions remain readable.
+  return {
+    ...old,
+    benefits: old.benefits.map(item => ({
+      ...item,
+      comparisonKind: item.comparisonKind === 'savings' ? 'savings' : 'income',
+      baselineUnits: item.baselineUnits ?? null,
+      baselineUnitValue: item.baselineUnitValue ?? null,
+      projectedUnits: item.projectedUnits ?? null,
+      projectedUnitValue: item.projectedUnitValue ?? null,
+      contributionPercent: item.contributionPercent ?? null,
+    })),
+    costs: old.costs.map(item => ({
+      ...item, method: item.method === 'units' ? 'units' : 'amount',
+      units: item.units ?? null, unitCost: item.unitCost ?? null,
+    })),
+  };
 }
 
 export function analysisRecord(value: CostBenefitAnalysis): PortableRecord {

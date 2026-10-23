@@ -33,12 +33,27 @@ export interface FinancialProjection {
 export function estimatedAnnualBenefit(item: FinancialBenefit): number | null {
   if (!item.name.trim()) return null;
   if (item.method === 'annual') return item.annualAmount;
-  if (item.units === null || item.valuePerUnit === null || item.changePercent === null) return null;
-  const result = item.units * item.valuePerUnit * item.changePercent / 100;
-  return Number.isFinite(result) ? result : null;
+  if (item.method === 'drivers') {
+    if (item.units === null || item.valuePerUnit === null || item.changePercent === null) return null;
+    const result = item.units * item.valuePerUnit * item.changePercent / 100;
+    return Number.isFinite(result) ? result : null;
+  }
+  if ([item.baselineUnits, item.baselineUnitValue, item.projectedUnits,
+    item.projectedUnitValue, item.contributionPercent].some(value => value === null)) return null;
+  const before = (item.baselineUnits as number) * (item.baselineUnitValue as number);
+  const after = (item.projectedUnits as number) * (item.projectedUnitValue as number);
+  const difference = item.comparisonKind === 'savings' ? before - after : after - before;
+  const result = difference * (item.contributionPercent as number) / 100;
+  return Number.isFinite(result) && result >= 0 ? result : null;
+}
+export function estimatedCostAmount(item: FinancialCost): number | null {
+  if (item.method === 'amount') return item.amount;
+  if (item.units === null || item.unitCost === null) return null;
+  const amount = item.units * item.unitCost;
+  return Number.isFinite(amount) ? amount : null;
 }
 export function costComplete(item: FinancialCost): boolean {
-  return !!item.name.trim() && item.amount !== null &&
+  return !!item.name.trim() && estimatedCostAmount(item) !== null &&
     (item.timing !== 'periodic' || item.intervalYears !== null);
 }
 export function benefitInYear(item: FinancialBenefit, year: number, horizon: number): number {
@@ -48,7 +63,7 @@ export function benefitInYear(item: FinancialBenefit, year: number, horizon: num
 }
 export function costInYear(item: FinancialCost, year: number): number {
   if (!costComplete(item)) return 0;
-  const amount = item.amount as number;
+  const amount = estimatedCostAmount(item) as number;
   if (item.timing === 'upfront') return year === 0 ? amount : 0;
   if (year < item.firstYear) return 0;
   if (item.timing === 'scheduled') return year === item.firstYear ? amount : 0;
