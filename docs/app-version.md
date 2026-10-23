@@ -112,9 +112,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.10.0-alpha` adds optional Step 06.5 after Verification & Traceability. One copied prompt reviews the complete saved workspace context while restricting proposed changes to existing, eligible SRS narrative fields. The separate `dsrs-cleanup` v1 JSON handoff offers only shorter, supported edits, with live target/snapshot checks, before/after review, individually selected application and stale-response rejection. Skipping cleanup never affects Phase 6 completion. No canonical IDs, references, statuses, figures, non-SRS documents, verification conclusions or saved schema structures are changed by the import. Existing `.dsrs` workspace format remains 2; see [optional AI cleanup](ai-cleanup.md).
 
+## Full-workspace Phase 6 AI cleanup repair
+
+`0.11.1-alpha` makes SRS-06.5 render its actual sectionless custom form (rather than the structure-only placeholder). It replaces the previous text-only cleanup with full uncompressed workspace JSON export, a copied review prompt, and a separate `dsrs-cleanup` v2 changes-only import supporting add, replace and remove across canonical SRS records and Phases 1–6. The app performs a complete source fingerprint check and detached-copy structural validation, then shows before/after details for selected atomic apply; an immediate undo is available while no other saved data changes. Phase 7 and non-SRS sections are read-only context for the cleanup. No saved schema or `.dsrs` format migration is required. See [AI cleanup](ai-cleanup.md).
+
 ## Manual review
 
-Open the application and confirm `v0.11.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.11.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.11.1-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.11.1-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 
