@@ -181,6 +181,12 @@ export function useClientBrief(workspace: ClientWorkspace) {
     }
   }
 
+  async function retrySave(): Promise<boolean> {
+    if (conflict.value) return false;
+    problem.value = '';
+    return flushSave();
+  }
+
   async function reload(): Promise<void> {
     if (dirty.value && !window.confirm('Discard unsaved Client Requirements edits and load the saved brief?')) return;
     cancelScheduledSave();
@@ -188,5 +194,5 @@ export function useClientBrief(workspace: ClientWorkspace) {
     await refresh(true);
   }
 
-  return { draft, dirty, ready, busy, writable, conflict, problem, status, update, flushSave, reload };
+  return { draft, dirty, ready, busy, writable, conflict, problem, status, update, flushSave, retrySave, reload };
 }

@@ -346,8 +346,11 @@ export const ClientRequirements = defineComponent({
           h('p', state.problem.value),
           h('button', {
             type: 'button', class: 'quiet-button',
-            onClick: () => { void state.reload(); },
-          }, state.conflict.value ? 'Reload saved brief' : 'Retry from saved brief'),
+            onClick: () => {
+              if (state.conflict.value) void state.reload();
+              else void state.retrySave();
+            },
+          }, state.conflict.value ? 'Reload saved brief' : 'Retry save'),
         ]) : null,
         h('div', { class: 'cr-layout' }, [
           h(Transition, { name: 'cr-pane' }, {
