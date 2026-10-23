@@ -8,11 +8,6 @@ export const AI_FORM_RESPONSE_VERSION = 1 as const;
 
 export type AiFormRecordId = string | number;
 
-export interface AiFormNeed {
-  path: string;
-  reason: string;
-}
-
 export interface AiFormRecordResponse {
   id?: AiFormRecordId | null;
   parent?: AiFormRecordId | null;
@@ -29,7 +24,6 @@ export interface AiFormResponse {
   path?: AiFormRecordId[];
   fields?: DataModel;
   records?: AiFormRecordResponse[];
-  needsInformation?: AiFormNeed[];
 }
 
 export interface AiFormResponseContract {
@@ -71,18 +65,6 @@ function parseRecord(value: unknown, index: number): AiFormRecordResponse {
   };
 }
 
-function parseNeeds(value: unknown): AiFormNeed[] | undefined {
-  if (value === undefined) return undefined;
-  if (!Array.isArray(value)) responseError('needsInformation must be an array.');
-  return value.map((item, index) => {
-    if (!isObject(item)) responseError(`needsInformation[${index}] must be an object.`);
-    onlyKeys(item, ['path', 'reason'], `needsInformation[${index}]`);
-    if (typeof item.path !== 'string' || !item.path.trim()) responseError(`needsInformation[${index}].path must be a non-empty string.`);
-    if (typeof item.reason !== 'string' || !item.reason.trim()) responseError(`needsInformation[${index}].reason must be a non-empty string.`);
-    return { path: item.path.trim(), reason: item.reason.trim() };
-  });
-}
-
 function unfenceJson(text: string) {
   const trimmed = text.trim();
   const fenced = /^\`\`\`(?:json|dsrs-form)?\s*([\s\S]*?)\s*\`\`\`$/i.exec(trimmed);
@@ -100,6 +82,8 @@ export function parseAiFormResponse(input: string | unknown): AiFormResponse {
   }
 
   if (!isObject(value)) responseError('the response root must be an object.');
+  // Allow the obsolete needsInformation key from previously copied AI responses.
+  // It is intentionally ignored regardless of shape; all other unknown keys still fail.
   onlyKeys(value, ['format', 'version', 'page', 'section', 'mode', 'record', 'path', 'fields', 'records', 'needsInformation'], 'response');
 
   if (value.format !== AI_FORM_RESPONSE_FORMAT) responseError(`format must be "${AI_FORM_RESPONSE_FORMAT}".`);
@@ -134,8 +118,6 @@ export function parseAiFormResponse(input: string | unknown): AiFormResponse {
     if (new Set(existingIds).size !== existingIds.length) responseError('records contains a duplicate existing record ID.');
   }
 
-  const needsInformation = parseNeeds(value.needsInformation);
-
   return {
     format: AI_FORM_RESPONSE_FORMAT,
     version: AI_FORM_RESPONSE_VERSION,
@@ -145,8 +127,7 @@ export function parseAiFormResponse(input: string | unknown): AiFormResponse {
     ...(record !== undefined ? { record } : {}),
     ...(path ? { path } : {}),
     ...(hasFields ? { fields: value.fields as DataModel } : {}),
-    ...(records ? { records } : {}),
-    ...(needsInformation ? { needsInformation } : {})
+    ...(records ? { records } : {})
   };
 }
 
@@ -224,10 +205,9 @@ export function buildAiFormResponseContract(
       records: [{
         id: null,
         fields: fieldTemplate
-      }],
-      needsInformation: []
+      }]
     }
-    : { ...base, fields: fieldTemplate, needsInformation: [] };
+    : { ...base, fields: fieldTemplate };
 
   const fieldTypes = fields.flatMap(field => typeDescription(field, documentModel));
   if (parent.length) fieldTypes.unshift(`records[].parent={${parent.join('|')}} for new records`);
@@ -243,7 +223,7 @@ export function renderAiFormResponseContract(
   const contract = buildAiFormResponseContract(page, section, documentModel);
   return [
     'Return only one valid dsrs-form v1 JSON object. mode is merge. null means unsupported/no change; omitted fields also remain unchanged.',
-    'Use existing record IDs exactly; omit id (or leave it null) for a new record. Add parent only for a new grouped record. Never return read-only/app-managed fields or diagram payloads.',
+    'Use existing record IDs exactly; omit id (or leave it null) for a new record. Add parent only for a new grouped record. Never return read-only/app-managed fields or diagram payloads. Do not add a needsInformation list.',
     `Shape: ${JSON.stringify(contract.envelope)}`,
     contract.fieldTypes.length ? `Types: ${contract.fieldTypes.join('; ')}` : ''
   ].filter(Boolean).join('\n');
