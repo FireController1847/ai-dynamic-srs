@@ -4,6 +4,7 @@ import { DocumentView } from '../features/documents/document-view.ts';
 import { ClientRequirements, type ClientRequirementsHandle } from '../features/client-requirements/client-requirements.ts';
 import { SystemRequestEditor, type SystemRequestHandle } from '../features/system-request/system-request.ts';
 import { CostBenefitEditor, type CostBenefitHandle } from '../features/cost-benefit/cost-benefit.ts';
+import { FsaEditor, type FsaHandle } from '../features/feasibility/feasibility.ts';
 import { DocumentSidebar } from './document-sidebar.ts';
 import { initializeTheme } from './theme.ts';
 import { ThemeMenu, type ThemeMenuHandle } from './theme-menu.ts';
@@ -27,9 +28,11 @@ const App = defineComponent({
     const crDirty = ref(false);
     const srDirty = ref(false);
     const cbaDirty = ref(false);
+    const fsaDirty = ref(false);
     const crEditor = ref<ClientRequirementsHandle | null>(null);
     const srEditor = ref<SystemRequestHandle | null>(null);
     const cbaEditor = ref<CostBenefitHandle | null>(null);
+    const fsaEditor = ref<FsaHandle | null>(null);
     const selectedDocument = computed(() => findDocument(selectedId.value) ?? DOCUMENTS[0]);
     const menuButton = ref<HTMLButtonElement | null>(null);
     const main = ref<HTMLElement | null>(null);
@@ -66,14 +69,16 @@ const App = defineComponent({
       // Flush the currently selected document before switching or changing the URL.
       const current = selectedId.value;
       const dirty = current === 'cr' ? crDirty.value : current === 'sr' ? srDirty.value :
-        current === 'cba' ? cbaDirty.value : false;
+        current === 'cba' ? cbaDirty.value : current === 'fsa' ? fsaDirty.value : false;
       if (!dirty) return true;
       const saved = current === 'cr' ? await crEditor.value?.flushSave() :
         current === 'sr' ? await srEditor.value?.flushSave() :
-          await cbaEditor.value?.flushSave();
+        current === 'cba' ? await cbaEditor.value?.flushSave() :
+          await fsaEditor.value?.flushSave();
       if (saved) return true;
       return window.confirm('The latest ' + (current === 'cr' ? 'Client Requirements' :
-        current === 'sr' ? 'System Request' : 'Cost-Benefit Analysis') +
+        current === 'sr' ? 'System Request' : current === 'cba' ? 'Cost-Benefit Analysis' :
+          'Feasibility & Stakeholder Analysis') +
         ' changes could not be saved. Leave and discard them?');
     }
 
@@ -212,7 +217,15 @@ const App = defineComponent({
                         onDirtyChange: (value: boolean) => { cbaDirty.value = value; },
                       }),
                     })
-                    : h(DocumentView, { document: selectedDocument.value }),
+                    : selectedId.value === 'fsa'
+                      ? h(DocumentView, { document: selectedDocument.value }, {
+                        default: () => h(FsaEditor, {
+                          ref: fsaEditor,
+                          workspace,
+                          onDirtyChange: (value: boolean) => { fsaDirty.value = value; },
+                        }),
+                      })
+                      : h(DocumentView, { document: selectedDocument.value }),
             ]),
           ]),
         ]),

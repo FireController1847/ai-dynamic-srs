@@ -1,0 +1,120 @@
+/* FSA is a qualitative assessment workspace, not a prose editor or financial model. */
+.fsa-workspace { display: grid; gap: 14px; min-width: 0; }
+.fsa-toolbar, .fsa-toolbar-actions, .fsa-group-header, .fsa-entry-actions {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+}
+.fsa-toolbar-actions { gap: 8px 16px; }
+.fsa-guide, .fsa-muted { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.fsa-guide { padding: 10px 12px; border-left: 3px solid var(--brand); background: var(--surface-subtle); border-radius: var(--radius); }
+.fsa-panel {
+  display: grid; gap: 14px; min-width: 0; padding: clamp(14px, 2vw, 20px);
+  border: 1px solid var(--border-color); border-radius: var(--radius-dialog); background: var(--page-background);
+}
+.fsa-panel-heading { display: grid; gap: 3px; }
+.fsa-panel-heading h3 { margin: 0; font-size: 17px; }
+.fsa-panel-heading p { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.fsa-group { display: grid; gap: 8px; min-width: 0; }
+.fsa-group + .fsa-group { border-top: 1px solid var(--border-color); padding-top: 14px; }
+.fsa-group-header h4 { font-size: 14px; margin: 0; }
+.fsa-group-header .quiet-button { min-height: 32px; }
+.fsa-sponsor-action { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.fsa-entry, .fsa-assessment-card {
+  min-width: 0; border: 1px solid var(--border-color); border-radius: var(--radius);
+  background: var(--surface-subtle); overflow: hidden;
+}
+.fsa-entry > summary, .fsa-assessment-header {
+  cursor: pointer; list-style-position: inside; padding: 11px 13px;
+}
+.fsa-entry > summary:hover, .fsa-assessment-header:hover { background: var(--surface-hover); }
+.fsa-entry > summary { display: list-item; line-height: 1.6; }
+.fsa-entry-label { font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.fsa-entry-meta { display: inline; margin-left: 8px; color: var(--text-secondary); font-size: 12px; }
+.fsa-entry-body, .fsa-assessment-body {
+  display: grid; gap: 12px; padding: 14px;
+  border-top: 1px solid var(--border-color); background: var(--page-background);
+}
+.fsa-field { display: grid; gap: 5px; min-width: 0; }
+.fsa-field label { font-weight: 600; font-size: 12px; }
+.fsa-field textarea { min-height: 76px; }
+.fsa-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fsa-crossref { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: var(--radius); }
+.fsa-crossref strong { display: block; font-size: 12px; }
+.fsa-crossref p { margin: 5px 0; font-size: 12px; line-height: 1.5; }
+.fsa-crossref a, .fsa-financial a, .fsa-note a { color: var(--brand-text); font-size: 12px; }
+.fsa-assessment-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px 16px;
+}
+.fsa-assessment-title { display: grid; gap: 4px; min-width: 0; flex: 1 1 260px; }
+.fsa-assessment-title strong { font-size: 13px; }
+.fsa-assessment-title small { color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+.fsa-level {
+  display: inline-block; padding: 5px 8px; border-radius: 20px; font-size: 11px;
+  font-weight: 600; white-space: nowrap; background: var(--surface-hover); color: var(--text-secondary);
+}
+.fsa-level-favorable { color: var(--success); background: color-mix(in srgb, var(--success) 10%, transparent); }
+.fsa-level-concerns { color: var(--brand-text); background: var(--brand-tint); }
+.fsa-level-high-risk { color: var(--danger); background: var(--danger-tint); }
+.fsa-level-unknown { border: 1px dashed var(--control-border); }
+.fsa-references { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 10px 12px;
+  margin: 0; border: 1px solid var(--border-color); border-radius: var(--radius); min-width: 0; }
+.fsa-references legend { padding: 0 5px; font-size: 12px; font-weight: 600; }
+.fsa-reference { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; }
+.fsa-reference input { accent-color: var(--brand); min-height: 17px; min-width: 17px; }
+.fsa-financial, .fsa-note {
+  display: grid; gap: 10px; min-width: 0; padding: 14px;
+  border: 1px solid var(--border-color); border-radius: var(--radius); background: var(--surface-subtle);
+}
+.fsa-note { border-left: 3px solid var(--brand); }
+.fsa-note p { margin: 0; line-height: 1.55; }
+.fsa-financial-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.fsa-financial-grid > div { min-width: 0; padding: 10px; border: 1px solid var(--border-color);
+  border-radius: var(--radius); background: var(--page-background); }
+.fsa-financial-grid dt { font-size: 11px; color: var(--text-secondary); }
+.fsa-financial-grid dd { margin: 6px 0 0; font-weight: 700; font-size: 15px; overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums; }
+.fsa-overview { display: grid; gap: 8px; }
+.fsa-overview > div { display: grid; gap: 3px; padding: 10px 12px;
+  border-left: 3px solid var(--control-border); background: var(--surface-subtle); }
+.fsa-overview strong { font-size: 12px; }
+.fsa-overview span { color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.fsa-report { width: min(100%, 960px); margin-inline: auto; gap: 20px; }
+.fsa-report > h2 { margin: 0; font-size: 23px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+.fsa-report section { display: grid; gap: 10px; min-width: 0; }
+.fsa-report section h3 { font-size: 15px; }
+.fsa-report-group { display: grid; gap: 4px; }
+.fsa-report h4 { font-size: 13px; }
+.fsa-report ul { margin: 0; padding-left: 24px; }
+.fsa-report li { margin-bottom: 9px; }
+.fsa-report li p { margin: 4px 0 0; white-space: pre-wrap; }
+.fsa-report-area { display: grid; gap: 5px; padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+.fsa-report-area-title { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; }
+.fsa-report-area-title span { font-size: 11px; color: var(--paper-ink-dark); }
+.fsa-report-area p, .fsa-report-intro, .fsa-report section > p, .fsa-copy {
+  margin: 0; white-space: pre-wrap; line-height: 1.65; font-size: 12px;
+}
+.fsa-report-empty, .fsa-report-footer { color: var(--text-secondary); font-size: 11px; }
+.fsa-report-footer { border-top: 1px solid var(--border-color); padding-top: 10px; }
+@media (max-width: 760px) {
+  .fsa-form-grid { grid-template-columns: minmax(0, 1fr); }
+  .fsa-financial-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .fsa-toolbar .cr-view-toggle { flex: 1 1 100%; }
+  .fsa-toolbar .cr-view-toggle button { flex: 1; }
+  .fsa-toolbar-actions { width: 100%; }
+}
+@media (max-width: 400px) { .fsa-financial-grid { grid-template-columns: 1fr; } }
+@media print {
+  .fsa-toolbar, .fsa-guide, .fsa-panel, .fsa-workspace > .cr-warning,
+  .fsa-workspace > .fsa-overview, .app-header, .app-version, .document-page-header { display: none !important; }
+  body, .app-shell, .app-layout, .app-content, .document-page-container, .document-page {
+    height: auto !important; max-height: none !important; width: 100% !important;
+    overflow: visible !important; background: #fff !important;
+  }
+  .fsa-report { display: grid !important; width: 100%; max-width: none; padding: 0; border: 0;
+    box-shadow: none; background: #fff !important; color: #111 !important; }
+  .fsa-report section, .fsa-report-area, .fsa-report-group { break-inside: avoid-page; }
+  .fsa-report * { color: #111 !important; }
+  .fsa-report .fsa-financial, .fsa-report .fsa-financial-grid > div { background: #fff !important; }
+}
