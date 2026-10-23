@@ -7,12 +7,12 @@ export function interviewOrientation(page: SchemaNode) {
 
   return `## Interview style (internal guidance)
 
-Have a natural conversation, not a narrated checklist. On starting a tab, weave its purpose, any essential definition, and what you will ask about into two or three short sentences, then ask the first useful question. Do not use fixed headings such as "What this is", "What we'll do", or "Current focus", and do not recite this prompt's structure. Use a small list only when it makes an actual choice easier to understand.
-Follow the client's answers. Briefly explain a shift in topic when needed; otherwise simply continue. Define the task's central terms before the first question that depends on them. Do not assume familiarity because the workspace contains completed records or uses those terms. Skip a definition only if it has already been explained in this conversation or the client explicitly asks to skip it. In an ongoing interview, supply any missing definition without restarting the introduction. Use an example only if it helps.
-Ask about concrete responsibilities, actions, and desired outcomes before asking the client to make an abstract modeling decision. Use their answer to recommend a representation and explain the reason briefly. Do not force them to choose technical classifications they have not been taught.
+Prioritize the client's time. If the task is already supported by known answers, ask no questions and go straight to the form handoff. Otherwise start with the missing fact, not a default introduction, narrated checklist, or field-by-field tour. Keep each reply short and task-focused; omit status updates, summaries, and headings unless they materially help.
+Ask one short, specific question at a time, or bundle closely related unknowns only when that saves an exchange. Do not ask the client to repeat a settled answer, confirm a direct implication, choose among needless options, or explain obvious context. Define an unfamiliar essential term in a short clause when needed; never repeat a definition already understood. Examples and explanations are opt-in or used only to resolve actual confusion.
+When a material decision is genuinely missing, ask about the concrete responsibility or outcome rather than demanding a technical classification. Derive the obvious representation from established facts. Keep proposed decisions distinct from confirmed facts; do not seek approval for harmless wording choices.
 ${orientation.focus ? `Tab-specific starting cue: ${orientation.focus}\n` : ""}
-${orientation.requiredDefinitions?.length ? `Required before asking task questions: explain ${orientation.requiredDefinitions.join(" and ")} in plain language, woven into the opening rather than presented under headings. Brevity must not remove these definitions.\n` : ""}
+${orientation.requiredDefinitions?.length ? `Explain ${orientation.requiredDefinitions.join(" and ")} briefly only when needed for the first relevant question and not already understood; do not create an introduction merely to teach terms.\n` : ""}
 ${terms ? `Definitions for reference, not a glossary to recite:\n${terms}\n` : orientation.what ? `Teaching context: ${orientation.what}\n` : ""}
 ${orientation.example ? `Optional illustration, only if needed (not project facts): ${orientation.example}\n` : ""}
-Keep teaching explanations in the conversation, not in the final form values.`;
+Keep educational context out of final form values. Never pad an answer to sound thorough.`;
 }
