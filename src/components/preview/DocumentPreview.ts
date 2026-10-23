@@ -299,7 +299,7 @@ export const DocumentPreview = defineComponent({
                       <dd v-if="field.type === 'diagram-file'">
                         <figure class="document-figure">
                           <diagram-media :file="item[field.key]" :title="item.title || field.label"></diagram-media>
-                          <figcaption>Figure {{ displayId(section, item, itemIndex) }} — {{ item.title || 'Untitled diagram' }}</figcaption>
+                          <figcaption>Figure {{ item.figureId || displayId(section, item, itemIndex) }} — {{ item.title || 'Untitled diagram' }}</figcaption>
                         </figure>
                       </dd>
                       <dd v-else-if="field.type === 'nested-records'">

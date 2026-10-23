@@ -9,6 +9,7 @@ import { phaseThreeStages } from "../phase-three/stages.ts";
 import { phaseFourStages } from "../phase-four/stages.ts";
 import { phaseFiveStages } from "../phase-five/stages.ts";
 import { phaseSixStages } from "../phase-six/stages.ts";
+import { phaseSevenStages } from "../phase-seven/stages.ts";
 
 interface PhaseDefinition {
   id: string;
@@ -149,43 +150,7 @@ const phaseDefinitions: PhaseDefinition[] = [
     role: "assemble",
     dependsOn: ["srs-reconcile-verify"],
     reviews: ["srs-reconcile-verify"],
-    stages: [
-      {
-        id: "srs-assembly-document-control",
-        stateKey: "documentControl",
-        label: "Document Control",
-        description: "Prepare identifying metadata, revision history, and document status for the assembled specification.",
-        documentTargets: ["front-matter.document-control", "front-matter.revision-history"]
-      },
-      {
-        id: "srs-assembly-artifacts-references",
-        stateKey: "controlledArtifacts",
-        label: "Figures & References",
-        description: "Confirm that every figure, model, source, and external reference is controlled once and cited consistently from its final destination.",
-        documentTargets: ["introduction.references", "supporting-information.artifacts"]
-      },
-      {
-        id: "srs-assembly-appendices",
-        stateKey: "appendices",
-        label: "Appendices",
-        description: "Attach or reference prior analysis and supporting material from canonical workspace records instead of copying them into the SRS.",
-        documentTargets: ["supporting-information.appendices"]
-      },
-      {
-        id: "srs-assembly-review",
-        stateKey: "assemblyReview",
-        label: "Assembly Review",
-        description: "Review numbering, cross-references, unresolved issues, approval readiness, and presentation as one complete specification.",
-        documentTargets: ["verification-traceability.coverage", "verification-traceability.verification"]
-      },
-      {
-        id: "srs-assembly-complete-document",
-        stateKey: "completeDocument",
-        label: "Complete SRS",
-        description: "Preview and export the complete document assembled from the accepted records and models created throughout the workflow.",
-        documentTargets: []
-      }
-    ]
+    stages: phaseSevenStages
   }
 ];
 
