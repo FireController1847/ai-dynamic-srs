@@ -1,0 +1,15 @@
+.workspace-files {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-dialog);
+  background: var(--surface-subtle);
+}
+.workspace-files h3 { margin: 0; }
+.workspace-files p { margin: 0; color: var(--text-secondary); }
+.workspace-files-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.workspace-import-review { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--control-border); border-radius: var(--radius); background: var(--page-background); }
+.workspace-file-message { color: var(--text-secondary); }
+.workspace-file-status { margin: 0; color: var(--text-secondary); }
+.workspace-file-error, .workspace-files .workspace-file-error { color: var(--danger); }

@@ -1,6 +1,8 @@
 import { createApp, defineComponent, h, ref } from 'vue';
 import { initializeTheme } from './theme.ts';
 import { ThemeMenu, type ThemeMenuHandle } from './theme-menu.ts';
+import { WorkspaceFiles } from './workspace-files.ts';
+import { useWorkspace } from './workspace.ts';
 import '../styles/index.css';
 
 initializeTheme();
@@ -9,6 +11,7 @@ const App = defineComponent({
   name: 'App',
   setup() {
     const themeMenu = ref<ThemeMenuHandle | null>(null);
+    const workspace = useWorkspace();
 
     return () => h('div', { class: 'app-shell' }, [
       h('header', { class: 'app-header' }, [
@@ -43,11 +46,24 @@ const App = defineComponent({
           h('div', { class: 'home-page' }, [
             h('h2', 'Workspace'),
             h('p', { class: 'home-intro' }, 'A new foundation for Dynamic SRS.'),
-            h('section', { class: 'blank-state', 'aria-label': 'Empty workspace' }, [
-              h('div', { class: 'blank-state-mark', 'aria-hidden': 'true' }, '✦'),
-              h('h3', 'A blank slate'),
-              h('p', 'No workflows or documents have been defined yet.'),
-            ]),
+            !workspace.ready.value
+              ? h('p', { class: 'workspace-file-error', role: 'status' },
+                  workspace.problem.value || 'Opening locally saved workspace…')
+              : [
+                h('section', { class: 'blank-state', 'aria-label': 'Empty workspace' }, [
+                  h('div', { class: 'blank-state-mark', 'aria-hidden': 'true' }, '✦'),
+                  h('h3', 'A blank slate'),
+                  h('p', 'No SRS workflows or documents have been defined yet.'),
+                ]),
+                h('p', { class: 'workspace-file-status' },
+                  workspace.current.value?.file.records.length === 0
+                    ? 'IndexedDB is ready. This workspace has no saved records yet.'
+                    : 'IndexedDB is ready. ' + workspace.current.value?.file.records.length + ' saved records.'),
+                h(WorkspaceFiles, { workspace }),
+                workspace.problem.value
+                  ? h('p', { class: 'workspace-file-error', role: 'alert' }, workspace.problem.value)
+                  : null,
+              ],
           ]),
         ]),
       ]),

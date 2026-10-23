@@ -4,7 +4,7 @@
 
 A browser-based workspace for exploring a better way to produce and refine software requirements specifications with AI.
 
-> **Blank-slate redesign:** This branch is a fresh technical starting point. No SRS construction workflow, document schema, agent orchestration, or product features have been chosen or implemented yet. The previous application is preserved on `main`.
+> **Blank-slate redesign:** This branch is a fresh technical starting point. No SRS construction workflow, domain-specific record schema, or agent orchestration has been chosen yet. The previous application is preserved on `main`.
 
 ## AI development disclosure
 
@@ -22,7 +22,7 @@ This scaffold follows the **Dynamic Learner** project's engineering baseline, no
 - Fluent-inspired neutral surfaces, blue accent, responsive layout, and Dynamic Learner's full theme module (system-following light/dark settings, stored preferences, and a settings dialog).
 - Node.js 24+ and GitHub Actions build verification.
 
-The home page is intentionally empty. There are no forms, agents, local workspace data, import/export contracts, diagrams, SRS phases, or domain assumptions to preserve. See [architecture](docs/architecture.md) and [design](docs/design.md) for the small amount of scaffolding that exists.
+The home page intentionally has no SRS forms, agents, diagrams, or phases. It now provides an IndexedDB-backed local workspace and portable .dsrs backup/restore; no domain-specific records or workflows have been established. See [architecture](docs/architecture.md) and [design](docs/design.md) for the small amount of scaffolding that exists.
 
 ## Run locally
 
@@ -41,6 +41,14 @@ npm run build
 ```
 
 The build writes a static site to ignored `dist/`. The development server reloads when source changes. Dependencies are installed with npm and bundled locally; the application has no runtime CDN dependency.
+
+## Local workspace and .dsrs backups
+
+Dynamic SRS stores the active working workspace in the browser's IndexedDB database (`dynamic-srs-data`). Records are keyed individually, with guarded revision updates so future features won't rewrite unrelated data. A `.dsrs` file is a portable JSON snapshot, **not an IndexedDB database dump**.
+
+The empty workspace page has **Download .dsrs** and **Import .dsrs** controls. Imports are validated and reviewed before replacing the active workspace; staging and atomic activation prevent partial restores. Work in this browser is not automatically backed up anywhere else. Themes and other local preferences stay outside the `.dsrs` file.
+
+This redesign starts with `.dsrs` format **version 1**, independent of the IndexedDB schema version. The old Dynamic SRS format v2 is *not* yet supported by the new import contract. See [workspace format and persistence](docs/workspace-data.md).
 
 ## Deployment
 

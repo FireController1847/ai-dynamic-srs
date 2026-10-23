@@ -12,9 +12,10 @@
 - Once those layers exist, dependency direction is app -> features/components/core, features -> components/core, components -> core, core -> core. Avoid circular/upward dependencies and abstractions created for hypothetical future consumers.
 - Treat all future imported, persisted, or AI-produced data as `unknown` until validated. Do not weaken TS strictness with blanket `any` or `@ts-nocheck`.
 - Avoid arbitrary caps and duplicate sources of truth. Preserve explicit ownership, IDs, and boundaries when those are eventually designed.
-- Make focused changes; do not re-create planning flows, prompts, schemas, diagrams, data persistence, or exports before requirements are settled.
+- Make focused changes; do not re-create planning flows, prompts, domain schemas, or diagrams before requirements are settled. Preserve the established IndexedDB and .dsrs boundaries; see `docs/workspace-data.md`.
 
 ## UX, verification, and delivery
+- Read `docs/workspace-data.md` for persistence, imports, schema evolution, backups, and conflict-handling changes.
 - Follow `docs/design.md` for the Fluent-style visual baseline: reusable semantic tokens, accessible controls, keyboard support, responsive sizing, dark theme, reduced-motion respect.
 - `docs/architecture.md` records the current *minimal* structure, not a future blueprint. Amend it only for actual decisions.
 - `.github/workflows/verify-build.yml` verifies type checking/build on pushes. Do not invent additional test suites or run browser automation unless requested; prefer focused manual verification.
