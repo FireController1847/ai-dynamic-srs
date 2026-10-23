@@ -2,6 +2,7 @@ import { computed, createApp, defineComponent, h, nextTick, onBeforeUnmount, onM
 import { DOCUMENTS, findDocument, type DocumentId } from '../features/documents/catalog.ts';
 import { DocumentView } from '../features/documents/document-view.ts';
 import { ClientRequirements, type ClientRequirementsHandle } from '../features/client-requirements/client-requirements.ts';
+import { SystemRequestEditor, type SystemRequestHandle } from '../features/system-request/system-request.ts';
 import { DocumentSidebar } from './document-sidebar.ts';
 import { initializeTheme } from './theme.ts';
 import { ThemeMenu, type ThemeMenuHandle } from './theme-menu.ts';
@@ -23,7 +24,9 @@ const App = defineComponent({
     const sidebarOpen = ref(false);
     const selectedId = ref<DocumentId>(documentIdFromLocation());
     const crDirty = ref(false);
+    const srDirty = ref(false);
     const crEditor = ref<ClientRequirementsHandle | null>(null);
+    const srEditor = ref<SystemRequestHandle | null>(null);
     const selectedDocument = computed(() => findDocument(selectedId.value) ?? DOCUMENTS[0]);
     const menuButton = ref<HTMLButtonElement | null>(null);
     const main = ref<HTMLElement | null>(null);
@@ -56,10 +59,17 @@ const App = defineComponent({
     }
 
     async function canLeaveDocument(nextId: DocumentId): Promise<boolean> {
-      if (nextId === selectedId.value || !crDirty.value) return true;
-      // Debounced edits are flushed before navigation so a fast click cannot lose them.
-      if (await crEditor.value?.flushSave()) return true;
-      return window.confirm('The latest Client Requirements changes could not be saved. Leave and discard them?');
+      if (nextId === selectedId.value) return true;
+      // Flush the currently selected document before switching or changing the URL.
+      const current = selectedId.value;
+      const dirty = current === 'cr' ? crDirty.value : current === 'sr' ? srDirty.value : false;
+      if (!dirty) return true;
+      const saved = current === 'cr'
+        ? await crEditor.value?.flushSave()
+        : await srEditor.value?.flushSave();
+      if (saved) return true;
+      return window.confirm('The latest ' + (current === 'cr' ? 'Client Requirements' : 'System Request') +
+        ' changes could not be saved. Leave and discard them?');
     }
 
     async function selectDocument(id: DocumentId) {
@@ -181,7 +191,15 @@ const App = defineComponent({
                     onDirtyChange: (value: boolean) => { crDirty.value = value; },
                   }),
                 })
-                : h(DocumentView, { document: selectedDocument.value }),
+                : selectedId.value === 'sr'
+                  ? h(DocumentView, { document: selectedDocument.value }, {
+                    default: () => h(SystemRequestEditor, {
+                      ref: srEditor,
+                      workspace,
+                      onDirtyChange: (value: boolean) => { srDirty.value = value; },
+                    }),
+                  })
+                  : h(DocumentView, { document: selectedDocument.value }),
             ]),
           ]),
         ]),
