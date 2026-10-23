@@ -39,7 +39,7 @@ function hash(value: string): string {
 
 /** Fingerprint all saved project content, not navigation timestamps or app chrome. */
 export function cleanupSourceHash(document: DocumentModel): string {
-  return hash(JSON.stringify(document));
+  return hash(JSON.stringify(document) || '');
 }
 
 export function cleanupPrompt(document: DocumentModel): string {
@@ -164,6 +164,6 @@ export function applyCleanup(document: DocumentModel, plan: CleanupPlan): void {
 
 export function cleanupPreview(value: unknown): string {
   if (value === undefined) return '(not present)';
-  const json = JSON.stringify(value, null, 2);
+  const json = JSON.stringify(value, null, 2) || String(value);
   return json.length > 1600 ? json.slice(0, 1600) + '\n… (preview truncated)' : json;
 }
