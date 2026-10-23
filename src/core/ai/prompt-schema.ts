@@ -74,12 +74,12 @@ export function fieldInputContract(field: Field, documentModel: DataModel): stri
   } else if (field.type === 'date') {
     rules.push('Date input: YYYY-MM-DD, only when supported.');
   } else if (field.type === 'textarea') {
-    rules.push('Narrative input: connected prose for explanations; lists for distinct items or ordered steps. Preserve necessary flow and acceptance detail.');
+    rules.push('Narrative input: the shortest complete answer, usually one or two sentences. Use compact bullets for distinct facts or numbered steps for an actual flow. Retain necessary conditions and acceptance detail; omit repeated background, headings and filler.');
   } else if (!reference) {
     rules.push(field.type === 'url' ? 'One supplied URL, no invented locator.' : 'Single-line plain text, no bullets or introductory prose.');
   }
   if (field.dateDocument) rules.push(`Date maintained automatically by the app (${documentDate(documentModel[field.dateDocument], '__automaticDate') || 'not recorded'}). Return a manual override only when the user requested one or a saved override exists; otherwise this is automatic context. Do not invent a date.`);
-  if (narrativeMarkdown(field)) rules.push('Basic Markdown is supported where useful; no HTML or wrapping code fence.');
+  if (narrativeMarkdown(field)) rules.push('Use Markdown only when it improves clarity; no decorative headings, HTML or wrapping code fence.');
   if (field.aiHint) rules.push(field.aiHint);
   return rules.join(' ');
 }
