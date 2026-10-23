@@ -20,7 +20,7 @@ export const costBenefitAnalysisSchema: SchemaNode = {
     { term: 'Net present value (NPV)', definition: 'Discounted benefits minus discounted costs.' },
     { term: 'Return on investment (ROI)', definition: 'Net present value divided by discounted costs, as a percentage.' }
   ], {
-    interviewGuidance: 'Cover every current benefit, one-time cost, ongoing cost and supporting source. Reuse known System Request benefits and clarify the quantities, amounts, timing and sources needed by each selected calculation. Establish model settings and material uncertainty. Keep nonfinancial benefits without invented amounts; do not require re-entry of calculated totals.',
+    interviewGuidance: "Use established benefits, costs, sources and model settings. Ask only for consequential missing amounts, quantities, timing, rates or assumptions needed by the chosen calculation; never invent financial estimates or re-ask calculated totals.",
     draftingGuidance: 'Format the requested model inputs and complete benefit, cost and source records using the selected calculation and schedule. Preserve supported rates, units, currency and timing; give every year for custom schedules. Use supplied live results for the financial decision without inventing estimates, double counting benefits or returning calculated totals as editable inputs.'
   }),
   evidence: { title: 'Proposed benefits and known limits', sources: [source('system-request', ['business-requirements', 'business-value', 'special-issues']), source('client-requirements', ['scope-constraints'])] },
