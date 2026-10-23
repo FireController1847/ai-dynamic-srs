@@ -100,9 +100,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.9.0-alpha` implements all four Phase 6 stages. Coverage Review derives links from the canonical goals, active use cases, source/flow references, model figures and requirement register; it reports missing/unsupported coverage without asking for a separately authored matrix. Cross-Model Consistency highlights inactive references, unresolved model differences, proposed quality targets, and unvalidated constraints/assumptions. Gaps & Conflicts reopens the original `SRS-ISS-*` register and flags due/unresolved issues and unsupported closures. Verification & Traceability provides a derived live and printable trace report alongside editable views of the same functional, quality and interface requirement acceptance criteria and verification methods. An explicit review disposition records the analyst decision; no status is automatically promoted, and a planned method does not imply an executed or passed test. Existing saved records, stable IDs and workspace format 2 are unchanged. Phase 7 remains a placeholder.
 
+## Interview-owned missing information
+
+`0.9.1-alpha` removes the redundant `needsInformation` output from scoped AI form prompts, the parser's live response model, the merge report and the import review panel. Missing decisions remain the guided interview's responsibility; unsupported fields remain `null` or omitted and are never invented or used to overwrite saved answers. Previously copied `dsrs-form` v1 responses containing the obsolete key, including string or object arrays, are tolerated and the key is ignored. Strict field validation, explicit review/apply, record IDs, diagram import, and workspace format 2 remain unchanged.
+
 ## Manual review
 
-Open the application and confirm `v0.9.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.9.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.9.1-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.9.1-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 
