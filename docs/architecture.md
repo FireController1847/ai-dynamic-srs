@@ -6,8 +6,8 @@ Dynamic SRS remains a frontend-only application. The redesign now has a fixed do
 - `src/app/document-sidebar.ts` — animated modal drawer, navigation among the seven document areas, and workspace-wide backup tools.
 - `src/features/documents/catalog.ts` — stable IDs, acronyms, names, and descriptions for CR, SR, CBA, FSA, SRS, EB, and GN.
 - `src/features/documents/document-view.ts` — shared document headers with a slot for implemented content; CBA, FSA, SRS, EB and GN still have empty states.
-- `src/features/client-requirements/model.ts` — typed and validated CR source, AI-draft, and interview-note records, plus file and AI handoff helpers.
-- `src/features/client-requirements/client-requirements.ts` — CR intake, source viewing, optional AI handoff and interview notes.
+- `src/features/client-requirements/model.ts` — validated CR brief and original-source records, with stable-ID capability and boundary lists.
+- `src/features/client-requirements/client-requirements.ts` — CR structured editing, original client materials, and preview.
 - `src/features/system-request/model.ts` — validated `sr.request` initiation record, business requirement/benefit entries, stable IDs and ordering.
 - `src/features/system-request/use-system-request.ts` — SR IndexedDB autosave, revision checks and navigation flush.
 - `src/features/system-request/system-request.ts` — five-section SR editor, benefit categorization, document metadata and live paper preview.
