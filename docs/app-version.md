@@ -92,9 +92,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.8.0-alpha` implements the four Phase 5 stages: Domain & Class Model, Interaction Models, State Models, and UI Scenarios & Evidence. Domain concepts get the new `SRS-DOM-*` IDs only when justified; all four kinds of model figures reuse the canonical `FIG-*` artifact register with filtered groups, upload, preview, native DrawIO generation and saved source links. The same diagram importer now recognizes `domain`, `interaction`, `state` and `ui-flow` semantic graphs. Each stage includes connected evidence, concise review outcomes, advisor checks, guided AI interview prompts and schema-placed partial document previews. No use-case, requirement or issue catalog is duplicated. The changes are additive; existing records/IDs and diagram files are preserved and workspace format remains 2. Phases 6–7 remain unimplemented.
 
+## Streamlined AI interviews and concise form answers
+
+`0.8.1-alpha` makes copied AI prompts evidence-first across CR, SR, CBA, FSA, implemented SRS stages (including Phase 5), Effort Breakdown and Notes. Interviews still account for every eligible field and record, but silently reuse known answers, make only low-risk supported inferences, skip redundant questions entirely when possible, and ask short questions only for consequential unknowns. Handoffs no longer restate unchanged catalogs. Scoped JSON/manual-form prompts favor minimal narrative and Markdown content without discarding verifiable requirements or essential flow detail. The `dsrs-form` v1, diagram formats, saved values, stable IDs and workspace format 2 are unchanged.
+
 ## Manual review
 
-Open the application and confirm `v0.8.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.8.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.8.1-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.8.1-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 
