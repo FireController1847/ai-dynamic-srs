@@ -305,7 +305,7 @@ export const SubpageNode = defineComponent({
         </section>
       </template>
 
-      <template v-else-if="nodeSchema.sections?.length">
+      <template v-else-if="nodeSchema.sections?.length || nodeSchema.formComponent === 'ai-cleanup-stage-form'">
         <preview-navigation-control
           v-if="nodeSchema.previewComponent !== false"
           :form-id="nodeSchema.id + '-form-top'"
