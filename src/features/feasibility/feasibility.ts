@@ -15,6 +15,8 @@ import { useFsa, type FsaWorkspace } from './use-fsa.ts';
 
 export interface FsaHandle { flushSave(): Promise<boolean> }
 type Node = VNode | null;
+type EvaluationPatch = Partial<Pick<Evaluation, 'level' | 'context' | 'risks' | 'evidence' | 'unknowns' | 'stakeholderIds'>>;
+type StakeholderPatch = Partial<Pick<Stakeholder, 'name' | 'role' | 'interests' | 'concerns' | 'involvement'>>;
 
 const DECISIONS: readonly [Decision, string][] = [
   ['undetermined', 'Not yet determined'],
@@ -85,7 +87,7 @@ export const FsaEditor = defineComponent({
     function update(patch: Partial<FeasibilityAssessment>) {
       state.update({ ...state.draft.value, ...patch } as FeasibilityAssessment);
     }
-    function updateStakeholder(id: string, patch: Partial<Stakeholder>) {
+    function updateStakeholder(id: string, patch: StakeholderPatch) {
       update({ stakeholders: state.draft.value.stakeholders.map(item =>
         item.id === id ? { ...item, ...patch } : item) });
     }
@@ -108,17 +110,17 @@ export const FsaEditor = defineComponent({
           [area.key, without(current.organizational[area.key])])) as FeasibilityAssessment['organizational'],
       });
     }
-    function technical(key: TechnicalKey, patch: Partial<Evaluation>) {
+    function technical(key: TechnicalKey, patch: EvaluationPatch) {
       const current = state.draft.value;
       update({ technical: { ...current.technical,
         [key]: { ...current.technical[key], ...patch } } });
     }
-    function organizational(key: OrganizationalKey, patch: Partial<Evaluation>) {
+    function organizational(key: OrganizationalKey, patch: EvaluationPatch) {
       const current = state.draft.value;
       update({ organizational: { ...current.organizational,
         [key]: { ...current.organizational[key], ...patch } } });
     }
-    function economic(patch: Partial<Evaluation>) {
+    function economic(patch: EvaluationPatch) {
       update({ economic: { ...state.draft.value.economic, ...patch } });
     }
     function input(id: string, label: string, value: string, change: (next: string) => void,
@@ -215,7 +217,7 @@ export const FsaEditor = defineComponent({
           ]);
         }));
     }
-    function references(id: string, area: Evaluation, change: (patch: Partial<Evaluation>) => void): Node {
+    function references(id: string, area: Evaluation, change: (patch: EvaluationPatch) => void): Node {
       if (!state.draft.value.stakeholders.length) {
         return h('p', { class: 'fsa-muted' }, 'Add stakeholders above to link them with this assessment.');
       }
@@ -237,7 +239,7 @@ export const FsaEditor = defineComponent({
       ]);
     }
     function evaluationCard(id: string, title: string, hint: string, area: Evaluation,
-      change: (patch: Partial<Evaluation>) => void, showStakeholders = false): Node {
+      change: (patch: EvaluationPatch) => void, showStakeholders = false): Node {
       return h('details', { key: id, class: 'fsa-assessment-card' }, [
         h('summary', { class: 'fsa-assessment-header' }, [
           h('span', { class: 'fsa-assessment-title' }, [h('strong', title), h('small', hint)]),
