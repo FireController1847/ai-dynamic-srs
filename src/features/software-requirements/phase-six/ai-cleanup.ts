@@ -144,10 +144,10 @@ function measure(value: unknown, field = ''): CleanupSize {
       return { words: 0, characters: 0 };
     }
     const text = value.trim();
-    if (!/\\s/u.test(text) || /^(?:<\\?xml|<mxfile|<svg|data:|\\{\\s*"format"\\s*:)/i.test(text)) {
+    if (!/\s/u.test(text) || /^(?:<\?xml|<mxfile|<svg|data:|\{\s*"format"\s*:)/i.test(text)) {
       return { words: 0, characters: 0 };
     }
-    const normalized = text.replace(/\\s+/gu, ' ');
+    const normalized = text.replace(/\s+/gu, ' ');
     return { words: normalized.split(' ').length, characters: normalized.length };
   }
   if (Array.isArray(value)) return value.reduce<CleanupSize>((sum, item) => {
