@@ -57,7 +57,7 @@ export function modelReview(stageId:string,documentModel:DocumentModel):RecordRe
   }
   const fields=['useCaseReferences','domainConceptReferences','actorReferences','userClassReferences',
     'statefulConceptId','relatedConceptReferences','requirementReferences','interfaceRequirementReferences'];
-  const enriched=artifacts.map(figure=>({...figure,referenceId:idFor('FIG-',figure),label:figure.title||'Untitled figure'}));
+  const enriched=artifacts.map((figure):ReviewRecord=>({...figure,referenceId:idFor('FIG-',figure),label:figure.title||'Untitled figure'}));
   for (const figure of enriched) {
     messages.push(...missingReferenceMessages(figure,fields,available));
     if (!present(figure.title)) messages.push(`${figure.referenceId}: give the figure a meaningful title.`);
@@ -86,7 +86,7 @@ export function modelReview(stageId:string,documentModel:DocumentModel):RecordRe
   const domainStage=phaseFiveStages[0];
   const catalogs:ReviewCatalog[]=[
     {title:'Domain concepts',items:concepts,target:nav(domainStage,'domain-concepts')},
-    {title:stage.label+' figures',items:enriched as ReviewRecord[],target:nav(stage,stageSection[stageId])},
+    {title:stage.label+' figures',items:enriched,target:nav(stage,stageSection[stageId])},
     sourceReview.catalog
   ];
   return {messages:[...new Set(messages)],catalogs};
