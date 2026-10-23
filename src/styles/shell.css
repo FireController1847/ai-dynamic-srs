@@ -1,8 +1,11 @@
 .app-shell {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 0;
   height: 100vh;
   height: 100dvh;
+  overflow: hidden;
 }
 
 .app-header {

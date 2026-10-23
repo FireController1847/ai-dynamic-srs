@@ -1,4 +1,4 @@
-.document-page-container { width: min(100%, 1040px); margin-inline: auto; }
+.document-page-container { width: min(100%, 1200px); min-width: 0; margin-inline: auto; }
 .document-heading-focus:focus { outline: none; }
 .document-page { display: flex; flex-direction: column; gap: 32px; }
 .document-page-header { display: grid; gap: 10px; }

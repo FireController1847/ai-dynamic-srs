@@ -85,6 +85,10 @@ const App = defineComponent({
     onMounted(() => {
       window.addEventListener('hashchange', syncLocation);
       window.addEventListener('popstate', syncLocation);
+      // Start on the document header, not a retained midway scroll position.
+      void nextTick(() => {
+        if (main.value) main.value.scrollTop = 0;
+      });
     });
     onBeforeUnmount(() => {
       window.removeEventListener('hashchange', syncLocation);

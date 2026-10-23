@@ -71,6 +71,8 @@ export default (_env: unknown, argv: { mode?: Configuration['mode'] }): Configur
       host: process.env.HOST ?? '127.0.0.1',
       port,
       static: false,
+      // A branch switch/rebuild must not leave the browser mixing old styles and new views.
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
       historyApiFallback: false,
       hot: false,
       liveReload: true,

@@ -210,7 +210,7 @@
 }
 .cr-warning p { margin: 0; }
 .cr-warning .quiet-button { justify-self: start; }
-.cr-preview-pane { display: grid; gap: 12px; min-width: 0; position: sticky; top: 0; }
+.cr-preview-pane { display: grid; align-self: start; gap: 12px; min-width: 0; }
 .cr-preview-heading {
   display: flex;
   justify-content: space-between;
@@ -280,7 +280,6 @@
 
 @media (max-width: 1020px) {
   .cr-layout { grid-template-columns: 1fr; }
-  .cr-preview-pane { position: static; }
 }
 @media (max-width: 720px) {
   .cr-intro-bar { align-items: flex-start; flex-direction: column; }
