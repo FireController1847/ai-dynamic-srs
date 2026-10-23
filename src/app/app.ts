@@ -1,7 +1,7 @@
 import { computed, createApp, defineComponent, h, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { DOCUMENTS, findDocument, type DocumentId } from '../features/documents/catalog.ts';
 import { DocumentView } from '../features/documents/document-view.ts';
-import { ClientRequirements } from '../features/client-requirements/client-requirements.ts';
+import { ClientRequirements, type ClientRequirementsHandle } from '../features/client-requirements/client-requirements.ts';
 import { DocumentSidebar } from './document-sidebar.ts';
 import { initializeTheme } from './theme.ts';
 import { ThemeMenu, type ThemeMenuHandle } from './theme-menu.ts';
@@ -23,6 +23,7 @@ const App = defineComponent({
     const sidebarOpen = ref(false);
     const selectedId = ref<DocumentId>(documentIdFromLocation());
     const crDirty = ref(false);
+    const crEditor = ref<ClientRequirementsHandle | null>(null);
     const selectedDocument = computed(() => findDocument(selectedId.value) ?? DOCUMENTS[0]);
     const menuButton = ref<HTMLButtonElement | null>(null);
     const main = ref<HTMLElement | null>(null);
@@ -54,13 +55,16 @@ const App = defineComponent({
       });
     }
 
-    function canLeaveDocument(nextId: DocumentId): boolean {
-      return nextId === selectedId.value || !crDirty.value ||
-        window.confirm('Client Requirements has unsaved changes. Leave without saving?');
+    async function canLeaveDocument(nextId: DocumentId): Promise<boolean> {
+      if (nextId === selectedId.value || !crDirty.value) return true;
+      // Debounced edits are flushed before navigation so a fast click cannot lose them.
+      if (await crEditor.value?.flushSave()) return true;
+      return window.confirm('The latest Client Requirements changes could not be saved. Leave and discard them?');
     }
 
-    function selectDocument(id: DocumentId) {
-      if (!canLeaveDocument(id)) return;
+    async function selectDocument(id: DocumentId) {
+      const previous = selectedId.value;
+      if (!await canLeaveDocument(id) || selectedId.value !== previous) return;
       if (selectedId.value !== id) {
         selectedId.value = id;
         window.history.pushState(null, '', '#/documents/' + id);
@@ -70,12 +74,14 @@ const App = defineComponent({
       else focusDocument();
     }
 
-    function syncLocation() {
+    async function syncLocation() {
+      const previous = selectedId.value;
       const nextId = documentIdFromLocation();
-      if (!canLeaveDocument(nextId)) {
-        window.history.replaceState(null, '', '#/documents/' + selectedId.value);
+      if (!await canLeaveDocument(nextId)) {
+        window.history.replaceState(null, '', '#/documents/' + previous);
         return;
       }
+      if (selectedId.value !== previous) return;
       selectedId.value = nextId;
       focusDocumentOnClose = true;
       if (sidebarOpen.value) sidebarOpen.value = false;
@@ -170,6 +176,7 @@ const App = defineComponent({
               selectedId.value === 'cr'
                 ? h(DocumentView, { document: selectedDocument.value }, {
                   default: () => h(ClientRequirements, {
+                    ref: crEditor,
                     workspace,
                     onDirtyChange: (value: boolean) => { crDirty.value = value; },
                   }),
