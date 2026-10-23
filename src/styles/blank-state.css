@@ -1,4 +1,4 @@
-/* Neutral starter shell, adapted from Dynamic Learner's home-page conventions. */
+/* Neutral starter shell using the shared Dynamic SRS design tokens. */
 .home-page {
   display: flex;
   flex-direction: column;

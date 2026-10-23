@@ -5,7 +5,7 @@ Dynamic SRS currently has **only a frontend scaffold**. It deliberately has no S
 - `src/app/app.ts` — one Vue 3 root component, theme settings trigger, and workspace backup controls.
 - `src/app/theme.ts`, `theme-menu.ts`, `theme-picker.ts` — shared theme registry, preferences, system appearance tracking, and settings UI.
 - `src/components/popup-dialog.ts`, `use-dialog.ts` — accessible modal dialog primitives.
-- `src/styles/` — Dynamic Learner-inspired semantic tokens and shell conventions.
+- `src/styles/` — shared semantic color/spacing tokens, theme palettes, accessible controls, and application-shell styles.
 - `src/core/data/indexeddb.ts` — browser-local record storage, revision checks, staged restore and cross-tab notifications.
 - `src/core/workspace/dsrs-format.ts` — portable versioned .dsrs validation/serialization, independent of database schema.
 - `src/app/workspace.ts`, `workspace-files.ts` — Vue adapter and backup/restore UI.
@@ -14,4 +14,4 @@ Dynamic SRS currently has **only a frontend scaffold**. It deliberately has no S
 - `tsconfig*.json` — strict browser/build tool checking.
 - `.github/workflows/` — push verification and manual Pages deployment.
 
-The `src/app`, `src/components`, `src/features`, `src/core` layering from Dynamic Learner is a *convention when needed*, not a commitment to reintroduce the previous Dynamic SRS implementation. Future product architecture needs explicit design discussion.
+Dependency layering is local to this repository: `app` may import `features`/`components`/`core`; `features` may import `components`/`core`; `components` may import `core`; `core` imports `core` only. Avoid upward or cyclic dependencies. Add `src/features` only when actual SRS product features exist, and share implementation only where multiple real callers warrant it. This structure does not imply any particular SRS workflow; future product architecture needs explicit design decisions.

@@ -14,15 +14,15 @@ For contributors and coding agents, see [AGENTS.md](AGENTS.md).
 
 ## Technical foundation
 
-This scaffold follows the **Dynamic Learner** project's engineering baseline, not the previous Dynamic SRS application:
+Dynamic SRS uses the following self-contained frontend and build conventions:
 
 - Vue 3 with plain TypeScript render-function components; no Vue SFC compiler.
 - Strict TypeScript and native ES modules.
 - webpack development server and static production builds.
-- Fluent-inspired neutral surfaces, blue accent, responsive layout, and Dynamic Learner's full theme module (system-following light/dark settings, stored preferences, and a settings dialog).
+- Fluent-inspired neutral surfaces, blue accent, responsive layout, and a local theme module with system-following light/dark settings, persisted preferences, and an accessible settings dialog.
 - Node.js 24+ and GitHub Actions build verification.
 
-The home page intentionally has no SRS forms, agents, diagrams, or phases. It now provides an IndexedDB-backed local workspace and portable .dsrs backup/restore; no domain-specific records or workflows have been established. See [architecture](docs/architecture.md) and [design](docs/design.md) for the small amount of scaffolding that exists.
+The home page intentionally has no SRS forms, agents, diagrams, or phases. It now provides an IndexedDB-backed local workspace and portable .dsrs backup/restore; no domain-specific records or workflows have been established. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
 
 ## Run locally
 
