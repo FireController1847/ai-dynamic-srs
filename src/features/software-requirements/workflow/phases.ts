@@ -8,6 +8,7 @@ import { candidateProcessesStage } from "../phase-two/candidate-processes.ts";
 import { phaseThreeStages } from "../phase-three/stages.ts";
 import { phaseFourStages } from "../phase-four/stages.ts";
 import { phaseFiveStages } from "../phase-five/stages.ts";
+import { phaseSixStages } from "../phase-six/stages.ts";
 
 interface PhaseDefinition {
   id: string;
@@ -138,36 +139,7 @@ const phaseDefinitions: PhaseDefinition[] = [
     role: "reconcile",
     dependsOn: ["srs-cross-check-models"],
     reviews: ["srs-establish-baseline", "srs-discover-actors-goals", "srs-describe-functional-behavior", "srs-specify-quality-interfaces", "srs-cross-check-models"],
-    stages: [
-      {
-        id: "srs-reconciliation-coverage",
-        stateKey: "coverageReview",
-        label: "Coverage Review",
-        description: "Find goals, needs, use cases, interfaces, and model elements not covered by a requirement—and requirements with no supporting source.",
-        documentTargets: ["verification-traceability.coverage"]
-      },
-      {
-        id: "srs-reconciliation-consistency",
-        stateKey: "consistencyReview",
-        label: "Cross-Model Consistency",
-        description: "Compare names, boundaries, responsibilities, flows, states, interfaces, and constraints across every representation of the system.",
-        documentTargets: ["verification-traceability.coverage"]
-      },
-      {
-        id: "srs-reconciliation-gaps",
-        stateKey: "gapResolution",
-        label: "Gaps & Conflicts",
-        description: "Track missing, ambiguous, contradictory, or unverified items to explicit resolutions instead of hiding them in document prose.",
-        documentTargets: ["verification-traceability.coverage"]
-      },
-      {
-        id: "srs-reconciliation-verification",
-        stateKey: "verificationTraceability",
-        label: "Verification & Traceability",
-        description: "Audit the links accumulated for each requirement: its source, related models, final document placement, and objective verification approach.",
-        documentTargets: ["verification-traceability.traceability", "verification-traceability.verification"]
-      }
-    ]
+    stages: phaseSixStages
   },
   {
     id: "srs-assemble-document",

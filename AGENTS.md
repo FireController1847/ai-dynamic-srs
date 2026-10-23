@@ -26,6 +26,8 @@ Phase 4 keeps functional, quality, and interface obligations in `records.require
 
 Phase 5 consists of four implemented model-validation stages under `features/software-requirements/phase-five/`. New domain concepts use the sole `records.domainConcepts` catalog (`SRS-DOM-*`); all model figures use existing `records.artifacts` (`FIG-*`) with group filters. Reuse actors, use cases, requirements, terms and SRS-ISS issues instead of cloning them. New domain/interaction/state/UI semantic diagram types live in `core/artifacts/diagram-model.ts` and use the existing DrawIO pipeline. Form, preview, record reviews and AI import must continue to agree on figure groups and saved references.
 
+Phase 6 derives coverage/traceability from saved canonical IDs, not a manually authored matrix. The `phase-six/traceability.ts` selector owns derived rows and review findings; `ReconciliationStageForm` and `ReconciliationStagePreview` consume it without storing the report. Phase 6 edits the original SRS-ISS issue register and existing requirement acceptance/verification fields. Plans do not constitute executed or passing tests, statuses remain human-controlled, and Phase 7 is still responsible for controlled final assembly.
+
 Architectural invariants:
 
 TypeScript invariants:

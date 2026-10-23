@@ -18,6 +18,8 @@ import { DiscoveryStageForm } from "./software-requirements/phase-two/DiscoveryS
 import { BehaviorStageForm } from "./software-requirements/phase-three/BehaviorStageForm.ts";
 import { QualityStageForm } from "./software-requirements/phase-four/QualityStageForm.ts";
 import { ModelStageForm } from "./software-requirements/phase-five/ModelStageForm.ts";
+import { ReconciliationStageForm } from "./software-requirements/phase-six/ReconciliationStageForm.ts";
+import { ReconciliationStagePreview } from "./software-requirements/phase-six/ReconciliationStagePreview.ts";
 import { softwareRequirementsSchema } from "./software-requirements/schema.ts";
 import { systemRequestSchema } from "./system-request/schema.ts";
 
@@ -40,6 +42,8 @@ export const featureComponents = Object.freeze({
   BehaviorStageForm,
   QualityStageForm,
   ModelStageForm,
+  ReconciliationStageForm,
+  ReconciliationStagePreview,
   PlacedStagePreview,
   BaselineStageForm,
   BaselineStagePreview,
