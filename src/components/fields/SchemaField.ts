@@ -116,7 +116,7 @@ export const SchemaField = defineComponent({
             <header class="nested-record-card-heading">
               <h5 class="mb-0">{{ nestedItemTitle(recordIndex) }}</h5>
               <copy-prompt-control persistent v-if="requestForItem(recordIndex)" :copied="copiedSection === requestForItem(recordIndex).key"
-                :label="'Copy formatted-answer prompt for ' + nestedItemTitle(recordIndex)"
+                :label="'Copy AI form prompt for ' + nestedItemTitle(recordIndex)"
                 tooltip="Copies the complete input structure for this nested item. The AI returns this item's formatted answers."
                 @copy="$emit('copy-markdown', requestForItem(recordIndex))"></copy-prompt-control>
               <button

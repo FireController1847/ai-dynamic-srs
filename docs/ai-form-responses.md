@@ -1,6 +1,6 @@
 # Structured AI form responses
 
-Dynamic SRS defines a versioned JSON interchange format for AI-authored form values. The backend is implemented in `src/core/ai/form-response.ts` and `form-response-import.ts`. It is intentionally not connected to the current copy/paste UI yet; existing form prompts still return formatted answers for manual entry until a later UI integration changes that workflow deliberately.
+Dynamic SRS defines a versioned JSON interchange format for AI-authored form values. The backend is implemented in `src/core/ai/form-response.ts` and `form-response-import.ts`. Ordinary scoped form prompts now request this format directly. The shared Paste AI response panel accepts raw JSON or a single fenced response, validates against the currently selected form and live schema on a copy of the document, shows proposed changes, and requires explicit Apply before modifying saved answers. Diagrams retain a separate importer. Notes remains manually edited so its dated revision history cannot be silently bypassed.
 
 ## Format
 
@@ -99,10 +99,10 @@ The parser accepts raw JSON and a single surrounding `json` or `dsrs-form` code 
 
 `buildAiFormResponseContract` derives an envelope and field types from the same live schema used by the form. `renderAiFormResponseContract` renders a compact prompt-ready contract. This avoids maintaining a second handwritten list of field keys, choices, references, nested children, or grouped-parent choices.
 
-These helpers are backend-only for now. A future UI change can attach the rendered contract to scoped AI prompts and pass pasted text to `applyAiFormResponse`, with an `AiFormImportExpectation` to enforce the exact record/nested/field scope of the control that requested the answer.
+`form-prompt.ts` uses the schema-derived contract to request the matching JSON shape. The app captures the copied prompt's page, section, saved record and nested path, then passes an `AiFormImportExpectation` to `applyAiFormResponse` to reject responses for a different target. `app/ai-form-controller.ts` first runs the same importer against an isolated JSON snapshot for validation; `app/app.ts` applies it only after the user confirms, then schedules autosave. Paste alone does nothing.
 
 ## Versioning
 
 `dsrs-form` response version 1 is independent from the application semantic version and the saved workspace `FORMAT_VERSION`. The structured response is transient clipboard/import data and is not stored in `.dsrs` files.
 
-Adding this dormant backend does not change current user-visible behavior, so it does not independently bump the application version. Enabling the structured copy/paste workflow in the UI is a separate user-facing capability and should be versioned under the normal application version policy.
+The backend was originally introduced without UI changes. Enabling the structured copy/paste workflow is a user-facing capability and is versioned separately under the normal app SemVer policy.

@@ -84,9 +84,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.6.4-alpha` removes the accidental 500-character limit from `dsrs-diagrams` figure metadata. Narrative metadata such as an activity `scenario` may now use its natural authored length; the separate semantic graph label/guard limit, control-character validation, overall response-size limit, saved artifact format and workspace format 2 are unchanged.
 
+## Structured AI form import
+
+`0.7.0-alpha` connects the existing `dsrs-form` v1 JSON contract and validated merge engine to ordinary form prompts and a shared paste/validate/apply UI. Section, group, saved-record and nested-item scopes use schema keys and saved IDs. The panel validates against a copy of the document, enforces the current page/stage and copied scope, shows changes and missing information, then requires explicit confirmation before merging/autosaving. Omitted/null values preserve existing data. Diagrams use their own importer and Notes retains its audited manual editor. Workspace format remains 2.
+
 ## Manual review
 
-Open the application and confirm `v0.6.4-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.6.4-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.7.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.7.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 

@@ -61,8 +61,8 @@ export const SectionInfo = defineComponent({
       <copy-prompt-control
         persistent
         :copied="copied"
-        :label="'Copy ' + title + (diagram ? ' AI diagram prompt' : ' formatted-answer prompt')"
-        :tooltip="diagram ? 'Generates diagram semantics from selected evidence. Repeatable figure sections return an ordered dsrs-diagrams batch for Import AI diagrams; individual figures use dsrs-diagram.' : 'Copies the complete form structure for this section or collection. The AI returns ready-to-enter answers using known information; use the tab interview to gather missing details.'"
+        :label="'Copy ' + title + (diagram ? ' AI diagram prompt' : ' AI form prompt')"
+        :tooltip="diagram ? 'Generates diagram semantics from selected evidence. Repeatable figure sections return an ordered dsrs-diagrams batch for Import AI diagrams; individual figures use dsrs-diagram.' : 'Copies the form structure. Ordinary forms return JSON for Paste AI response; Notes still uses manual entry. Run the interview first to cover missing information.'"
         @copy="$emit('copy-markdown', { markdown: copyText, title, key: copyKey })"
       ></copy-prompt-control>
       <span v-if="helpContent" class="section-info-tip">

@@ -23,6 +23,7 @@
             <button class="btn btn-light app-header-action" type="button" @click="newWip">New WIP</button>
             <label class="btn btn-light app-header-action mb-0" for="workspace-file">Import WIP</label>
             <input id="workspace-file" class="visually-hidden" type="file" accept=".dsrs,application/json,application/gzip,application/x-gzip" @change="importWip">
+            <button class="btn btn-outline-secondary app-header-action" type="button" :aria-expanded="aiFormPanelOpen" aria-controls="ai-form-import-panel" @click="aiFormPanelOpen = !aiFormPanelOpen">Paste AI response</button>
             <workspace-download-control @download-wip="downloadWip" @download-md="downloadMd"></workspace-download-control>
           </div>
         </div>
@@ -82,6 +83,19 @@
         </aside>
 
         <main class="app-main">
+          <ai-form-import-panel
+            v-if="aiFormPanelOpen"
+            id="ai-form-import-panel"
+            :text="aiFormResponseText"
+            :error="aiFormError"
+            :report="aiFormReport"
+            :validated="Boolean(aiFormReport) && aiFormValidatedContext === aiFormContextKey()"
+            :scope-label="aiFormScopeLabel"
+            @close="aiFormPanelOpen = false"
+            @update:text="setAiFormResponseText"
+            @validate="validateAiFormResponse"
+            @apply="applyValidatedAiFormResponse"
+          ></ai-form-import-panel>
           <button
             v-if="!documentNavigationVisible"
             class="navigation-restore-button document-navigation-restore"

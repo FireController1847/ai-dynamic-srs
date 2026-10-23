@@ -45,7 +45,7 @@ export const RelatedRecordItem = defineComponent({
       <div class="d-flex align-items-center justify-content-between mb-3 gap-2">
         <h5 class="h6 mb-0">{{ referenceId }}</h5>
         <copy-prompt-control persistent v-if="recordPrompt" :copied="copiedSection === recordPrompt.key"
-          :label="'Copy formatted-answer prompt for ' + referenceId"
+          :label="'Copy AI form prompt for ' + referenceId"
           tooltip="Copies every input and nested field for this record, preserving its parent relationship. The AI returns ready-to-enter answers."
           @copy="$emit('copy-markdown', recordPrompt)"></copy-prompt-control>
         <button v-if="removable" type="button" class="btn btn-link btn-sm text-danger" @click="$emit('remove', item)">Remove {{ section.repeatable.itemLabel.toLowerCase() }}</button>

@@ -202,7 +202,7 @@ export const DynamicForm = defineComponent({
               <div class="d-flex align-items-center justify-content-between mb-3">
                 <h4 class="h6 mb-0">{{ itemTitle(section, item, itemIndex) }}</h4>
                 <copy-prompt-control persistent :copied="copiedSection === copyKey(section, item)"
-                  :label="(diagramFieldFor(section) ? 'Copy AI diagram prompt for ' : 'Copy formatted-answer prompt for ') + itemTitle(section, item, itemIndex)"
+                  :label="(diagramFieldFor(section) ? 'Copy AI diagram prompt for ' : 'Copy AI form prompt for ') + itemTitle(section, item, itemIndex)"
                   :tooltip="diagramFieldFor(section) ? 'Generates one semantic diagram response for this figure. Paste the dsrs-diagram block into Import AI diagram.' : 'Copies every input and nested field for this exact record. The AI returns ready-to-enter answers for this record.'"
                   @copy="$emit('copy-markdown', promptRequest(section, item))"></copy-prompt-control>
                 <button
@@ -281,7 +281,7 @@ export const FormProgress = defineComponent({
           button-class="completion-copy-trigger"
           :copied="copiedSection === copyKey"
           :label="'Copy the ' + pageSchema.title + ' AI interview prompt'"
-          tooltip="Copies a complete interview of this tab: every existing record and nested input. The AI gathers missing information naturally, then hands off to formatted-answer prompts."
+          tooltip="Copies a complete interview of this tab: every existing record and nested input. The AI gathers missing information naturally, then hands off to scoped JSON prompts."
           @copy="$emit('copy-markdown', { markdown: interviewPrompt, title: pageSchema.title + ' interview prompt', key: copyKey })"
         ></copy-prompt-control>
       </div>

@@ -16,6 +16,9 @@ import { createWorkspaceSnapshot } from "../core/workspace/workspace-format.ts";
 import { clearLastWorkspace, createWorkspaceId, loadLastWorkspace, saveLastWorkspace } from "../core/workspace/workspace-storage.ts";
 import { downloadWorkspace, downloadWorkspaceMarkdown, readWorkspaceFile } from "../core/workspace/workspace-files.ts";
 import { WorkspaceDownloadControl } from "../components/controls/WorkspaceDownloadControl.ts";
+import { AiFormImportPanel } from "../components/controls/AiFormImportPanel.ts";
+import { importAiFormOnActivePage } from "./ai-form-controller.ts";
+import type { AiFormImportExpectation, AiFormImportResult } from "../core/ai/form-response-import.ts";
 import { SubpageWorkspace } from "../components/navigation/SubpageWorkspace.ts";
 import { FormSidebarToggle } from "../components/navigation/FormSidebarToggle.ts";
 import { PreviewNavigationControl } from "../components/navigation/PreviewNavigationControl.ts";
@@ -78,7 +81,8 @@ const app = createApp({
     PreviewNavigationControl,
     SubpageWorkspace,
     TabCompletionCheck,
-    WorkspaceDownloadControl
+    WorkspaceDownloadControl,
+    AiFormImportPanel
   },
   data() {
     const sections = createDocumentState(pages);
@@ -97,6 +101,16 @@ const app = createApp({
       saveTimerId: null as number | null,
       copyResetTimerId: undefined as ReturnType<typeof setTimeout> | undefined,
       copiedSection: "",
+      aiFormPanelOpen: false,
+      aiFormResponseText: "",
+      aiFormScopeLabel: "",
+      aiFormError: "",
+      aiFormSuccess: "",
+      aiFormReport: null as AiFormImportResult | null,
+      aiFormExpectation: null as AiFormImportExpectation | null,
+      aiFormExpectedPage: "",
+      aiFormExpectedSection: "",
+      aiFormValidatedContext: "",
       documentNavigationVisible: loadNavigationPreference(DOCUMENT_NAV_PREFERENCE_KEY),
       formSidebarVisible: loadFormSidebarPreference(),
       phaseNavigationVisible: loadNavigationPreference(PHASE_NAV_PREFERENCE_KEY),
@@ -123,6 +137,7 @@ const app = createApp({
   },
   watch: {
     activePage(pageId: string) {
+      this.invalidateAiFormValidation();
       this.scheduleAutosave();
       this.$nextTick(() => this.scrollTabIntoView(pageId));
     },
@@ -153,9 +168,100 @@ const app = createApp({
     clearTimeout(this.copyResetTimerId);
   },
   methods: {
+    aiFormContextKey(): string {
+      return JSON.stringify([this.activePage, this.activeSubpages, this.aiFormResponseText]);
+    },
+    invalidateAiFormValidation() {
+      this.aiFormReport = null;
+      this.aiFormValidatedContext = "";
+      this.aiFormError = "";
+      this.aiFormSuccess = "";
+    },
+    setAiFormResponseText(value: string) {
+      this.aiFormResponseText = value;
+      this.invalidateAiFormValidation();
+    },
+    validateAiFormResponse() {
+      try {
+        const root = this.pages.find((page: SchemaNode) => page.id === this.activePage);
+        if (!root) throw new Error("Choose the document for this AI response.");
+        const result = importAiFormOnActivePage({
+          root, document: this.documentSections,
+          activeSubpages: this.activeSubpages, responseText: this.aiFormResponseText, preview: true,
+          expectation: this.aiFormExpectedPage ? this.aiFormExpectation || undefined : undefined,
+          expectedPage: this.aiFormExpectedPage || undefined,
+          expectedSection: this.aiFormExpectedSection || undefined
+        });
+        this.aiFormReport = result;
+        this.aiFormValidatedContext = this.aiFormContextKey();
+        this.aiFormError = "";
+        this.aiFormSuccess = "";
+      } catch (error) {
+        this.invalidateAiFormValidation();
+        this.aiFormError = errorMessage(error);
+      }
+    },
+    applyValidatedAiFormResponse() {
+      if (!this.aiFormReport || this.aiFormValidatedContext !== this.aiFormContextKey()) {
+        this.invalidateAiFormValidation();
+        this.aiFormError = "The form or JSON changed after validation. Validate again before applying.";
+        return;
+      }
+      try {
+        const root = this.pages.find((page: SchemaNode) => page.id === this.activePage);
+        if (!root) throw new Error("Choose the document for this AI response.");
+        // Recheck the entire response against current values before touching live data.
+        importAiFormOnActivePage({
+          root, document: this.documentSections,
+          activeSubpages: this.activeSubpages, responseText: this.aiFormResponseText, preview: true,
+          expectation: this.aiFormExpectedPage ? this.aiFormExpectation || undefined : undefined,
+          expectedPage: this.aiFormExpectedPage || undefined,
+          expectedSection: this.aiFormExpectedSection || undefined
+        });
+        const result = importAiFormOnActivePage({
+          root, document: this.documentSections,
+          activeSubpages: this.activeSubpages, responseText: this.aiFormResponseText, preview: false,
+          expectation: this.aiFormExpectedPage ? this.aiFormExpectation || undefined : undefined,
+          expectedPage: this.aiFormExpectedPage || undefined,
+          expectedSection: this.aiFormExpectedSection || undefined
+        });
+        this.scheduleAutosave();
+        this.aiFormSuccess = `Applied ${result.updatedFields} field updates, ${result.updatedRecords} existing records and ${result.addedRecords + result.addedNestedRecords} new entries.`;
+        this.workspaceStatus = "AI form response applied; saving locally";
+        this.aiFormValidatedContext = "";
+        this.aiFormResponseText = "";
+        this.aiFormReport = null;
+        this.aiFormError = "";
+      } catch (error) {
+        this.invalidateAiFormValidation();
+        this.aiFormError = errorMessage(error);
+      }
+    },
     async copyMarkdown({ markdown, title, key }: CopyRequest) {
       try {
         await writeClipboard(withFinancialEvidence(markdown, key, this.documentSections));
+        if (markdown.startsWith("# Form prompt:") && markdown.includes("dsrs-form")) {
+          const match = /^JSON shape: (\{.*\})$/m.exec(markdown);
+          const shape = match ? JSON.parse(match[1]) as Record<string, unknown> : null;
+          this.aiFormExpectedPage = typeof shape?.page === "string" ? shape.page : "";
+          this.aiFormExpectedSection = typeof shape?.section === "string" ? shape.section : "";
+          this.aiFormExpectation = shape ? {
+            ...(typeof shape.record === "string" || typeof shape.record === "number"
+              ? { record: shape.record } : {}),
+            ...(Array.isArray(shape.path) ? { path: shape.path as (string | number)[] } : {}),
+            ...(shape.fields && typeof shape.fields === "object" && !Array.isArray(shape.fields)
+              ? { fieldKeys: Object.keys(shape.fields) } : {})
+          } : null;
+          this.aiFormPanelOpen = true;
+          this.aiFormScopeLabel = title;
+          this.aiFormResponseText = "";
+          this.invalidateAiFormValidation();
+          this.$nextTick(() => {
+            document.getElementById("ai-form-import-panel")?.scrollIntoView({
+              behavior: preferredScrollBehavior(), block: "start", inline: "nearest"
+            });
+          });
+        }
         clearTimeout(this.copyResetTimerId);
         this.copiedSection = key;
         this.workspaceStatus = `${title} AI prompt copied as Markdown`;

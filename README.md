@@ -64,7 +64,7 @@ The implemented construction workflow covers four phases:
 
 Later phases for model cross-checks, reconciliation, and complete SRS assembly are currently placeholders. Construction order is separate from finished-document order: a stage can contribute to several document sections while retaining the same underlying records.
 
-Human guides and section tips explain the forms directly. Separate copy buttons provide Markdown prompts for an external AI conversation. The tab's guided interview covers every applicable item and gathers missing information naturally; section, group, record, and nested-item prompts then return complete formatted answers for their selected scope. Each item prompt includes all its child fields; individual inputs do not have copy buttons. See the [AI prompt contract](docs/ai-prompts.md). Using the forms does not require an AI conversation.
+Human guides and section tips explain the forms directly. Separate copy buttons provide Markdown prompts for an external AI conversation. The tab's guided interview covers every applicable item and gathers missing information naturally; section, group, record, and nested-item prompts return `dsrs-form` JSON for their selected scope. Paste it into **Paste AI response**, validate and review changes, then apply them; copying or pasting alone never modifies saved data. Notes retains manual revision editing, and diagrams have a separate JSON importer. Each item prompt includes all its child fields; individual inputs do not have copy buttons. See the [AI prompt contract](docs/ai-prompts.md). Using the forms does not require an AI conversation.
 
 Diagram uploads retain their actual files in the workspace. Copied text prompts include diagram metadata, rather than binary or XML payloads.
 

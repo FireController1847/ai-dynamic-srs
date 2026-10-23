@@ -33,6 +33,7 @@ Primary references:
 | Semantic colors, typography, spacing, radii, motion, elevation | `src/styles/tokens.css` |
 | Shared buttons, inputs, cards, badges, tables, focus and reduced motion | `src/styles/base.css` |
 | Shared icon sizing and icon-button geometry | `src/styles/iconography.css` |
+| Shared AI form paste/validation UI | `src/components/controls/AiFormImportPanel.ts`, `src/styles/ai-form-import.css` |
 | App bar and workspace status | `src/styles/shell.css` |
 | Document rail, page hierarchy, phase stepper, stage tabs and responsive navigation collapse | `src/styles/workspace-layout.css` |
 | Forms, progress, guides, evidence, diagrams, Notes, CBA, live preview | `src/styles/fluent-workspace.css` |
