@@ -114,3 +114,8 @@ CR, SR, CBA and FSA use concise declarative helpers from `features/planning/sche
 
 `features/software-requirements/phase-six/traceability.ts` derives in-memory chains from canonical saved goal/use-case/figure/requirement links, with both missing-coverage and unsupported-origin checks. `reconciliation-review.ts` surfaces stage-specific structural issues and previously unresolved evidence/quality/model decisions. `stages.ts` supplies four actual stage schemas; `ReconciliationStageForm` renders derived reports and reuses EvidenceForm/RecordReviewPanel, and `ReconciliationStagePreview` injects derived-only traceability rows into working partial previews. Neither derived matrix nor validation result is serialized. Shared SRS-ISS issues and requirement verification fields are edited in place, with no second issue/requirement register. The verification method is a **plan**, never executed-test evidence. Phase 7 assembly remains separate and pending.
 
+
+
+## Phase 7 final SRS projection
+
+`phase-seven/assembly-model.ts` derives one outline-ordered final SRS from canonical saved records and stage data without mutating those sources or concatenating repeated working partial previews. `AssemblyStageForm` records explicit human inclusion and approval decisions with live findings; `AssemblyStagePreview` renders attached figure payloads and finished-document sections through the existing document and print infrastructure. Only stage-local approval, revision, appendix, and figure-review decisions are added to saved state; `.dsrs` stays at format 2. A release label requires actual human authority and no known structural blockers.

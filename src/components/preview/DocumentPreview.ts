@@ -168,7 +168,7 @@ export const DocumentPreview = defineComponent({
       return dataModelForSection(section, this.dataModel, this.documentModel);
     },
     sectionNumber(section: Section, sectionIndex: number): string {
-      if (section.documentNumber) {
+      if (section.documentNumber !== undefined) {
         return section.documentNumber;
       }
 
@@ -216,7 +216,7 @@ export const DocumentPreview = defineComponent({
     },
     sectionHeadingText(section: Section, sectionIndex: number) {
       const number = this.sectionNumber(section, sectionIndex);
-      return `${this.headingNumber(number)} ${section.title}`;
+      return number ? `${this.headingNumber(number)} ${section.title}` : section.title;
     }
   },
   template: `

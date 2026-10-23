@@ -62,7 +62,7 @@ The implemented construction workflow covers four phases:
 3. **Describe Behavior:** refine use-case descriptions, upload use-case and activity diagrams, develop event flows, and derive functional requirements.
 4. **Specify Quality & Interfaces:** describe operating conditions, measurable quality expectations, external contracts, assumptions, and dependencies.
 
-Later phases for model cross-checks, reconciliation, and complete SRS assembly are currently placeholders. Construction order is separate from finished-document order: a stage can contribute to several document sections while retaining the same underlying records.
+All seven SRS construction phases are implemented, including model cross-checks, reconciliation, and controlled complete-document assembly. Construction order is separate from finished-document order: a stage can contribute to several document sections while retaining the same underlying records.
 
 Human guides and section tips explain the forms directly. Separate copy buttons provide Markdown prompts for an external AI conversation. The tab's guided interview covers every applicable item and gathers missing information naturally; section, group, record, and nested-item prompts return `dsrs-form` JSON for their selected scope. Paste it into **Paste AI response**, validate and review changes, then apply them; copying or pasting alone never modifies saved data. Notes retains manual revision editing, and diagrams have a separate JSON importer. Each item prompt includes all its child fields; individual inputs do not have copy buttons. See the [AI prompt contract](docs/ai-prompts.md). Using the forms does not require an AI conversation.
 
