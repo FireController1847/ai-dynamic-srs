@@ -10,7 +10,6 @@ export {
   renderAiFormResponseContract
 } from './form-response.ts';
 export type {
-  AiFormNeed,
   AiFormRecordId,
   AiFormRecordResponse,
   AiFormResponse,
