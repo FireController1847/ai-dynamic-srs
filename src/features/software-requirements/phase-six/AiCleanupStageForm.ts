@@ -20,6 +20,7 @@ export const AiCleanupStageForm = defineComponent({
       validatedHash: '',
       plan: null as CleanupPlan | null,
       selectedIndices: [] as number[],
+      visibleKind: 'all' as 'all' | 'reduction' | 'neutral' | 'expansion',
       error: '',
       success: '',
       undoData: null as DataModel | null,
@@ -32,7 +33,9 @@ export const AiCleanupStageForm = defineComponent({
     },
     orderedChanges(): CleanupChange[] {
       const priority = { reduction: 0, neutral: 1, expansion: 2 };
-      return [...(this.plan?.changes || [])].sort((a, b) => priority[a.kind] - priority[b.kind] || a.index - b.index);
+      return [...(this.plan?.changes || [])]
+        .filter(change => this.visibleKind === 'all' || change.kind === this.visibleKind)
+        .sort((a, b) => priority[a.kind] - priority[b.kind] || a.index - b.index);
     },
     reductionCount(): number {
       return this.plan?.changes.filter(change => change.kind === 'reduction').length || 0;
@@ -77,6 +80,7 @@ export const AiCleanupStageForm = defineComponent({
       this.validatedResponse = '';
       this.validatedHash = '';
       this.selectedIndices = [];
+      this.visibleKind = 'all';
       this.error = '';
       this.success = '';
     },
@@ -208,16 +212,30 @@ export const AiCleanupStageForm = defineComponent({
               </div>
             </div>
           </div>
-          <p class="small text-body-secondary">These estimates count prose-like strings in SRS Phases 1–6, excluding common IDs, metadata and encoded files. They measure length, not completeness or correctness. A net increase is a signal to scrutinize additions, not an automatic rejection.</p>
+          <p class="small text-body-secondary">These estimates count prose-like strings in SRS Phases 1–6, excluding common IDs, metadata and encoded files. They measure length, not completeness or correctness.</p>
+          <p v-if="plan.impact.wordDelta > 0" class="small text-danger" role="status">
+            Warning: The complete proposal makes the SRS longer. Inspect additions and expanded replacements carefully before approving it.
+          </p>
+          <p v-if="selectedReview.plan && selectedReview.plan.impact.wordDelta > 0" class="small text-danger" role="status">
+            Warning: Your current selection increases SRS prose by {{ signed(selectedReview.plan.impact.wordDelta) }} words.
+          </p>
           <div v-if="plan.changes.length" class="d-flex flex-wrap align-items-center gap-2 mb-3">
             <button type="button" class="btn btn-outline-primary btn-sm" @click="selectReductions">Select all reductions ({{ reductionCount }})</button>
             <button type="button" class="btn btn-outline-secondary btn-sm" @click="selectAll">Select all proposals</button>
             <button type="button" class="btn btn-outline-secondary btn-sm" @click="clearSelection">Deselect all</button>
             <span class="small text-body-secondary">{{ selectedIndices.length }} selected · none preapproved</span>
+            <label class="small" for="cleanup-change-filter">Show</label>
+            <select id="cleanup-change-filter" class="form-select form-select-sm w-auto" v-model="visibleKind">
+              <option value="all">All changes ({{ plan.changes.length }})</option>
+              <option value="reduction">Reductions ({{ reductionCount }})</option>
+              <option value="neutral">Neutral corrections ({{ plan.changes.length - reductionCount - expansionCount }})</option>
+              <option value="expansion">Additions / expansions ({{ expansionCount }})</option>
+            </select>
           </div>
           <p class="small text-body-secondary">Reductions are displayed first; additions/expansions last. Review before/after values and reasons. Changing IDs, statuses, diagrams or linked records needs extra care. Selecting only part of a dependent batch can invalidate the remaining changeset.</p>
           <p v-if="selectedReview.error" class="small text-danger" role="alert">Selected operations conflict: {{ selectedReview.error }}</p>
           <p v-if="!plan.changes.length" class="small text-body-secondary">No changes proposed. Your workspace is untouched.</p>
+          <p v-else-if="!orderedChanges.length" class="small text-body-secondary">No changes match this filter.</p>
           <div v-for="change in orderedChanges" :key="change.index" class="card border mb-3">
             <div class="card-body">
               <label class="d-flex gap-2 align-items-start">
