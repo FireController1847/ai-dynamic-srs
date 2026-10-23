@@ -22,7 +22,7 @@ export const feasibilityAnalysisSchema: SchemaNode = {
     { term: 'Economic feasibility', definition: 'Whether expected value justifies the costs and uncertainty.' },
     { term: 'Organizational feasibility', definition: 'Whether the organization can adopt and support the change.' }
   ], {
-    interviewGuidance: 'Reuse the proposal, stakeholder knowledge and known financial case. Explore consequential technical and organizational gaps, then cover every current risk and missing response before settling the recommendation and necessary conditions. Do not restart the stakeholder catalog or require a separate rating and essay for every consideration.',
+    interviewGuidance: "Reuse established technical, organizational and financial evidence. Ask only about material uncertainty, unaddressed risks or conditions that change the recommendation; do not request a separate essay or rating for each factor.",
     draftingGuidance: 'Format the requested concise technical and organizational assessments, applicable affordability considerations, complete risk records and recommendation from established facts. Use carried CBA results without rewriting calculated totals. Keep analyst recommendation distinct from a confirmed authorized decision.'
   }),
   evidence: { title: 'Existing project evidence', sources: [
