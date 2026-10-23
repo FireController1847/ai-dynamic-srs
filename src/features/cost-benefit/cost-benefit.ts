@@ -456,7 +456,7 @@ export const CostBenefitEditor = defineComponent({
             graphic(p.years, current.currency),
           ]) : null,
           p.years.length ? projectionTable(p.years, current.currency) :
-            h('p', { class: 'cba-muted' }, 'Enter a projection period to see the annual table.'),
+            h('p', { class: 'cba-muted' }, 'Enter a projection period and discount rate to see the annual projections.'),
         ]),
       ];
     }
