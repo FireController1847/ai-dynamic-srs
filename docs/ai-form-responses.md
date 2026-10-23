@@ -15,14 +15,13 @@ Version 1 uses `format: "dsrs-form"` and merge-only semantics:
   "mode": "merge",
   "fields": {
     "fieldKey": "value"
-  },
-  "needsInformation": []
+  }
 }
 ```
 
 `page` and `section` are stable schema IDs, not visible titles or section numbers. The importer rejects a response aimed at a different page or section.
 
-`null` means the AI could not support a value and the saved value must be preserved. Omitted fields are also unchanged. Version 1 never replaces an entire form or deletes omitted records.
+`null` means the AI could not support a value and the saved value must be preserved. Omitted fields are also unchanged. The guided interview owns missing information and unresolved decisions; formatted responses contain no separate `needsInformation` list. Version 1 never replaces an entire form or deletes omitted records.
 
 ## Repeatable sections
 
@@ -93,7 +92,7 @@ Select and checkbox values are normalized to the schema's stored option values. 
 
 `diagram-file` is explicitly outside this protocol. AI-generated diagrams use their separate artifact pipeline: `dsrs-diagram` for one figure and `dsrs-diagrams` for an ordered repeatable-section batch. Neither response is a `dsrs-form` payload.
 
-The parser accepts raw JSON and a single surrounding `json` or `dsrs-form` code fence for clipboard robustness. Unknown envelope keys and unsupported format versions are rejected instead of being ignored.
+The parser accepts raw JSON and a single surrounding `json` or `dsrs-form` code fence for clipboard robustness. Unknown envelope keys and unsupported format versions are rejected, except the retired `needsInformation` key in previously copied prompts: it is accepted and ignored regardless of its value type. It is not validated, shown, applied, or saved.
 
 ## Schema-derived contract
 
