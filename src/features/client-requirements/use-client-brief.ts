@@ -36,7 +36,7 @@ export function useClientBrief(workspace: ClientWorkspace) {
     if (problem.value) return 'Could not save';
     if (busy.value) return 'Saving…';
     if (dirty.value) return 'Unsaved changes';
-    return 'All changes saved';
+    return 'Autosaved';
   });
 
   let fetchCounter = 0;
@@ -159,10 +159,6 @@ export function useClientBrief(workspace: ClientWorkspace) {
       return false;
     } finally {
       busy.value = false;
-      if (refreshQueued) {
-        refreshQueued = false;
-        void refresh();
-      }
     }
   }
 
@@ -176,6 +172,10 @@ export function useClientBrief(workspace: ClientWorkspace) {
       return await savingTask;
     } finally {
       savingTask = null;
+      if (refreshQueued) {
+        refreshQueued = false;
+        void refresh();
+      }
       // A newer edit during the transaction is retried without losing the existing draft.
       if (dirty.value && writable.value && !problem.value) scheduleSave();
     }
