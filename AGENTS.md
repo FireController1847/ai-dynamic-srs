@@ -46,6 +46,6 @@ TypeScript invariants:
 
 Prefer focused modules below 400 lines. Split a schema by section when it grows beyond roughly 500 lines.
 
-Verification is manual at the user's request. Do not run builds, tests, browser checks, or other automated checks unless the user later requests them. Provide a focused manual checklist when handing off changes.
+Every pushed commit is automatically checked by `.github/workflows/verify-build.yml` using Node.js 24, `npm ci`, strict TypeScript checking, and a production webpack build. Prefer the GitHub Actions result for compile verification; do not create ad hoc verification workflows or rerun builds just to check compilation. Other verification remains manual at the user's request: do not run additional tests, local builds, browser checks, or automation unless explicitly asked. Provide a focused manual checklist when handing off changes.
 
 Whenever creating or amending a Git commit, preserve the user's existing author/committer identity and include `Co-authored-by: Codex <noreply@openai.com>` as a commit-message trailer.
