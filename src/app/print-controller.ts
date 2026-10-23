@@ -4,7 +4,10 @@ import { printableContent } from "../core/printing/print-media.ts";
 
 export async function printPage({ date, page, sectionCode, title, version }: { date: string; page: SchemaNode; sectionCode?: string; title: string; version: unknown }) {
   const panel = document.getElementById(`${page.id}-panel`);
-  const content = panel?.querySelector<HTMLElement>(".document-content");
+  // Phase 7 owns the complete document; select its output explicitly even if
+  // other working previews are present in the SRS workspace.
+  const assembledContent = panel?.querySelector<HTMLElement>(".srs-assembly-preview .document-content");
+  const content = assembledContent || panel?.querySelector<HTMLElement>(".document-content");
 
   if (!content) {
     throw new Error("The active document preview could not be found.");
@@ -15,6 +18,7 @@ export async function printPage({ date, page, sectionCode, title, version }: { d
     date,
     version: version || "0.1",
     sectionCode: sectionCode || page.code,
-    contentHtml: await printableContent(content)
+    contentHtml: await printableContent(content),
+    pagination: assembledContent ? "browser" : "paged"
   });
 }

@@ -1,4 +1,11 @@
-export interface PrintDocumentOptions { title: string; date: string; version: unknown; sectionCode?: string; contentHtml: string; }
+export interface PrintDocumentOptions {
+  title: string;
+  date: string;
+  version: unknown;
+  sectionCode?: string;
+  contentHtml: string;
+  pagination?: "paged" | "browser";
+}
 const MARKDOWN_STYLES_URL = new URL("assets/print/markdown.css", document.baseURI).href;
 const COMPACT_STYLES_URL = new URL("assets/print/compact-documents.css", document.baseURI).href;
 const PAGED_SCRIPT_URL = new URL("assets/paged.polyfill.js", document.baseURI).href;
@@ -20,12 +27,24 @@ const PAGED_SCRIPT_URL = new URL("assets/paged.polyfill.js", document.baseURI).h
       .replaceAll("\r", " ");
   }
 
-  function createPrintHtml({ title, date, version, sectionCode, contentHtml, readyMessage }: PrintDocumentOptions & { readyMessage: string }) {
+  function createPrintHtml({ title, date, version, sectionCode, contentHtml, pagination, readyMessage }: PrintDocumentOptions & { readyMessage: string }) {
     const safeTitle = escapeHtml(title);
     const headerTitle = cssString(title);
     const headerDate = cssString(date);
     const footerVersion = cssString(`${sectionCode} · v${version}`);
     const pagedScript = escapeHtml(PAGED_SCRIPT_URL);
+    // Browser printing avoids requiring the heavyweight Paged.js DOM rewrite for
+    // the assembled SRS, which may be hundreds of pages with embedded figures.
+    const paginationScripts = pagination === "browser" ? "" : [
+      "    <script>",
+      "      window.PagedConfig = {",
+      "        after() {",
+      `          window.parent.postMessage({ type: "${readyMessage}" }, "*");`,
+      "        }",
+      "      };",
+      "    </script>",
+      `    <script src="${pagedScript}"></script>`
+    ].join("\n");
 
     return `<!doctype html>
 <html lang="en">
@@ -328,14 +347,7 @@ const PAGED_SCRIPT_URL = new URL("assets/paged.polyfill.js", document.baseURI).h
     </style>
     <link rel="stylesheet" href="${escapeHtml(COMPACT_STYLES_URL)}">
     <link rel="stylesheet" href="${escapeHtml(MARKDOWN_STYLES_URL)}">
-    <script>
-      window.PagedConfig = {
-        after() {
-          window.parent.postMessage({ type: "${readyMessage}" }, "*");
-        }
-      };
-    </script>
-    <script src="${pagedScript}"></script>
+${paginationScripts}
   </head>
   <body>${contentHtml}</body>
 </html>`;
@@ -343,10 +355,12 @@ const PAGED_SCRIPT_URL = new URL("assets/paged.polyfill.js", document.baseURI).h
 
   export function printDocument(options: PrintDocumentOptions): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+      const browserPagination = options.pagination === "browser";
       const token = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
       const readyMessage = `dynamic-srs-print-ready-${token}`;
       const iframe = document.createElement("iframe");
-      let timeoutId: number;
+      let timeoutId: number | undefined;
+      let printStarted = false;
 
       iframe.title = "Printable SRS document";
       iframe.setAttribute("aria-hidden", "true");
@@ -358,29 +372,65 @@ const PAGED_SCRIPT_URL = new URL("assets/paged.polyfill.js", document.baseURI).h
       iframe.style.border = "0";
 
       const cleanup = () => {
-        window.clearTimeout(timeoutId);
+        if (timeoutId !== undefined) window.clearTimeout(timeoutId);
         window.removeEventListener("message", handleReady);
+        iframe.removeEventListener("load", handleLoad);
         iframe.remove();
       };
 
-      const handleReady = (event: MessageEvent<unknown>) => {
-        if (event.source !== iframe.contentWindow || (event.data as { type?: string } | null)?.type !== readyMessage) {
+      const fail = (error: Error) => {
+        if (printStarted) return;
+        cleanup();
+        reject(error);
+      };
+
+      const startPrint = () => {
+        if (printStarted || !iframe.isConnected) return;
+        const printWindow = iframe.contentWindow;
+        if (!printWindow) {
+          fail(new Error("The printable document window is unavailable."));
           return;
         }
 
+        printStarted = true;
+        if (timeoutId !== undefined) window.clearTimeout(timeoutId);
         window.removeEventListener("message", handleReady);
-        window.clearTimeout(timeoutId);
-        iframe.contentWindow?.addEventListener("afterprint", cleanup, { once: true });
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-        resolve();
+        iframe.removeEventListener("load", handleLoad);
+
+        try {
+          printWindow.addEventListener("afterprint", cleanup, { once: true });
+          printWindow.focus();
+          printWindow.print();
+          resolve();
+        } catch (error) {
+          cleanup();
+          reject(error instanceof Error ? error : new Error("The browser could not open the print dialog."));
+        }
       };
 
-      window.addEventListener("message", handleReady);
+      const handleReady = (event: MessageEvent<unknown>) => {
+        if (browserPagination || event.source !== iframe.contentWindow
+          || (event.data as { type?: string } | null)?.type !== readyMessage) return;
+        startPrint();
+      };
+
+      const handleLoad = () => {
+        if (!browserPagination || printStarted || !iframe.contentDocument?.querySelector(".document-content")) return;
+        // The iframe load event includes linked styles/images; wait for its fonts
+        // before opening the native print dialog.
+        void Promise.resolve(iframe.contentDocument.fonts?.ready)
+          .then(startPrint)
+          .catch(() => fail(new Error("The printable document assets could not be prepared.")));
+      };
+
+      if (browserPagination) iframe.addEventListener("load", handleLoad);
+      else window.addEventListener("message", handleReady);
+
       timeoutId = window.setTimeout(() => {
-        cleanup();
-        reject(new Error("The printable document could not be paginated."));
-      }, 15000);
+        fail(new Error(browserPagination
+          ? "The full document could not finish loading for printing."
+          : "The printable document could not be paginated."));
+      }, browserPagination ? 90000 : 15000);
 
       iframe.srcdoc = createPrintHtml({ ...options, readyMessage });
       document.body.append(iframe);
