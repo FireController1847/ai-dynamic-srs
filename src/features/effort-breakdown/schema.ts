@@ -46,7 +46,7 @@ export const effortBreakdownSchema: SchemaNode = {
   ai: {
     task: 'Establish the named team, every project task and its points, and an agreed responsibility allocation for each task totaling 100%.',
     showInterview: true,
-    interviewGuidance: 'Review every current task, including all seeded rows, and confirm whether it belongs to the actual project. Clarify unknown point values and each named member’s responsibility task by task. Keep allocation agreement distinct from actual work performed. Defaults are starting suggestions, not confirmed ownership.',
+    interviewGuidance: "Use the complete task and team inventory, recognizing seeded values as suggestions. Ask only for material unknown task scope, points or ownership that cannot be derived from agreed responsibilities; distinguish allocation from work already done.",
     draftingGuidance: 'Format the requested team details and complete task rows with task name, established point value and all five member percentages. Each task must total 100%; unused member positions receive zero. Do not invent contributions, equalize an agreed uneven allocation or return computed weighted totals as editable fields.',
     definitions: [
       { term: "Task completion", definition: "The sum of responsibility percentages assigned to members for a task; full allocation totals 100%." },
