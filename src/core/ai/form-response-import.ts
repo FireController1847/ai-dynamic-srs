@@ -9,7 +9,7 @@ import { parentRecordGroups } from '../records/parent-records.ts';
 import { referenceChoices } from '../records/reference-fields.ts';
 import { promptPeriodCount, sectionPromptFields } from './prompt-schema.ts';
 import { parseAiFormResponse } from './form-response.ts';
-import type { AiFormNeed, AiFormRecordId, AiFormRecordResponse, AiFormResponse } from './form-response.ts';
+import type { AiFormRecordId, AiFormRecordResponse, AiFormResponse } from './form-response.ts';
 
 interface ReplacePatch {
   kind: 'replace';
@@ -56,7 +56,6 @@ export interface AiFormImportResult {
   addedRecords: number;
   addedNestedRecords: number;
   skippedNulls: number;
-  needsInformation: AiFormNeed[];
 }
 
 interface PlanningStats {
@@ -422,8 +421,7 @@ export function applyAiFormResponse(args: {
     updatedRecords: 0,
     addedRecords: 0,
     addedNestedRecords: 0,
-    skippedNulls: 0,
-    needsInformation: response.needsInformation || []
+    skippedNulls: 0
   };
 
   if (response.records) {
