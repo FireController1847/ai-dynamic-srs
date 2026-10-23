@@ -7,6 +7,7 @@ export interface SrsRecords extends DataModel {
   useCases?: DataModel[]; useCaseRelationships?: DataModel[];
   requirements?: DataModel[]; artifacts?: DataModel[]; evidenceIssues?: DataModel[];
   scopeDecisions?: DataModel[]; terms?: DataModel[]; audiences?: DataModel[];
+  domainConcepts?: DataModel[];
   sources?: DataModel[];
 }
 export function srsRecords(documentModel: DocumentModel): SrsRecords {

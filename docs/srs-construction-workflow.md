@@ -149,13 +149,32 @@ Constraints and assumptions keep their SRS-SCP IDs and editable source fields. C
 
 `evidence.ts` supplies collapsed source references/navigation and clipboard context from the baseline, actors/goals, catalog, detailed behavior, functional requirements, feasibility findings, and preceding Phase 4 stages. Category review outcomes are included even when no requirement was added. `QualityStageForm.ts` combines generic EvidenceForm/RecordReviewPanel; `quality-review.ts` gives advisory ID, acceptance, agreement, and validation-gap checks, never automatic approval or completion changes. Schema-based previews represent all authored stage fields under the finished-document outline, not workflow numbering.
 
-Phase 5 should use these same requirements, scope decisions, actors, cases, issues, and artifact records when models reveal omissions. DrawIO upload/preview remains available in Phase 3; interface mockups and additional model uploads belong to Phase 5, not this implementation. The original implementation left verification to the user; the maintenance review adds focused regression checks (see `srs-phase-three-four-review.md`). Final assembly/print validation is still a later-phase responsibility.
+Phase 5 should use these same requirements, scope decisions, actors, cases, issues, and artifact records when models reveal omissions. DrawIO upload/preview remains available in Phase 3; interface mockups and additional model uploads are now implemented in Phase 5. The original implementation left verification to the user; the maintenance review adds focused regression checks (see `srs-phase-three-four-review.md`). Final assembly/print validation is still a later-phase responsibility.
 
 ## Cross-phase follow-through
 
 `issue-follow-up.ts` supplies additive fields on the shared issue register. `follow-through-review.ts` keeps unresolved questions visible, checks ownership/actions/resolution phase and closure evidence, and is consumed by both Phase 3 and Phase 4. Phase 4 also carries Phase 3 consistency findings forward. `record-review.ts` owns common SRS/figure reference checks; `requirement-fields.ts` owns the common requirement answer contract.
 
 Detailed descriptions carry casual questions and offer `workflowEvidenceNotes` for justified walkthrough evidence. Phase 4 `review-outcomes.ts` compares review outcomes with actual category records and assumption validation. These checks are advisory, read-only, and distinct from completion or approval.
+
+## Phase 5 implementation and handoff
+
+Phase 5 is implemented under `phase-five/` and registered in `workflow/phases.ts`. Its four real stages use the existing Fluent authoring shell, shared `EvidenceForm`, model-specific consistency panel, schema-derived preview and the existing figure upload/AI generation pipeline. Their editable scope is analysis evidence, **not** new copies of use cases, requirements or questions.
+
+| Stage | Canonical authoring | Final placement |
+|---|---|---|
+| Domain & Class Model (05.1) | New concepts only when needed: `records.domainConcepts` (`SRS-DOM-*`); domain figures in `records.artifacts` with `artifactGroup=domain-class-model` | 7.2 Domain and Class Model |
+| Interaction Models (05.2) | `records.artifacts`, filtered to `interaction-model`; scenario/path, actors and domain responsibilities | 7.3 Interaction Models |
+| State Models (05.3) | `records.artifacts`, filtered to `state-model`; stateful concept, events and guards | 7.4 State Models |
+| UI Scenarios & Evidence (05.4) | `records.artifacts`, filtered to `ui-scenario`; source task, user classes, feedback, validation and recovery | 7.5 User Interface Design Evidence; findings inform 6.1 User Interfaces |
+
+All model figures share the existing `FIG-0001` sequence and stored `file` payload (editable DrawIO/XML or PNG/JPEG). Four new semantic diagram types (`domain`, `interaction`, `state`, `ui-flow`) are registered in `core/artifacts/diagram-types.ts`, with the same `dsrs-diagram` single-figure and `dsrs-diagrams` ordered-batch import validation, caption/ID placement, preview, print and save behavior. The models use layout-free graphs and shared deterministic DrawIO generation; `diagram-model.ts` owns their layout/semantic constraints, not separate file or storage models. Graph groups are not supported for these four types and are explicitly rejected instead of discarded.
+
+Phase 5 `model-review.ts` identifies unavailable/stale cross-model IDs, figure records without file evidence, ungrounded modeling outcomes, missing scenarios and open shared questions. Its messages are advisory; it cannot inspect the truth of a diagram, declare model acceptance, or silently create/change prior requirements. Analysts correct the original `SRS-UC`, `SRS-FR/QR/IR`, vocabulary or `SRS-ISS` entries. Optional model kinds need not be invented for every object or scenario; a no-model decision requires a recorded scope/reason. Domain concepts are the only new identity catalog, and are not implementation classes.
+
+New workspaces initialize `records.domainConcepts` as an empty collection; normalization of older workspaces preserves it along with all existing records and diagram payloads. `FORMAT_VERSION` remains 2. Model stages have active completion criteria; filling them records structural progress, **not** semantic approval. Phases 6–7 remain incomplete placeholders.
+
+Manual review (not run): open a saved pre-Phase-5 workspace; check all four tabs, evidence links and previews; create two domain concepts with stable IDs; upload one DrawIO figure in each group and verify FIG identifiers do not collide; generate single and batch diagrams using each model type; compare a real scenario, state transition and UI recovery path with the original use case/requirement; retire a linked model figure and verify warnings; save/reopen and print the document sections.
 
 For course rationale, answer lifecycle, Phase 5–7 entry points, final assembly inclusion/deduplication rules, and focused verification, read `srs-phase-three-four-review.md`.
 

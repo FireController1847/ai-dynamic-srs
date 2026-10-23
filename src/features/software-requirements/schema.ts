@@ -26,6 +26,7 @@ export const softwareRequirementsSchema: SchemaNode = {
       audiences: [],
       scopeDecisions: [],
       terms: [],
+      domainConcepts: [],
       perspectives: [],
       actors: [],
       goals: [],

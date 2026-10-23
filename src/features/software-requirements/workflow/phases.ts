@@ -7,6 +7,7 @@ import { actorsGoalsStage } from "../phase-two/actors-goals.ts";
 import { candidateProcessesStage } from "../phase-two/candidate-processes.ts";
 import { phaseThreeStages } from "../phase-three/stages.ts";
 import { phaseFourStages } from "../phase-four/stages.ts";
+import { phaseFiveStages } from "../phase-five/stages.ts";
 
 interface PhaseDefinition {
   id: string;
@@ -127,36 +128,7 @@ const phaseDefinitions: PhaseDefinition[] = [
     role: "validate",
     dependsOn: ["srs-specify-quality-interfaces"],
     reviews: ["srs-describe-functional-behavior", "srs-specify-quality-interfaces"],
-    stages: [
-      {
-        id: "srs-models-domain",
-        stateKey: "domainModel",
-        label: "Domain & Class Model",
-        description: "Develop the behavioral vocabulary into domain concepts, responsibilities, attributes, and relationships, then check it against the use cases.",
-        documentTargets: ["analysis-models.domain"]
-      },
-      {
-        id: "srs-models-interactions",
-        stateKey: "interactionModels",
-        label: "Interaction Models",
-        description: "Trace selected scenarios through collaborating actors and objects to expose missing operations, responsibilities, or sequence assumptions.",
-        documentTargets: ["analysis-models.interaction"]
-      },
-      {
-        id: "srs-models-state",
-        stateKey: "stateModels",
-        label: "State Models",
-        description: "Model important stateful domain objects and verify that events, guards, transitions, and lifecycle rules are supported by the specification.",
-        documentTargets: ["analysis-models.state"]
-      },
-      {
-        id: "srs-models-interface-design",
-        stateKey: "interfaceDesignEvidence",
-        label: "UI Scenarios & Evidence",
-        description: "Use scenarios, storyboards, and mockups to challenge navigation, feedback, validation, accessibility, and other interface requirements.",
-        documentTargets: ["analysis-models.interface-design", "external-interfaces.user"]
-      }
-    ]
+    stages: phaseFiveStages
   },
   {
     id: "srs-reconcile-verify",

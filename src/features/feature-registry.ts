@@ -17,6 +17,7 @@ import { ActorsGoalsForm } from "./software-requirements/phase-two/ActorsGoalsFo
 import { DiscoveryStageForm } from "./software-requirements/phase-two/DiscoveryStageForm.ts";
 import { BehaviorStageForm } from "./software-requirements/phase-three/BehaviorStageForm.ts";
 import { QualityStageForm } from "./software-requirements/phase-four/QualityStageForm.ts";
+import { ModelStageForm } from "./software-requirements/phase-five/ModelStageForm.ts";
 import { softwareRequirementsSchema } from "./software-requirements/schema.ts";
 import { systemRequestSchema } from "./system-request/schema.ts";
 
@@ -38,6 +39,7 @@ export const featureComponents = Object.freeze({
   ActorsGoalsForm,
   BehaviorStageForm,
   QualityStageForm,
+  ModelStageForm,
   PlacedStagePreview,
   BaselineStageForm,
   BaselineStagePreview,

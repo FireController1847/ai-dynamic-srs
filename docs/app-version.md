@@ -88,9 +88,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.7.0-alpha` connects the existing `dsrs-form` v1 JSON contract and validated merge engine to ordinary form prompts and a shared paste/validate/apply UI. Section, group, saved-record and nested-item scopes use schema keys and saved IDs. The panel validates against a copy of the document, enforces the current page/stage and copied scope, shows changes and missing information, then requires explicit confirmation before merging/autosaving. Omitted/null values preserve existing data. Diagrams use their own importer and Notes retains its audited manual editor. Workspace format remains 2.
 
+## SRS Phase 5 — Cross-Check with Models
+
+`0.8.0-alpha` implements the four Phase 5 stages: Domain & Class Model, Interaction Models, State Models, and UI Scenarios & Evidence. Domain concepts get the new `SRS-DOM-*` IDs only when justified; all four kinds of model figures reuse the canonical `FIG-*` artifact register with filtered groups, upload, preview, native DrawIO generation and saved source links. The same diagram importer now recognizes `domain`, `interaction`, `state` and `ui-flow` semantic graphs. Each stage includes connected evidence, concise review outcomes, advisor checks, guided AI interview prompts and schema-placed partial document previews. No use-case, requirement or issue catalog is duplicated. The changes are additive; existing records/IDs and diagram files are preserved and workspace format remains 2. Phases 6–7 remain unimplemented.
+
 ## Manual review
 
-Open the application and confirm `v0.7.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.7.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.8.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.8.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 

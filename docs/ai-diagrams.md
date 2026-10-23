@@ -69,7 +69,7 @@ Every figure graph uses exactly four keys:
 
 | Key | Compact entries |
 |---|---|
-| `t` | Registered diagram type: currently `use-case` or `activity` |
+| `t` | Registered diagram type: `use-case`, `activity`, `domain`, `interaction`, `state` or `ui-flow` |
 | `g` | `[localId, labelOrReference]` groups |
 | `n` | `[localId, kind, labelOrReference, optionalGroupId]` nodes |
 | `e` | `[fromLocalNodeId, toLocalNodeId, optionalKind, optionalGuardOrCondition]` directed edges |
@@ -126,7 +126,7 @@ Workspace format remains unchanged.
 | Strict single-graph parsing | `diagram-ir.ts` |
 | Strict ordered section-batch parsing and metadata/scope validation | `diagram-batch.ts` |
 | Canonical label resolution and selected scalar evidence | `diagram-context.ts` |
-| Registered semantic validators/layouts | `diagram-types.ts`, `diagram-use-case.ts`, `diagram-activity.ts` |
+| Registered semantic validators/layouts | `diagram-types.ts`, `diagram-use-case.ts`, `diagram-activity.ts`, `diagram-model.ts` |
 | Native XML generation and single/batch upload-reader handoff | `diagram-drawio.ts` |
 | Existing file validation and shared limits | `diagram-files.ts` |
 | Section/figure prompt routing | `src/core/ai/diagram-prompt.ts`, `form-prompt.ts` |
@@ -152,3 +152,8 @@ The regression checks that the batch parses as six figures in exactly that order
 A separate regression asserts that the whole section prompt requests `dsrs-diagrams` while an individual figure prompt still requests only `dsrs-diagram` and states that only its file is replaced.
 
 Browser-level manual review should additionally import the six-figure response through **Import AI diagrams**, inspect each generated figure in the DrawIO preview/editor, save/reopen the workspace, print the document, and confirm normal file uploads and individual replacement still behave as before. Visual acceptance is based on readable diagrams, not merely valid XML.
+
+## Phase 5 model diagrams
+
+Phase 5 reuses the same single/batch JSON importer for four additional model graph types: `domain` (concepts and semantic relationships), `interaction` (named participant communication, not implementation lifelines), `state` (significant lifecycles/events/guards), and `ui-flow` (scenarios, feedback and recovery). Their validator and deterministic layout live in `diagram-model.ts`. For these four types `g` must be empty and node groups must be omitted; unknown model grouping is rejected rather than silently dropped. All saved results are ordinary editable DrawIO figure files with shared FIG IDs and stage-specific artifactGroup filters. AI inputs include selected canonical records and metadata, never saved XML/PNG bytes. Manual uploaded diagrams remain supported.
+

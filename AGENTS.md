@@ -24,6 +24,8 @@ Phase 3 extends the same use cases, with shared relationships, figures, requirem
 
 Phase 4 keeps functional, quality, and interface obligations in `records.requirements`; use `requirement-records.ts` for their kind filters and ID namespaces. Constraints and assumptions enrich existing scope decisions. See the workflow guide before extending these records or assembling later previews.
 
+Phase 5 consists of four implemented model-validation stages under `features/software-requirements/phase-five/`. New domain concepts use the sole `records.domainConcepts` catalog (`SRS-DOM-*`); all model figures use existing `records.artifacts` (`FIG-*`) with group filters. Reuse actors, use cases, requirements, terms and SRS-ISS issues instead of cloning them. New domain/interaction/state/UI semantic diagram types live in `core/artifacts/diagram-model.ts` and use the existing DrawIO pipeline. Form, preview, record reviews and AI import must continue to agree on figure groups and saved references.
+
 Architectural invariants:
 
 TypeScript invariants:

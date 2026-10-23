@@ -88,4 +88,4 @@ Initial isolated browser loading/navigation reported no JavaScript errors. The l
 6. Copy an AI prompt and inspect the carried discovery questions, casual questions, issue follow-up fields, and diagram metadata. Confirm no XML/base64 payload is included.
 7. Review partial previews and print output, especially the added issue fields, workflow evidence explanation, captions, long text, and page breaks. Final document assembly is still a future phase.
 
-Phase 5–7 remain declared placeholders. This review prepares their contracts; it does not implement final assembly or certify a project's SRS.
+Phase 5 is implemented with shared domain concepts, model figures, evidence and consistency checks (see `srs-construction-workflow.md`). Phases 6–7 remain placeholders; none of this implements final assembly or certifies a project's SRS.

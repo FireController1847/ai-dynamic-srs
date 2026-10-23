@@ -18,7 +18,8 @@ export function availableSrsIds(records: SrsRecords) {
     ["useCases", "SRS-UC-", item => ["Candidate", "Ready for elaboration", "Needs clarification"].includes(String(item.disposition))],
     ["scopeDecisions", "SRS-SCP-", item => item.status !== "Superseded"],
     ["perspectives", "SRS-VPT-"], ["terms", "SRS-TERM-"], ["audiences", "SRS-AUD-"],
-    ["useCaseRelationships", "SRS-REL-"], ["artifacts", "FIG-"], ["evidenceIssues", "SRS-ISS-"]
+    ["useCaseRelationships", "SRS-REL-"], ["artifacts", "FIG-"], ["evidenceIssues", "SRS-ISS-"],
+    ["domainConcepts", "SRS-DOM-"]
   ];
   return new Set([
     ...collections.flatMap(([key, prefix, eligible = () => true]) => recordItems(records[key])
@@ -28,7 +29,15 @@ export function availableSrsIds(records: SrsRecords) {
 }
 
 export function missingReferenceMessages(item: DataModel, fields: string[], available: Set<string>) {
-  const kinds: Record<string, string[]> = { useCaseReferences: ["SRS-UC-"], externalActorId: ["SRS-ACT-"], relatedRequirementReferences: ["SRS-FR-", "SRS-QR-", "SRS-IR-"] };
+  const kinds: Record<string, string[]> = {
+    useCaseReferences: ["SRS-UC-"], externalActorId: ["SRS-ACT-"],
+    relatedRequirementReferences: ["SRS-FR-", "SRS-QR-", "SRS-IR-"],
+    requirementReferences: ["SRS-FR-", "SRS-QR-", "SRS-IR-"],
+    interfaceRequirementReferences: ["SRS-IR-", "SRS-QR-"],
+    domainConceptReferences: ["SRS-DOM-"], relatedConceptReferences: ["SRS-DOM-"],
+    statefulConceptId: ["SRS-DOM-"], actorReferences: ["SRS-ACT-"],
+    userClassReferences: ["SRS-VPT-"]
+  };
   return fields.flatMap(field => referenceIds(item[field]).flatMap(id => {
     if (kinds[field] && !kinds[field].some(prefix => id.startsWith(prefix))) return [`${item.referenceId}: ${id} is the wrong record kind for ${field}; use ${kinds[field].join(" or ")} IDs.`];
     return available.has(id) ? [] : [`${item.referenceId}: ${id} is missing, retired, or not active; review the link.`];
