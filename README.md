@@ -4,7 +4,7 @@
 
 A browser-based workspace for exploring a better way to produce and refine software requirements specifications with AI.
 
-> **Blank-slate redesign:** This branch is a fresh, intentionally limited foundation with structured CR and SR documents. Detailed SRS construction, AI orchestration, and other document workflows remain undecided. The previous application is preserved on `main`.
+> **Blank-slate redesign:** This branch is a fresh, intentionally limited foundation with structured CR and SR documents plus a financial CBA workbench. Detailed SRS construction, AI orchestration, and other document workflows remain undecided. The previous application is preserved on `main`.
 
 ## AI development disclosure
 
@@ -22,7 +22,7 @@ Dynamic SRS uses the following self-contained frontend and build conventions:
 - Fluent-inspired neutral surfaces, blue accent, responsive layout, and a local theme module with system-following light/dark settings, persisted preferences, and an accessible settings dialog.
 - Node.js 24+ and GitHub Actions build verification.
 
-The application has seven navigable document areas: Client Requirements (CR), System Request (SR), Cost-Benefit Analysis (CBA), Feasibility & Stakeholder Analysis (FSA), Software Requirements Specification (SRS), Effort Breakdown (EB), and General Notes (GN). Open the animated three-line menu and select one in the document drawer (or link to `#/documents/<id>`). Client Requirements now has a structured brief for client context, problem or opportunity, desired solution, individually managed requested capabilities, and optional expressed boundaries. A live document preview is assembled from the same structured fields. Optional original client materials can still be attached or referenced. System Request is also editable, with a sponsor, business need, reorderable high-level requirements, individually managed qualitative/measurable business benefits, and optional special issues. Date and preparer metadata are supported, alongside the same live preview and autosave behavior. CBA, FSA, SRS, EB, and GN remain intentionally empty. No detailed requirements, diagrams, or phased workflows have been implemented. The underlying workspace is stored in IndexedDB. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
+The application has seven navigable document areas: Client Requirements (CR), System Request (SR), Cost-Benefit Analysis (CBA), Feasibility & Stakeholder Analysis (FSA), Software Requirements Specification (SRS), Effort Breakdown (EB), and General Notes (GN). Open the animated three-line menu and select one in the document drawer (or link to `#/documents/<id>`). Client Requirements now has a structured brief for client context, problem or opportunity, desired solution, individually managed requested capabilities, and optional expressed boundaries. A live document preview is assembled from the same structured fields. Optional original client materials can still be attached or referenced. System Request is also editable, with a sponsor, business need, reorderable high-level requirements, individually managed qualitative/measurable business benefits, and optional special issues. Date and preparer metadata are supported, alongside the same live preview and autosave behavior. FSA, SRS, EB, and GN remain intentionally empty. CBA now provides editable assumptions, benefit and cost line items, a year-by-year chart and table, financial summary calculations, linked source notes, and a printable report; no detailed requirements, diagrams, or AI workflows have been implemented. The underlying workspace is stored in IndexedDB. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
 
 ## Run locally
 
@@ -57,6 +57,10 @@ The structured Client Requirements brief autosaves to IndexedDB after a brief pa
 ## System Request editing
 
 System Request follows the five sections used in the systems analysis coursework: Project Sponsor, Business Need, Business Requirements, Business Value, and Special Issues. Its benefits can record a qualitative improvement or a measurable target without performing cost-benefit calculations. All lists are individually editable and reorderable. The same Editor / Split / Preview controls and conflict-safe autosave work here as in CR. It stores one `sr.request` record inside the workspace and never auto-copies content from CR or GN.
+
+## Cost-Benefit Analysis editing
+
+CBA is an interactive financial model rather than a prose editor. Configure the projection period and discount rate, then enter benefits as direct annual estimates or volume × value × incremental share. Choose flat annual benefits or a linear ramp toward the final-year estimate. Costs can be upfront, annual, scheduled for one future year, or periodically repeated. Totals, discounted cash flows, net present value, ROI, benefit/cost ratio, and whole-year payback recalculate immediately. Missing assumptions and incomplete line items withhold the financial summary; no estimates are fabricated. Source notes follow each input. A report tab provides an editable-data-derived, print-friendly document. CBA uses the same autosave and .dsrs records as the other documents, and can show read-only business-value context from System Request.
 
 ## Deployment
 

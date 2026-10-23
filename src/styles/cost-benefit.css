@@ -1,0 +1,120 @@
+/* CBA is a financial workbench, intentionally distinct from the CR/SR prose editors. */
+.cba-workspace { display: grid; align-content: start; gap: 16px; min-width: 0; }
+.cba-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.cba-toolbar-right { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; }
+.cba-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.cba-metric {
+  display: grid; align-content: start; gap: 6px; min-width: 0;
+  padding: 14px; border: 1px solid var(--border-color);
+  background: var(--page-background); border-radius: var(--radius-dialog);
+}
+.cba-metric-primary { border-color: var(--brand); }
+.cba-metric > span { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.cba-metric > strong { font-size: clamp(16px, 1.65vw, 22px); line-height: 1.3; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.cba-metric > small { color: var(--text-secondary); font-size: 11px; line-height: 1.5; }
+.cba-panel { display: grid; gap: 14px; min-width: 0; padding: 18px; background: var(--page-background); border: 1px solid var(--border-color); border-radius: var(--radius-dialog); }
+.cba-section-heading { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; }
+.cba-section-heading h3 { margin: 0; font-size: 16px; }
+.cba-section-heading p { margin: 4px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+.cba-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; min-width: 0; }
+.cba-field { display: grid; align-content: start; gap: 5px; min-width: 0; }
+.cba-field label, .cba-date-row label { font-weight: 600; font-size: 12px; }
+.cba-field .cr-input { font-variant-numeric: tabular-nums; }
+.cba-number-control { display: flex; align-items: center; min-width: 0; }
+.cba-number-control .cr-input { flex: 1 1 0; }
+.cba-unit { flex: 0 0 auto; min-width: 26px; padding: 0 0 0 8px; color: var(--text-secondary); font-size: 12px; }
+.cba-numeric { text-align: right; }
+.cba-date-row { display: grid; gap: 5px; width: min(100%, 240px); }
+.cba-muted, .cba-empty, .cba-item-helper, .cba-count { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.cba-item { display: grid; min-width: 0; gap: 12px; padding: 14px; border: 1px solid var(--border-color); border-radius: var(--radius); background: var(--surface-subtle); }
+.cba-item-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.cba-item-title { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.cba-item-title strong { font-size: 13px; overflow-wrap: anywhere; }
+.cba-item-icon { display: grid; place-items: center; flex: 0 0 26px; width: 26px; height: 26px; border-radius: var(--radius); background: var(--brand-tint); color: var(--brand-text); font-size: 15px; }
+.cba-item-heading .quiet-button { flex: 0 0 auto; }
+.cba-derived { display: flex; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; padding: 10px 12px; background: var(--page-background); border: 1px solid var(--border-color); border-radius: var(--radius); }
+.cba-derived > span { font-size: 12px; color: var(--text-secondary); }
+.cba-derived > strong { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 14px; }
+.cba-derived small { flex-basis: 100%; color: var(--text-secondary); line-height: 1.4; }
+.cba-incomplete { margin: 0; color: var(--danger); font-size: 12px; }
+.cba-detail { display: grid; min-width: 0; border-top: 1px solid var(--border-color); }
+.cba-detail summary { padding: 10px 0 0; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--brand-text); }
+.cba-detail .cba-field-grid { margin-top: 12px; }
+.cba-crossref { padding-top: 8px; }
+.cba-crossref p { margin: 8px 0; }
+.cba-crossref ul { padding-left: 24px; margin: 6px 0; }
+.cba-crossref li { line-height: 1.6; }
+.cba-crossref small { color: var(--text-secondary); }
+.cba-crossref a { display: inline-block; margin-bottom: 8px; color: var(--brand-text); }
+.cba-alert { display: grid; gap: 5px; margin: 0; padding: 12px; background: var(--surface-subtle); border-left: 3px solid var(--brand); border-radius: var(--radius); font-size: 12px; line-height: 1.5; }
+.cba-alert p { margin: 0; }
+.cba-missing { color: var(--text-secondary); overflow-wrap: anywhere; }
+.cba-chart { display: grid; gap: 8px; min-width: 0; }
+.cba-chart-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; color: var(--text-secondary); }
+.cba-chart-legend span { display: flex; align-items: center; gap: 6px; }
+.cba-chart-legend span::before { content: ''; width: 12px; height: 12px; border-radius: 2px; background: var(--brand); }
+.cba-chart-legend .cba-legend-cost::before { background: var(--text-secondary); }
+.cba-chart-scroll { max-width: 100%; overflow-x: auto; padding: 10px 6px 0; border-bottom: 1px solid var(--border-color); }
+.cba-chart-scroll:focus-visible, .cba-table-scroll:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.cba-bars { display: flex; align-items: end; min-width: max-content; gap: 18px; min-height: 180px; }
+.cba-year-bars { display: grid; align-content: end; gap: 6px; width: 52px; }
+.cba-bar-pair { display: flex; justify-content: center; align-items: end; gap: 4px; height: 150px; }
+.cba-bar { display: block; flex: 0 0 18px; background: var(--brand); min-height: 0; border-radius: 2px 2px 0 0; }
+.cba-bar-cost { background: var(--text-secondary); opacity: 0.75; }
+.cba-year-label { text-align: center; font-size: 11px; color: var(--text-secondary); }
+.cba-table-scroll { width: 100%; max-width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--radius); }
+.cba-table { border-collapse: collapse; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
+.cba-table caption { padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+.cba-table th, .cba-table td { padding: 9px 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+.cba-table th { text-align: left; }
+.cba-table td { text-align: right; }
+.cba-table thead { background: var(--surface-subtle); }
+.cba-table tbody tr:last-child > * { border-bottom: none; }
+.cba-table tbody tr:hover { background: var(--surface-hover); }
+.cba-negative { color: var(--danger); }
+.cba-report { width: 100%; max-width: 960px; margin-inline: auto; gap: 22px; }
+.cba-report > h2 { margin: 0; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); font-size: 24px; }
+.cba-report-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--paper-ink-dark); }
+.cba-report section { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.cba-report section h3 { font-size: 14px; }
+.cba-report section p { margin: 0; line-height: 1.6; }
+.cba-report-items { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.cba-report-items li { display: grid; gap: 3px; padding: 6px 0; border-bottom: 1px solid var(--border-color); }
+.cba-report-line { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 15px; }
+.cba-report-line strong { font-variant-numeric: tabular-nums; }
+.cba-source { display: block; color: var(--text-secondary); overflow-wrap: anywhere; white-space: pre-wrap; font-size: 11px; }
+.cba-report-outcome { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; font-variant-numeric: tabular-nums; }
+.cba-report-notes { white-space: pre-wrap; }
+.cba-print-note { font-size: 11px; color: var(--text-secondary); }
+.cba-report .cba-table-scroll { background: var(--paper-white); }
+@media (max-width: 900px) { .cba-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .cba-field-grid, .cba-report-outcome { grid-template-columns: minmax(0, 1fr); }
+  .cba-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cba-panel { padding: 13px; }
+  .cba-toolbar > .cr-view-toggle { flex: 1 1 100%; }
+  .cba-toolbar > .cr-view-toggle > button { flex: 1; }
+  .cba-toolbar-right { width: 100%; justify-content: space-between; }
+}
+@media (max-width: 390px) { .cba-summary { grid-template-columns: minmax(0, 1fr); } }
+@media print {
+  @page { size: auto; margin: 16mm; }
+  body, .app-shell, .app-layout, .app-content, .document-page-container, .document-page {
+    height: auto !important; max-height: none !important; width: 100% !important;
+    overflow: visible !important; background: #fff !important; color: #111 !important;
+  }
+  .app-header, .app-version, .document-page-header, .cba-toolbar, .cba-workspace > .cba-summary,
+  .document-sidebar, .cr-warning { display: none !important; }
+  .cba-workspace { display: block !important; }
+  .cba-report {
+    display: block !important; max-width: none; margin: 0; padding: 0;
+    border: none; border-radius: 0; box-shadow: none; color: #111 !important;
+    background: #fff !important;
+  }
+  .cba-report > * { margin-bottom: 15px; }
+  .cba-report section { break-inside: avoid-page; }
+  .cba-report .cba-table-scroll { overflow: visible; border: 0; }
+  .cba-report .cba-table { width: 100%; font-size: 9px; }
+  .cba-report .cba-table th, .cba-report .cba-table td { padding: 5px 3px; white-space: normal; }
+  .cba-report * { color: #111 !important; }
+}

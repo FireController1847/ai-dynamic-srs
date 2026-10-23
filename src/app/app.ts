@@ -3,6 +3,7 @@ import { DOCUMENTS, findDocument, type DocumentId } from '../features/documents/
 import { DocumentView } from '../features/documents/document-view.ts';
 import { ClientRequirements, type ClientRequirementsHandle } from '../features/client-requirements/client-requirements.ts';
 import { SystemRequestEditor, type SystemRequestHandle } from '../features/system-request/system-request.ts';
+import { CostBenefitEditor, type CostBenefitHandle } from '../features/cost-benefit/cost-benefit.ts';
 import { DocumentSidebar } from './document-sidebar.ts';
 import { initializeTheme } from './theme.ts';
 import { ThemeMenu, type ThemeMenuHandle } from './theme-menu.ts';
@@ -25,8 +26,10 @@ const App = defineComponent({
     const selectedId = ref<DocumentId>(documentIdFromLocation());
     const crDirty = ref(false);
     const srDirty = ref(false);
+    const cbaDirty = ref(false);
     const crEditor = ref<ClientRequirementsHandle | null>(null);
     const srEditor = ref<SystemRequestHandle | null>(null);
+    const cbaEditor = ref<CostBenefitHandle | null>(null);
     const selectedDocument = computed(() => findDocument(selectedId.value) ?? DOCUMENTS[0]);
     const menuButton = ref<HTMLButtonElement | null>(null);
     const main = ref<HTMLElement | null>(null);
@@ -62,13 +65,15 @@ const App = defineComponent({
       if (nextId === selectedId.value) return true;
       // Flush the currently selected document before switching or changing the URL.
       const current = selectedId.value;
-      const dirty = current === 'cr' ? crDirty.value : current === 'sr' ? srDirty.value : false;
+      const dirty = current === 'cr' ? crDirty.value : current === 'sr' ? srDirty.value :
+        current === 'cba' ? cbaDirty.value : false;
       if (!dirty) return true;
-      const saved = current === 'cr'
-        ? await crEditor.value?.flushSave()
-        : await srEditor.value?.flushSave();
+      const saved = current === 'cr' ? await crEditor.value?.flushSave() :
+        current === 'sr' ? await srEditor.value?.flushSave() :
+          await cbaEditor.value?.flushSave();
       if (saved) return true;
-      return window.confirm('The latest ' + (current === 'cr' ? 'Client Requirements' : 'System Request') +
+      return window.confirm('The latest ' + (current === 'cr' ? 'Client Requirements' :
+        current === 'sr' ? 'System Request' : 'Cost-Benefit Analysis') +
         ' changes could not be saved. Leave and discard them?');
     }
 
@@ -199,7 +204,15 @@ const App = defineComponent({
                       onDirtyChange: (value: boolean) => { srDirty.value = value; },
                     }),
                   })
-                  : h(DocumentView, { document: selectedDocument.value }),
+                  : selectedId.value === 'cba'
+                    ? h(DocumentView, { document: selectedDocument.value }, {
+                      default: () => h(CostBenefitEditor, {
+                        ref: cbaEditor,
+                        workspace,
+                        onDirtyChange: (value: boolean) => { cbaDirty.value = value; },
+                      }),
+                    })
+                    : h(DocumentView, { document: selectedDocument.value }),
             ]),
           ]),
         ]),
