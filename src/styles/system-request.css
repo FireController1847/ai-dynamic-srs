@@ -1,0 +1,72 @@
+/* SR reuses the established CR workspace, editor, toolbar and paper surfaces. */
+.sr-two-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.sr-benefit-row { align-items: flex-start; }
+.sr-benefit-row > .cr-item-number { margin-top: 9px; }
+.sr-benefit-row > .cr-item-actions { flex-shrink: 0; margin-top: 4px; }
+.sr-benefit-fields { display: grid; flex: 1 1 0; min-width: 0; gap: 6px; }
+.sr-benefit-details { display: flex; flex-wrap: wrap; gap: 7px; min-width: 0; }
+.sr-benefit-kind { display: block; flex: 0 0 auto; }
+.sr-type-select { min-width: 128px; padding-right: 22px; }
+.sr-target-input { flex: 1 1 190px; }
+.sr-benefit-add { display: grid; gap: 7px; }
+.sr-benefit-picker { display: inline-flex; justify-self: start; gap: 3px; }
+.sr-kind-button {
+  min-height: 32px;
+  padding: 5px 11px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  background: var(--page-background);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  transition: background-color var(--motion-fast), color var(--motion-fast);
+}
+.sr-kind-button:hover { background: var(--surface-hover); }
+.sr-kind-button.is-active {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  color: var(--brand-text);
+}
+.sr-kind-button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.sr-document-details > h3 { font-size: 14px; }
+.sr-paper-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 20px;
+  color: var(--paper-ink-dark);
+  font-size: 12px;
+}
+.sr-preview-copy { display: grid; gap: 5px; }
+.sr-preview-copy p { margin: 0; white-space: pre-wrap; line-height: 1.55; }
+.sr-preview-target { font-style: italic; }
+.sr-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 600px) {
+  .sr-two-fields { grid-template-columns: minmax(0, 1fr); }
+  .sr-benefit-row { flex-wrap: wrap; }
+  .sr-benefit-fields { flex-basis: calc(100% - 40px); }
+  .sr-benefit-row > .cr-item-actions { margin-left: auto; }
+  .sr-type-select { width: 100%; }
+}
+@media (max-width: 420px) {
+  .sr-benefit-details { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .sr-target-input { flex-basis: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sr-kind-button { transition: none; }
+}
