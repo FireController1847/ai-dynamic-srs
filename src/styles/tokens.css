@@ -1,0 +1,15 @@
+/* Fluent-inspired shared tokens. Theme-dependent palette values live in themes.css. */
+:root {
+  --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius: 4px;
+  --radius-dialog: 8px;
+  --control-height: 32px;
+  --page-padding: 24px;
+  --motion-fast: 100ms;
+  --motion-normal: 220ms;
+  --ease-out: cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+@media (pointer: coarse) {
+  :root { --control-height: 44px; }
+}
