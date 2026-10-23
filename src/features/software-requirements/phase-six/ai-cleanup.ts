@@ -28,7 +28,7 @@ function fail(message: string): never {
 }
 
 function copy<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
+  return value === undefined ? value : JSON.parse(JSON.stringify(value)) as T;
 }
 
 function hash(value: string): string {
