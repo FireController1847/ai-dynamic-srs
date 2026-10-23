@@ -38,7 +38,7 @@ function buildStage(phase: CodedPhaseDefinition, originalStage: SchemaNode, inde
     documentTargets: stage.documentTargets || [],
     workflow: {
       kind: "stage",
-      required: true,
+      required: stage.workflow?.required ?? true,
       role: stage.role || phase.role,
       sequence: index + 1,
       dependsOn: stage.dependsOn || (previousId ? [previousId] : phase.dependsOn),
