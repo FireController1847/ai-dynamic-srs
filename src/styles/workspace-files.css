@@ -1,15 +1,20 @@
-.workspace-files {
-  display: grid;
-  gap: 12px;
-  padding: 20px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-dialog);
-  background: var(--surface-subtle);
+.workspace-files { display: grid; gap: 8px; }
+.workspace-files .sidebar-heading { margin-bottom: 0; }
+.workspace-files-actions { display: grid; gap: 3px; }
+.workspace-files .sidebar-tool {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 40px;
+  padding-left: 12px;
+  border-color: transparent;
+  background: transparent;
+  font-weight: 400;
 }
-.workspace-files h3 { margin: 0; }
-.workspace-files p { margin: 0; color: var(--text-secondary); }
-.workspace-files-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.workspace-import-review { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--control-border); border-radius: var(--radius); background: var(--page-background); }
+.workspace-files .sidebar-tool:hover:not(:disabled) { background: var(--surface-hover); }
+.workspace-files-hint { margin: 4px 12px 0; color: var(--text-secondary); font-size: 12px; line-height: 18px; }
+.workspace-file-message, .workspace-file-error { margin: 4px 12px; font-size: 12px; overflow-wrap: anywhere; }
 .workspace-file-message { color: var(--text-secondary); }
-.workspace-file-status { margin: 0; color: var(--text-secondary); }
-.workspace-file-error, .workspace-files .workspace-file-error { color: var(--danger); }
+.workspace-file-error { color: var(--danger); }
+.workspace-import-review { display: grid; gap: 16px; }
+.workspace-import-review p { margin: 0; overflow-wrap: anywhere; }
+.workspace-files-review-actions { display: flex; flex-wrap: wrap; gap: 8px; }

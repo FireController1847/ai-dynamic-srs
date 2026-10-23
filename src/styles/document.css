@@ -1,0 +1,33 @@
+.document-page-container { width: min(100%, 1040px); margin-inline: auto; }
+.document-heading-focus:focus { outline: none; }
+.document-page { display: flex; flex-direction: column; gap: 32px; }
+.document-page-header { display: grid; gap: 10px; }
+.document-eyebrow {
+  margin: 0;
+  color: var(--brand-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+.document-page-title { font-size: clamp(24px, 2.2vw, 30px); line-height: 1.2; }
+.document-page-description { max-width: 65ch; margin: 0; color: var(--text-secondary); }
+.document-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 340px;
+  padding: 48px 24px;
+  border: 1px dashed var(--control-border);
+  border-radius: var(--radius-dialog);
+  background: var(--surface-subtle);
+  text-align: center;
+}
+.document-empty-icon { color: var(--text-secondary); opacity: 0.65; }
+.document-empty h3 { font-size: 17px; }
+.document-empty p { max-width: 47ch; margin: 0; color: var(--text-secondary); }
+@media (max-width: 760px) {
+  .document-page { gap: 22px; }
+  .document-empty { min-height: 280px; padding: 32px 16px; }
+}

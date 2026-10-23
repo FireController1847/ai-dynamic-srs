@@ -1,20 +1,109 @@
-import { createApp, defineComponent, h, ref } from 'vue';
+import { computed, createApp, defineComponent, h, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { DOCUMENTS, findDocument, type DocumentId } from '../features/documents/catalog.ts';
+import { DocumentView } from '../features/documents/document-view.ts';
+import { DocumentSidebar } from './document-sidebar.ts';
 import { initializeTheme } from './theme.ts';
 import { ThemeMenu, type ThemeMenuHandle } from './theme-menu.ts';
-import { WorkspaceFiles } from './workspace-files.ts';
 import { useWorkspace } from './workspace.ts';
 import '../styles/index.css';
 
 initializeTheme();
+
+function documentIdFromLocation(): DocumentId {
+  const match = /^#\/documents\/([a-z]+)$/.exec(window.location.hash);
+  return findDocument(match?.[1] ?? '')?.id ?? DOCUMENTS[0].id;
+}
 
 const App = defineComponent({
   name: 'App',
   setup() {
     const themeMenu = ref<ThemeMenuHandle | null>(null);
     const workspace = useWorkspace();
+    const narrow = window.matchMedia('(max-width: 760px)');
+    const sidebarOpen = ref(!narrow.matches);
+    const selectedId = ref<DocumentId>(documentIdFromLocation());
+    const selectedDocument = computed(() => findDocument(selectedId.value) ?? DOCUMENTS[0]);
+    const sidebarToggle = ref<HTMLButtonElement | null>(null);
+    const pageHeading = ref<HTMLElement | null>(null);
+
+    function focusHeading() {
+      void nextTick(() => pageHeading.value?.focus());
+    }
+
+    function closeSidebar(restoreFocus = false) {
+      sidebarOpen.value = false;
+      if (restoreFocus) void nextTick(() => sidebarToggle.value?.focus());
+    }
+
+    function toggleSidebar() {
+      sidebarOpen.value = !sidebarOpen.value;
+      if (sidebarOpen.value && narrow.matches) {
+        void nextTick(() => {
+          const current = document.querySelector<HTMLAnchorElement>(
+            '.document-navigation-link[aria-current="page"]');
+          current?.focus();
+        });
+      }
+    }
+
+    function selectDocument(id: DocumentId) {
+      if (selectedId.value !== id) {
+        selectedId.value = id;
+        window.history.pushState(null, '', '#/documents/' + id);
+      }
+      if (narrow.matches) closeSidebar();
+      focusHeading();
+    }
+
+    function syncLocation() {
+      selectedId.value = documentIdFromLocation();
+      if (narrow.matches) closeSidebar();
+      focusHeading();
+    }
+
+    function onViewportChange(event: MediaQueryListEvent) {
+      sidebarOpen.value = !event.matches;
+    }
+
+    function onEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape' && sidebarOpen.value && narrow.matches &&
+          !document.querySelector('dialog[open]')) closeSidebar(true);
+    }
+
+    onMounted(() => {
+      narrow.addEventListener('change', onViewportChange);
+      window.addEventListener('hashchange', syncLocation);
+      window.addEventListener('popstate', syncLocation);
+      window.addEventListener('keydown', onEscape);
+    });
+    onBeforeUnmount(() => {
+      narrow.removeEventListener('change', onViewportChange);
+      window.removeEventListener('hashchange', syncLocation);
+      window.removeEventListener('popstate', syncLocation);
+      window.removeEventListener('keydown', onEscape);
+    });
 
     return () => h('div', { class: 'app-shell' }, [
       h('header', { class: 'app-header' }, [
+        h('button', {
+          ref: sidebarToggle, type: 'button',
+          class: 'icon-button sidebar-toggle',
+          title: sidebarOpen.value ? 'Hide documents' : 'Show documents',
+          'aria-label': sidebarOpen.value ? 'Hide documents sidebar' : 'Show documents sidebar',
+          'aria-controls': 'documents-sidebar',
+          'aria-expanded': sidebarOpen.value,
+          onClick: toggleSidebar,
+        }, [
+          h('svg', {
+            viewBox: '0 0 24 24', width: 20, height: 20,
+            fill: 'none', stroke: 'currentColor', 'stroke-width': 1.7,
+            'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+            'aria-hidden': 'true', focusable: 'false',
+          }, [
+            h('rect', { x: 3, y: 4, width: 18, height: 16, rx: 2 }),
+            h('path', { d: 'M9 4v16' }),
+          ]),
+        ]),
         h('span', { class: 'app-brand-mark', 'aria-hidden': 'true' }, 'S'),
         h('h1', 'Dynamic SRS'),
         h('div', { class: 'app-header-actions' }, [
@@ -41,29 +130,35 @@ const App = defineComponent({
         ]),
       ]),
       h(ThemeMenu, { ref: themeMenu }),
-      h('div', { class: 'app-layout' }, [
-        h('main', { class: 'app-content' }, [
-          h('div', { class: 'home-page' }, [
-            h('h2', 'Workspace'),
-            h('p', { class: 'home-intro' }, 'A new foundation for Dynamic SRS.'),
-            !workspace.ready.value
-              ? h('p', { class: 'workspace-file-error', role: 'status' },
-                  workspace.problem.value || 'Opening locally saved workspace…')
-              : [
-                h('section', { class: 'blank-state', 'aria-label': 'Empty workspace' }, [
-                  h('div', { class: 'blank-state-mark', 'aria-hidden': 'true' }, '✦'),
-                  h('h3', 'A blank slate'),
-                  h('p', 'No SRS workflows or documents have been defined yet.'),
-                ]),
-                h('p', { class: 'workspace-file-status' },
-                  workspace.current.value?.file.records.length === 0
-                    ? 'IndexedDB is ready. This workspace has no saved records yet.'
-                    : 'IndexedDB is ready. ' + workspace.current.value?.file.records.length + ' saved records.'),
-                h(WorkspaceFiles, { workspace }),
-                workspace.problem.value
-                  ? h('p', { class: 'workspace-file-error', role: 'alert' }, workspace.problem.value)
-                  : null,
-              ],
+      h('div', {
+        class: ['app-layout', sidebarOpen.value ? 'sidebar-open' : 'sidebar-collapsed'],
+      }, [
+        h('button', {
+          type: 'button', class: 'sidebar-scrim', tabindex: -1,
+          'aria-label': 'Close documents sidebar',
+          onClick: () => closeSidebar(true),
+        }),
+        h(DocumentSidebar, {
+          selected: selectedId.value,
+          workspace,
+          inert: !sidebarOpen.value,
+          'aria-hidden': !sidebarOpen.value ? 'true' : undefined,
+          onSelect: selectDocument,
+        }),
+        h('main', {
+          class: 'app-content', id: 'document-content',
+          inert: narrow.matches && sidebarOpen.value,
+        }, [
+          h('div', { class: 'document-page-container' }, [
+            !workspace.ready.value || workspace.problem.value
+              ? h('p', {
+                  class: 'workspace-storage-warning',
+                  role: workspace.problem.value ? 'alert' : 'status',
+                }, workspace.problem.value || 'Opening locally saved workspace…')
+              : null,
+            h('div', { ref: pageHeading, tabindex: -1, class: 'document-heading-focus' }, [
+              h(DocumentView, { document: selectedDocument.value }),
+            ]),
           ]),
         ]),
       ]),

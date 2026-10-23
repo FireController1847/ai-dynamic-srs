@@ -22,7 +22,7 @@ Dynamic SRS uses the following self-contained frontend and build conventions:
 - Fluent-inspired neutral surfaces, blue accent, responsive layout, and a local theme module with system-following light/dark settings, persisted preferences, and an accessible settings dialog.
 - Node.js 24+ and GitHub Actions build verification.
 
-The home page intentionally has no SRS forms, agents, diagrams, or phases. It now provides an IndexedDB-backed local workspace and portable .dsrs backup/restore; no domain-specific records or workflows have been established. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
+The application has seven navigable document areas: Client Requirements (CR), System Request (SR), Cost-Benefit Analysis (CBA), Feasibility & Stakeholder Analysis (FSA), Software Requirements Specification (SRS), Effort Breakdown (EB), and General Notes (GN). Select one in the collapsible sidebar (or link to `#/documents/<id>`). Each currently has an intentionally empty view; no domain editors, records, agents, diagrams, or phases have been implemented. The underlying workspace is stored in IndexedDB. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
 
 ## Run locally
 
@@ -46,7 +46,7 @@ The build writes a static site to ignored `dist/`. The development server reload
 
 Dynamic SRS stores the active working workspace in the browser's IndexedDB database (`dynamic-srs-data`). Records are keyed individually, with guarded revision updates so future features won't rewrite unrelated data. A `.dsrs` file is a portable JSON snapshot, **not an IndexedDB database dump**.
 
-The empty workspace page has **Download .dsrs** and **Import .dsrs** controls. Imports are validated and reviewed before replacing the active workspace; staging and atomic activation prevent partial restores. Work in this browser is not automatically backed up anywhere else. Themes and other local preferences stay outside the `.dsrs` file.
+The document sidebar contains **Download .dsrs** and **Import .dsrs** controls. Imports are validated and reviewed before replacing the active workspace; staging and atomic activation prevent partial restores. Work in this browser is not automatically backed up anywhere else. Themes and other local preferences stay outside the `.dsrs` file.
 
 This redesign starts with `.dsrs` format **version 1**, independent of the IndexedDB schema version. The old Dynamic SRS format v2 is *not* yet supported by the new import contract. See [workspace format and persistence](docs/workspace-data.md).
 

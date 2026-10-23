@@ -1,12 +1,12 @@
 # Design baseline
 
-The initial appearance is defined by the local styles, theme palette, and small application shell. It is a neutral starting point, not a commitment to the prior SRS interface.
+The application uses a Fluent-inspired, neutral interface with semantic styling tokens, restrained blue accents, and system typography.
 
-- Fluent-inspired neutral surfaces, restrained blue accents, system font, semantic CSS variables and compact controls.
-- Light and dark color palettes in `src/styles/themes.css`; visual components should consume tokens instead of hard-coded theme-specific colors.
-- Theme settings use `src/app/theme.ts`, `theme-picker.ts`, and `theme-menu.ts`: an accessible dialog with Follow system, per-appearance theme choices, local preferences, and updates when OS appearance changes. See [theme behavior](theme.md) for state ownership and persistence details.
-- A simple 48px application header, wide padded content area, centered 1080px max-width home column, and unobtrusive version label.
-- Keyboard accessibility, focus visibility, touch-sized interactions, responsive layouts, and reduced-motion preferences are baseline requirements.
-- The empty state is intentionally *not* a mock SRS dashboard. Only storage status and backup/restore controls have been added; do not introduce section tabs, agent tiles, documents, or workflow controls before the user chooses that direction.
+- The 48px header provides a document-sidebar toggle and the existing accessible theme dialog.
+- The sidebar lists seven distinct documents (CR, SR, CBA, FSA, SRS, EB, GN) with stable, shareable `#/documents/<id>` URLs and an active-document indicator.
+- The sidebar is collapsible on desktop and becomes an overlay drawer on narrow screens. The selected view has its own title, description, and intentionally blank content area.
+- Workspace-level **Download .dsrs** and **Import .dsrs** controls live at the bottom of the sidebar. Restoring requires a confirmation dialog; storage is browser-local.
+- Light/dark palettes are defined by `src/styles/themes.css`, and components consume tokens rather than hard-coded mode-specific colors.
+- Keyboard navigation, focus visibility, escape-to-close for the narrow sidebar, touch-friendly targets, responsive layouts, and reduced-motion settings remain baseline requirements.
 
-Adapt these conventions only in response to actual new requirements.
+The document views are a navigation foundation, not a commitment to a particular SRS workflow or content-editing UI. Add content functionality as its requirements are defined.
