@@ -104,9 +104,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.9.1-alpha` removes the redundant `needsInformation` output from scoped AI form prompts, the parser's live response model, the merge report and the import review panel. Missing decisions remain the guided interview's responsibility; unsupported fields remain `null` or omitted and are never invented or used to overwrite saved answers. Previously copied `dsrs-form` v1 responses containing the obsolete key, including string or object arrays, are tolerated and the key is ignored. Strict field validation, explicit review/apply, record IDs, diagram import, and workspace format 2 remain unchanged.
 
+## Optional Phase 6 AI cleanup
+
+`0.10.0-alpha` adds optional Step 06.5 after Verification & Traceability. One copied prompt reviews the complete saved workspace context while restricting proposed changes to existing, eligible SRS narrative fields. The separate `dsrs-cleanup` v1 JSON handoff offers only shorter, supported edits, with live target/snapshot checks, before/after review, individually selected application and stale-response rejection. Skipping cleanup never affects Phase 6 completion. No canonical IDs, references, statuses, figures, non-SRS documents, verification conclusions or saved schema structures are changed by the import. Existing `.dsrs` workspace format remains 2; see [optional AI cleanup](ai-cleanup.md).
+
 ## Manual review
 
-Open the application and confirm `v0.9.1-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.9.1-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.10.0-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.10.0-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 
