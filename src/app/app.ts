@@ -106,8 +106,16 @@ const App = defineComponent({
           'aria-expanded': sidebarOpen.value,
           onClick: openSidebar,
         }, [
-          h('span', { class: 'menu-icon', 'aria-hidden': 'true' }, [
-            h('span'), h('span'), h('span'),
+          h('svg', {
+            class: 'menu-icon',
+            width: 20, height: 20, viewBox: '0 0 24 24',
+            stroke: 'currentColor', 'stroke-width': 2.4,
+            'stroke-linecap': 'round', fill: 'none',
+            'aria-hidden': 'true', focusable: 'false',
+          }, [
+            h('path', { d: 'M4 6h16' }),
+            h('path', { d: 'M4 12h16' }),
+            h('path', { d: 'M4 18h16' }),
           ]),
         ]),
         h('span', { class: 'app-brand-mark app-header-mark', 'aria-hidden': 'true' }, 'S'),
