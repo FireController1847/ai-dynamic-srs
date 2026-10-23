@@ -5,17 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Dynamic SRS</title>
     <meta name="description" content="Dynamic SRS — a fresh workspace for AI-assisted requirements engineering.">
+    <meta name="theme-color" content="#0f6cbd">
     <base href="<%= basePath %>">
     <script>
       try {
-        const saved = localStorage.getItem('dynamic-srs.theme');
-        document.documentElement.dataset.theme =
-          saved === 'light' || saved === 'dark'
-            ? saved
-            : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      } catch {
-        document.documentElement.dataset.theme = 'light';
-      }
+        const systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+        const legacy = localStorage.getItem('dynamic-srs.theme');
+        let theme = legacy === 'light' || legacy === 'dark' ? legacy : (systemDark ? 'dark' : 'light');
+        const saved = localStorage.getItem('dynamic-srs.theme-preferences');
+        if (saved) {
+          try {
+            const preferences = JSON.parse(saved);
+            const valid = value => value === 'light' || value === 'dark';
+            if (preferences && typeof preferences === 'object') {
+              if (preferences.followSystem === true) {
+                const chosen = systemDark ? preferences.darkTheme : preferences.lightTheme;
+                theme = valid(chosen) && chosen === (systemDark ? 'dark' : 'light')
+                  ? chosen : (systemDark ? 'dark' : 'light');
+              } else {
+                theme = valid(preferences.theme) ? preferences.theme : 'light';
+              }
+            }
+          } catch { /* Keep the legacy or system-default theme if malformed. */ }
+        }
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', theme === 'dark' ? '#1f1f1f' : '#0f6cbd');
+      } catch { /* Theme is best effort. The module will apply preferences on startup. */ }
     </script>
   </head>
   <body>

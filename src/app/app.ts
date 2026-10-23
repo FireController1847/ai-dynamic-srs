@@ -1,24 +1,14 @@
 import { createApp, defineComponent, h, ref } from 'vue';
+import { initializeTheme } from './theme.ts';
+import { ThemeMenu, type ThemeMenuHandle } from './theme-menu.ts';
 import '../styles/index.css';
 
-type Theme = 'light' | 'dark';
-
-function currentTheme(): Theme {
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-}
+initializeTheme();
 
 const App = defineComponent({
   name: 'App',
   setup() {
-    const theme = ref<Theme>(currentTheme());
-
-    function toggleTheme(): void {
-      theme.value = theme.value === 'light' ? 'dark' : 'light';
-      document.documentElement.dataset.theme = theme.value;
-      try {
-        localStorage.setItem('dynamic-srs.theme', theme.value);
-      } catch { /* The theme still works when storage is unavailable. */ }
-    }
+    const themeMenu = ref<ThemeMenuHandle | null>(null);
 
     return () => h('div', { class: 'app-shell' }, [
       h('header', { class: 'app-header' }, [
@@ -28,16 +18,26 @@ const App = defineComponent({
           h('button', {
             type: 'button',
             class: 'quiet-button app-header-action',
-            'aria-label': theme.value === 'dark' ? 'Switch to light theme' : 'Switch to dark theme',
-            onClick: toggleTheme,
+            title: 'Theme settings',
+            'aria-label': 'Open theme settings',
+            'aria-haspopup': 'dialog',
+            onClick: (event: MouseEvent) => themeMenu.value?.open(event.currentTarget),
           }, [
-            h('span', { class: 'theme-toggle-icon', 'aria-hidden': 'true' },
-              theme.value === 'dark' ? '☀' : '☾'),
-            h('span', { class: 'app-header-action-label' },
-              theme.value === 'dark' ? 'Light theme' : 'Dark theme'),
+            h('svg', {
+              class: 'ui-icon', viewBox: '0 0 24 24', width: 20, height: 20,
+              fill: 'none', stroke: 'currentColor', 'stroke-width': 1.6,
+              'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+              'aria-hidden': 'true', focusable: 'false',
+            }, [
+              h('circle', { cx: 12, cy: 12, r: 9 }),
+              h('path', { d: 'M12 3a9 9 0 0 1 0 18Z', fill: 'currentColor', stroke: 'none', 'fill-opacity': 0.22 }),
+              h('path', { d: 'M12 3v18' }),
+            ]),
+            h('span', { class: 'app-header-action-label' }, 'Theme'),
           ]),
         ]),
       ]),
+      h(ThemeMenu, { ref: themeMenu }),
       h('div', { class: 'app-layout' }, [
         h('main', { class: 'app-content' }, [
           h('div', { class: 'home-page' }, [

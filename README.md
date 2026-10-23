@@ -19,7 +19,7 @@ This scaffold follows the **Dynamic Learner** project's engineering baseline, no
 - Vue 3 with plain TypeScript render-function components; no Vue SFC compiler.
 - Strict TypeScript and native ES modules.
 - webpack development server and static production builds.
-- Fluent-inspired neutral surfaces, blue accent, light/dark themes, responsive layout.
+- Fluent-inspired neutral surfaces, blue accent, responsive layout, and Dynamic Learner's full theme module (system-following light/dark settings, stored preferences, and a settings dialog).
 - Node.js 24+ and GitHub Actions build verification.
 
 The home page is intentionally empty. There are no forms, agents, local workspace data, import/export contracts, diagrams, SRS phases, or domain assumptions to preserve. See [architecture](docs/architecture.md) and [design](docs/design.md) for the small amount of scaffolding that exists.

@@ -2,4 +2,6 @@
 @import './themes.css';
 @import './base.css';
 @import './shell.css';
+@import './popup-dialog.css';
+@import './theme.css';
 @import './blank-state.css';

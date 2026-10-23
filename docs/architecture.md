@@ -2,7 +2,9 @@
 
 Dynamic SRS currently has **only a frontend scaffold**. It deliberately has no SRS schema, persistence, document model, AI agents, prompt protocol, diagrams, or feature registry.
 
-- `src/app/app.ts` — one Vue 3 root component and basic appearance toggle.
+- `src/app/app.ts` — one Vue 3 root component and a theme settings trigger.
+- `src/app/theme.ts`, `theme-menu.ts`, `theme-picker.ts` — shared theme registry, preferences, system appearance tracking, and settings UI.
+- `src/components/popup-dialog.ts`, `use-dialog.ts` — accessible modal dialog primitives.
 - `src/styles/` — Dynamic Learner-inspired semantic tokens and shell conventions.
 - `src/html/index.html` — base HTML for the static site.
 - `webpack.config.mts` — one webpack entry, live development server, and GitHub Pages-compatible static build.
