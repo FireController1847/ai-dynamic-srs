@@ -6,7 +6,7 @@ import { downloadWorkspaceJson } from '../../../core/workspace/workspace-files.t
 import {
   applyCleanup, cleanupPreview, cleanupPrompt, cleanupSourceHash, planCleanup
 } from './ai-cleanup.ts';
-import type { CleanupPlan } from './ai-cleanup.ts';
+import type { CleanupChange, CleanupPlan } from './ai-cleanup.ts';
 
 /** Full JSON review/edit flow. No schema sections or user-entered completion fields. */
 export const AiCleanupStageForm = defineComponent({
@@ -30,8 +30,24 @@ export const AiCleanupStageForm = defineComponent({
     sourceHash(): string {
       return cleanupSourceHash(this.documentModel);
     },
-    allSelected(): boolean {
-      return !!this.plan?.changes.length && this.selectedIndices.length === this.plan.changes.length;
+    orderedChanges(): CleanupChange[] {
+      const priority = { reduction: 0, neutral: 1, expansion: 2 };
+      return [...(this.plan?.changes || [])].sort((a, b) => priority[a.kind] - priority[b.kind] || a.index - b.index);
+    },
+    reductionCount(): number {
+      return this.plan?.changes.filter(change => change.kind === 'reduction').length || 0;
+    },
+    expansionCount(): number {
+      return this.plan?.changes.filter(change => change.kind === 'expansion').length || 0;
+    },
+    selectedReview(): { plan: CleanupPlan | null; error: string } {
+      if (!this.plan || !this.selectedIndices.length || this.responseText !== this.validatedResponse
+        || this.sourceHash !== this.validatedHash) return { plan: null, error: '' };
+      try {
+        return { plan: planCleanup(this.documentModel, this.documentSchemas, this.responseText, this.selectedIndices), error: '' };
+      } catch (error) {
+        return { plan: null, error: error instanceof Error ? error.message : String(error) };
+      }
     }
   },
   methods: {
@@ -68,7 +84,8 @@ export const AiCleanupStageForm = defineComponent({
       try {
         const plan = planCleanup(this.documentModel, this.documentSchemas, this.responseText);
         this.plan = plan;
-        this.selectedIndices = plan.changes.map(change => change.index);
+        // Nothing is implicitly approved. Use bulk-select for extensive cleanup passes.
+        this.selectedIndices = [];
         this.validatedResponse = this.responseText;
         this.validatedHash = this.sourceHash;
         this.error = '';
@@ -81,9 +98,18 @@ export const AiCleanupStageForm = defineComponent({
         this.error = error instanceof Error ? error.message : String(error);
       }
     },
-    toggleAll() {
-      if (!this.plan) return;
-      this.selectedIndices = this.allSelected ? [] : this.plan.changes.map(change => change.index);
+    selectReductions() {
+      this.selectedIndices = (this.plan?.changes || []).filter(change => change.kind === 'reduction')
+        .map(change => change.index);
+    },
+    selectAll() {
+      this.selectedIndices = (this.plan?.changes || []).map(change => change.index);
+    },
+    clearSelection() {
+      this.selectedIndices = [];
+    },
+    signed(value: number): string {
+      return (value > 0 ? '+' : '') + value.toLocaleString();
     },
     preview(value: unknown): string {
       return cleanupPreview(value);
@@ -95,8 +121,12 @@ export const AiCleanupStageForm = defineComponent({
         return;
       }
       try {
-        const selection = [...this.selectedIndices].sort((a, b) => a - b);
-        const finalPlan = planCleanup(this.documentModel, this.documentSchemas, this.responseText, selection);
+        const selectedPlan = this.selectedReview;
+        if (selectedPlan.error || !selectedPlan.plan) {
+          this.error = selectedPlan.error || 'Review a valid selection before applying.';
+          return;
+        }
+        const finalPlan = selectedPlan.plan;
         const previous = JSON.parse(JSON.stringify(this.documentModel.softwareRequirementsSpecification || {})) as DataModel;
         applyCleanup(this.documentModel, finalPlan);
         this.undoData = previous;
@@ -109,7 +139,8 @@ export const AiCleanupStageForm = defineComponent({
         this.validatedResponse = '';
         this.validatedHash = '';
         this.error = '';
-        this.success = 'Applied ' + finalPlan.changes.length + ' approved changes to the saved SRS Phases 1–6. Undo is available here until another edit is made.';
+        this.success = 'Applied ' + finalPlan.changes.length + ' approved changes to the saved SRS Phases 1–6 (' +
+          this.signed(finalPlan.impact.wordDelta) + ' estimated prose words). Undo is available until another edit is made.';
       } catch (error) {
         this.error = error instanceof Error ? error.message : String(error);
       }
@@ -131,7 +162,7 @@ export const AiCleanupStageForm = defineComponent({
       <div class="card-body p-4">
         <p class="section-kicker mb-2">Phase 6 · Step 5 · Optional</p>
         <h3 id="ai-cleanup-title" class="h5">Full-workspace AI cleanup</h3>
-        <p class="text-body-secondary">Give ChatGPT your complete saved Dynamic SRS JSON. It can review and propose improvements anywhere across SRS Phases 1–6, including shared records, relationships, requirements and model metadata. It returns <strong>changes only</strong> rather than a rewritten workspace.</p>
+        <p class="text-body-secondary">Give ChatGPT your complete saved Dynamic SRS JSON for an <strong>extensive reduction-first cleanup</strong>: shorten wordy fields, remove repetition, consolidate duplicate material, and repair proven inconsistencies across Phases 1–6. Hundreds of justified replacements and deletions are welcome. Additions are reserved for essential corrections. GPT returns <strong>changes only</strong>, not a rewritten workspace.</p>
         <p class="small text-body-secondary">This is optional and does not affect phase completion. The exported JSON can contain project-sensitive information; review what you share with an external AI.</p>
         <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
           <button type="button" class="btn btn-outline-primary" @click="downloadJson">1. Download full workspace JSON</button>
@@ -153,17 +184,52 @@ export const AiCleanupStageForm = defineComponent({
         <p v-if="success" class="small text-body-secondary mt-3" role="status">{{ success }}</p>
 
         <section v-if="plan" class="mt-4" aria-label="Proposed full-workspace changes">
-          <div class="d-flex flex-wrap justify-content-between gap-2 align-items-center">
-            <h4 class="h6 mb-0">{{ plan.changes.length }} proposed changes</h4>
-            <button v-if="plan.changes.length" type="button" class="btn btn-outline-secondary btn-sm" @click="toggleAll">{{ allSelected ? 'Deselect all' : 'Select all' }}</button>
+          <h4 class="h6">{{ plan.changes.length }} proposed changes</h4>
+          <p class="small text-body-secondary">{{ reductionCount }} reductions · {{ plan.changes.length - reductionCount - expansionCount }} neutral corrections · {{ expansionCount }} additions or expansions</p>
+          <div class="row g-2 mt-2 mb-3">
+            <div class="col-sm-4">
+              <div class="border rounded p-3 h-100">
+                <span class="d-block small text-body-secondary">Current estimated SRS prose</span>
+                <strong>{{ plan.impact.before.words.toLocaleString() }} words</strong>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="border rounded p-3 h-100">
+                <span class="d-block small text-body-secondary">All proposed changes</span>
+                <strong>{{ plan.impact.after.words.toLocaleString() }} words</strong>
+                <span class="d-block small" :class="plan.impact.wordDelta > 0 ? 'text-danger' : 'text-body-secondary'">{{ signed(plan.impact.wordDelta) }} words</span>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="border rounded p-3 h-100">
+                <span class="d-block small text-body-secondary">Your selected changes</span>
+                <strong>{{ (selectedReview.plan?.impact.after.words ?? plan.impact.before.words).toLocaleString() }} words</strong>
+                <span class="d-block small" :class="(selectedReview.plan?.impact.wordDelta ?? 0) > 0 ? 'text-danger' : 'text-body-secondary'">{{ signed(selectedReview.plan?.impact.wordDelta ?? 0) }} words</span>
+              </div>
+            </div>
           </div>
-          <p class="small text-body-secondary mt-2">All operations were validated together against a detached copy of the current workspace. Review the before/after values and reasons. Record IDs, approvals, figures, model links and requirements may be changed by selected operations; check their downstream impacts. Deselecting dependent operations can make the remaining changeset invalid.</p>
+          <p class="small text-body-secondary">These estimates count prose-like strings in SRS Phases 1–6, excluding common IDs, metadata and encoded files. They measure length, not completeness or correctness. A net increase is a signal to scrutinize additions, not an automatic rejection.</p>
+          <div v-if="plan.changes.length" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <button type="button" class="btn btn-outline-primary btn-sm" @click="selectReductions">Select all reductions ({{ reductionCount }})</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @click="selectAll">Select all proposals</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @click="clearSelection">Deselect all</button>
+            <span class="small text-body-secondary">{{ selectedIndices.length }} selected · none preapproved</span>
+          </div>
+          <p class="small text-body-secondary">Reductions are displayed first; additions/expansions last. Review before/after values and reasons. Changing IDs, statuses, diagrams or linked records needs extra care. Selecting only part of a dependent batch can invalidate the remaining changeset.</p>
+          <p v-if="selectedReview.error" class="small text-danger" role="alert">Selected operations conflict: {{ selectedReview.error }}</p>
           <p v-if="!plan.changes.length" class="small text-body-secondary">No changes proposed. Your workspace is untouched.</p>
-          <div v-for="change in plan.changes" :key="change.index" class="card border mb-3">
+          <div v-for="change in orderedChanges" :key="change.index" class="card border mb-3">
             <div class="card-body">
               <label class="d-flex gap-2 align-items-start">
                 <input type="checkbox" class="form-check-input mt-1" :value="change.index" v-model="selectedIndices" />
-                <span><strong>{{ change.op.toUpperCase() }} · {{ change.path }}</strong><span v-if="change.reason" class="d-block small text-body-secondary">{{ change.reason }}</span></span>
+                <span>
+                  <strong>{{ change.op.toUpperCase() }} · {{ change.path }}</strong>
+                  <span class="d-block small" :class="change.kind === 'expansion' ? 'text-danger' : 'text-body-secondary'">
+                    {{ change.kind === 'reduction' ? 'Reduction' : change.kind === 'expansion' ? 'Addition / expansion — review carefully' : 'Neutral correction' }}
+                    · {{ signed(change.wordDelta) }} prose words · {{ signed(change.characterDelta) }} prose characters
+                  </span>
+                  <span v-if="change.reason" class="d-block small text-body-secondary">{{ change.reason }}</span>
+                </span>
               </label>
               <div class="row g-3 mt-2">
                 <div class="col-md-6">
@@ -178,7 +244,7 @@ export const AiCleanupStageForm = defineComponent({
             </div>
           </div>
           <button v-if="plan.changes.length" type="button" class="btn btn-primary"
-            :disabled="!selectedIndices.length || sourceHash !== validatedHash"
+            :disabled="!selectedIndices.length || sourceHash !== validatedHash || !!selectedReview.error || !selectedReview.plan"
             @click="applySelected">5. Apply {{ selectedIndices.length }} selected changes</button>
         </section>
       </div>
