@@ -1,27 +1,31 @@
-# Optional Phase 6 AI editorial cleanup
+# Optional Phase 6, Step 5 — full-workspace AI cleanup
 
-**Step 5 of Reconcile & Verify** is an optional, pre-assembly editorial pass. It never changes progress requirements, SRS approvals or requirements status. Skipping it leaves the workspace untouched.
+This stage is optional. It is a working form even though the stage has no schema sections: the custom form is explicitly rendered by the workspace navigation. Skipping it never affects Phase 6 completion or creates a document section.
 
-## Workflow
+## User workflow
 
-1. Select **AI Cleanup (Optional)** after the four Phase 6 reconciliation and verification stages.
-2. Choose **Copy AI cleanup prompt** and paste it into ChatGPT. The prompt includes the complete saved workspace Markdown context (with figure file bytes excluded), plus a compact list of currently populated, active, editable SRS narrative fields. It does not require another interview.
-3. ChatGPT returns exactly one `dsrs-cleanup` v1 JSON object with only meaningful, shorter replacements: `{"format":"dsrs-cleanup","version":1,"edits":[{"id":"c...","snapshot":"...","text":"shorter wording"}]}`. An empty `edits` array is valid.
-4. Paste into the stage panel and choose **Validate suggestions**. The application verifies that each ID maps to a live editable narrative field, each copied snapshot still matches the current saved value, no field appears twice, the replacement is shorter and nonempty, and canonical SRS/FIG IDs in that field are retained.
-5. Read the side-by-side original/replacement for each proposal. Select only edits that keep all material conditions, observable behavior, exceptions and requirements. **Apply selected edits** updates those original fields in the reactive document and triggers the existing autosave; unselected suggestions change nothing.
+1. Select **SRS-06.5 — AI Cleanup (Optional)**. Choose **Download full workspace JSON**. This is a complete uncompressed JSON snapshot of the saved Dynamic SRS sections, including original evidence, planning documents, SRS Phases 1–7, shared records, and figure payloads. Review it for confidential data before sharing with an external model. The normal compressed `.dsrs` WIP remains available independently.
+2. Choose **Copy AI cleanup instructions** from the *same current workspace state*. Attach the JSON export and paste the instructions into ChatGPT.
+3. The AI reviews the full JSON but returns **only a compact changeset**, not the whole workspace: `{"format":"dsrs-cleanup","version":2,"baseHash":"<copied value>","changes":[{"op":"replace","path":"/document/sections/softwareRequirementsSpecification/records/requirements/0/statement","value":"Revised statement","reason":"Removed repetition"}]}`. To make no changes, return an empty `changes` array.
+4. Paste the changeset in Stage 5 and choose **Validate and review changes**. The app checks the fingerprint against the complete current saved sections, allows only JSON Pointer targets under the shared SRS records and the six phase-local state trees, validates every operation on a detached copy, and normalizes the result using the existing document schema. This step does not mutate saved data.
+5. Inspect the before/after values and each short reason. All changes are initially selected and can be deselected. **Apply selected changes** reevaluates the selected operations in order against the current workspace, then atomically replaces the single canonical SRS root. The normal autosave persists it. **Undo last cleanup** restores that root as long as nothing has changed since apply.
 
-Only existing SRS `textarea` fields are eligible. Stage and record identifiers, references, choices, statuses, dates, figures, planning documents, read-only and inactive inputs, and nested non-text structures cannot be patched. The proposal is not a second requirement catalog, issue register, approvals workflow, or bulk replacement of the finished document. Its context may include source records outside SRS, but edits do not modify them.
+## Scope and guarantees
 
-This is an editorial safeguard, not a semantic-verification engine: mechanical validation cannot prove a shorter paragraph retains every requirement or nuance. The user deliberately selects every edit. If a meaningful contradiction or actual missing project decision appears, it belongs in the existing reconciliation interview and canonical source record, not in a cleanup proposal. The import does not interpret source material as instructions.
+The model can propose **add**, **replace** and **remove** operations for any nested JSON within `document.sections.softwareRequirementsSpecification.records`, `baselineConstruction`, `actorGoalDiscovery`, `functionalBehaviorDescription`, `qualityInterfaceSpecification`, `modelCrossChecks`, or `specificationReconciliation`. This includes full records, statuses, relationships, requirement statements, numeric inputs, and diagram metadata/payloads. It is not limited to text or existing fields. Earlier CR, SR, CBA, FSA, Notes and Effort Breakdown documents are provided as **context**, not patch targets. Phase 7 and workspace metadata are not patch targets.
 
-The cleanup format is transient, independent of `dsrs-form` v1 and `.dsrs` workspace format 2; it is never saved as a separate dataset. It writes existing source strings only, so the eventual Phase 7 document picks up accepted wording automatically.
+Paths use RFC 6901 JSON Pointer escaping. Arrays accept numeric indices or `-` for appending. An `add` into an object requires an absent key; use `replace` for an existing key. `remove` and `replace` require existing targets. Arrays and dependent changes are processed in the response order. Prototype-pollution segments and attempts to mutate the workspace outside the allowed SRS subtree are rejected. No arbitrary per-record limit is introduced.
 
-## Focused manual review (not run)
+The importer enforces **structure and staleness**, not semantic correctness. A human must still assess the effect of changing IDs, references, obligations, figures, approval/status fields or issue history; the AI is instructed not to invent decisions or test results. Subset application can make a dependency invalid; in that case the operation batch is rejected. Schema normalization may add default fields or resolve colliding record IDs, as when loading ordinary workspace files. This workflow does not execute tests or grant release approval. Phase 7 continues to assemble the existing canonical state.
 
-1. Check navigation lists **SRS-06.5 AI Cleanup (Optional)** after Verification & Traceability; Phase 6 completion is identical whether or not this stage is visited.
-2. With populated SRS narratives and prior CR/SR/CBA/Notes context, copy the prompt. Confirm every eligible SRS narrative includes an ID/snapshot and the workspace context includes previous saved material without XML/image bytes.
-3. Paste `{"format":"dsrs-cleanup","version":1,"edits":[]}`; it should validate and leave nothing to apply.
-4. Paste a valid single shorter replacement using its current ID/snapshot. Confirm the comparison appears and **Apply** remains disabled until its checkbox is selected; after applying, the original field and document preview use the new wording.
-5. Try a duplicate ID, invented ID, wrong snapshot, deleted canonical ID, unchanged/empty/longer text and invalid JSON. All should fail before touching data.
-6. Change a source field after copying or validation. Applying a stale proposal should fail without modifying any selected records. Unselected proposals must remain unchanged.
-7. Verify Phase 6 other stages, review outcomes, requirement IDs, figure files and Phase 7 assembly remain unaffected; workspace format stays at 2.
+The `dsrs-cleanup` v2 response is an ephemeral patch format independent of `dsrs-form` v1 and `.dsrs` workspace format 2. No second catalog or redundant shadow workspace is stored.
+
+## Focused manual checks (not run)
+
+1. Select Stage 06.5 and verify the full form appears rather than **Structure only**. Check other sectionless stage placeholders remain unchanged.
+2. Export JSON and verify a `dynamic-srs-workspace` object with complete `document.sections` data. Confirm the copied prompt includes the same `baseHash` as the response contract.
+3. Validate a v2 response with no changes: it should show zero proposals. Test replace of a Phase 1 scalar, add of a new canonical record to an array, and remove of a stale Phase 6 field. Review each proposed operation before applying.
+4. Check that invalid path roots, malformed pointers, unknown operation names, missing targets, duplicate object-key additions, and invalid array positions are rejected without mutation.
+5. Modify the workspace between copy and validation, or between validation and apply: stale responses must be rejected. Reject attempts to change Phase 7 or other top-level documents.
+6. Deselect dependent array edits, check that invalid subsets are rejected atomically, and confirm valid subsets update only intended SRS data while Phase 6 completion stays optional.
+7. Verify successful apply updates downstream Phase 1–6 views and Phase 7's final projection; undo when unchanged, and verify undo is disabled after later edits. Confirm `.dsrs` format remains 2.
