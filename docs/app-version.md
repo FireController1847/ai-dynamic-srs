@@ -124,9 +124,13 @@ Because the SRS still has unfinished construction phases and is not yet a comple
 
 `0.11.3-alpha` prints the Phase 7 complete assembled SRS using the browser's native pagination instead of waiting for a time-limited Paged.js rewrite of the entire document. The same print-specific styles, running page metadata, captions, and cloned diagram output remain in place. Partial previews continue using Paged.js. The print controller explicitly selects the complete assembly preview when it is present. Workspace format and canonical records remain unchanged.
 
+## Bounded Phase 7 assembled preview
+
+`0.11.4-alpha` avoids mounting the full SRS in one Vue preview. The final document is browsed in small, bounded sections (up to eight text records or one diagram per chunk), with section navigation and preserved canonical ordering and data. Printing still includes **every** assembled entry: the print view renders one chunk at a time, captures the existing Markdown/diagram output, and combines the resulting HTML for the native browser print route. This avoids a giant simultaneous interactive DOM without changing `.dsrs` format, stored content, identifiers, or approval policy.
+
 ## Manual review
 
-Open the application and confirm `v0.11.3-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.11.3-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
+Open the application and confirm `v0.11.4-alpha` stays fixed in the bottom-right corner while switching tabs and scrolling. It should remain small, subdued, noninteractive, and clear of the browser safe area. Download a new `.dsrs` workspace and confirm its `application.version` metadata is `0.11.4-alpha`. Existing document-specific version fields and workspace `formatVersion` must remain unchanged.
 
 ## Markdown workspace context
 

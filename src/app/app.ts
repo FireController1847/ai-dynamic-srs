@@ -403,7 +403,8 @@ const app = createApp({
           title: printRequest.title || this.documentTitleFor(pageId),
           date: this.printDateLabel,
           sectionCode: printRequest.sectionCode || page.code,
-          version: this.documentValueForPage(page, page.document?.versionField || "version")
+          version: this.documentValueForPage(page, page.document?.versionField || "version"),
+          contentHtml: printRequest.contentHtml
         });
         this.workspaceStatus = "Print dialog opened";
       } catch (error) {

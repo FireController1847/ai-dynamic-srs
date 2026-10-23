@@ -30,7 +30,8 @@ export const documentPreviewProps = {
   printDateLabel: { type: String, required: true },
   projectContext: { type: Object as PropType<DataModel>, required: true },
   sectionContext: { type: Object as PropType<SectionContext | null>, default: null },
-  partial: { type: Boolean, default: false }
+  partial: { type: Boolean, default: false },
+  showCover: { type: Boolean, default: true }
 } as const;
 
 export const DocumentPreview = defineComponent({
@@ -242,14 +243,14 @@ export const DocumentPreview = defineComponent({
         <div class="document-content" :class="{ 'document-compact': pageSchema.compactPreview }">
           <preview-watermark :is-printing="isPrinting" :is-partial="isPartial"></preview-watermark>
           <document-cover-page
-            v-if="!isPartial"
+            v-if="!isPartial && showCover"
             :document-code="pageSchema.code"
             :document-name="documentName"
             :metadata-entries="metadataEntries"
             :project-title="projectTitle"
           ></document-cover-page>
 
-          <header v-else class="document-title-block document-partial-title-block">
+          <header v-else-if="isPartial" class="document-title-block document-partial-title-block">
             <p class="document-type">{{ documentType }}</p>
             <h1>{{ projectTitle || "Untitled Project" }}</h1>
             <p class="document-subtitle">{{ partialSubtitle }}</p>
@@ -261,7 +262,7 @@ export const DocumentPreview = defineComponent({
             </dl>
           </header>
 
-          <div class="document-body" :class="{ 'document-body-after-cover': !isPartial }">
+          <div class="document-body" :class="{ 'document-body-after-cover': !isPartial && showCover }">
           <template v-if="previewSections.length">
             <section v-if="sectionContext" class="document-context-section">
               <h2>{{ contextHeadingText() }}</h2>

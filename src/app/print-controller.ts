@@ -2,7 +2,13 @@ import type { DataModel, DocumentModel, SchemaNode, CopyRequest, NavigationReque
 import { printDocument } from "../core/printing/print-document.ts";
 import { printableContent } from "../core/printing/print-media.ts";
 
-export async function printPage({ date, page, sectionCode, title, version }: { date: string; page: SchemaNode; sectionCode?: string; title: string; version: unknown }) {
+export async function printPage({ date, page, sectionCode, title, version, contentHtml }: { date: string; page: SchemaNode; sectionCode?: string; title: string; version: unknown; contentHtml?: string }) {
+  // A paged Phase 7 preview contains only one small slice. Its complete print
+  // output is composed incrementally and supplied explicitly by that preview.
+  if (contentHtml !== undefined) {
+    await printDocument({ title, date, version: version || "0.1", sectionCode: sectionCode || page.code, contentHtml, pagination: "browser" });
+    return;
+  }
   const panel = document.getElementById(`${page.id}-panel`);
   // Phase 7 owns the complete document; select its output explicitly even if
   // other working previews are present in the SRS workspace.

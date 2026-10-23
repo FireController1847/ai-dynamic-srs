@@ -89,7 +89,7 @@ export interface SchemaNode {
 }
 export interface CopyRequest { markdown: string; title: string; key: string; }
 export interface NavigationRequest { pageId: string; anchorId?: string; subpageSelections?: Record<string, string>; }
-export interface PrintRequest { pageId?: string; title?: string; sectionCode?: string; }
+export interface PrintRequest { pageId?: string; title?: string; sectionCode?: string; contentHtml?: string; }
 
 export interface ParentChoice { value: string; label: string; }
 export interface MetadataEntry { key: string; label: string; value: unknown; format?: string; }
