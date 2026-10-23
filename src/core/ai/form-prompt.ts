@@ -83,9 +83,9 @@ function jsonResponseGuide(page: SchemaNode, section: Section, documentModel: Da
   const savedPath = scoped ? jsonTargetPath(record || model, path) : [];
   const base = { format: 'dsrs-form', version: 1, page: page.id, section: section.id, mode: 'merge' };
   const envelope = section.repeatable && (!record || !hasValue(record.id))
-    ? { ...base, records: [{ id: null, fields }], needsInformation: [] }
+    ? { ...base, records: [{ id: null, fields }] }
     : { ...base, ...(record && hasValue(record.id) ? { record: record.id } : {}),
-      ...(savedPath.length ? { path: savedPath } : {}), fields, needsInformation: [] };
+      ...(savedPath.length ? { path: savedPath } : {}), fields };
   return [
     'Return one dsrs-form v1 JSON object, optionally inside a single json code fence. No surrounding explanations.',
     'Only use the schema field keys in the JSON, never human-readable labels as property names.',
@@ -94,7 +94,7 @@ function jsonResponseGuide(page: SchemaNode, section: Section, documentModel: Da
     ...(section.repeatable?.parent && !section.repeatable.parent.preserveFreeform
       ? ['For every new grouped record include parent with a valid available parent ID; omit parent for existing records.']
       : []),
-    'Do not include read-only, inactive, app-managed or diagram fields. Record consequential unsupported facts briefly in needsInformation; do not ask questions.',
+    'Do not include read-only, inactive, app-managed or diagram fields. Unsupported values stay null or omitted; never invent them or add a needsInformation list. Discovery belongs to the interview; do not ask questions.',
     'Keep prose/Markdown field values minimal: usually one or two short sentences; use compact bullets or numbered steps only for distinct requirements or flows. Preserve essential conditions and verifiable detail. Do not repeat the field label, other fields, earlier-stage explanations, generic rationale or examples.',
     'JSON shape: ' + JSON.stringify(envelope),
     contract.fieldTypes.length ? 'Allowed field values: ' + contract.fieldTypes.join('; ') : ''
@@ -118,7 +118,7 @@ export function buildFormPrompt(
     || (section.repeatable?.recordFilter && !fieldVisible({ showWhen: section.repeatable.recordFilter }, record)));
   const invalid = invalidRecord || (target.fieldPath?.length && !scoped);
   const title = [page.title || page.label, section.title, recordTitle, ...(scoped?.labels || [])].filter(Boolean).join(' / ');
-  if (invalid) return `# Form prompt: ${title}\n\nThe requested target is unavailable or outside this stage's eligible records. Do not fill a different scope.\n\n## Needs information\n\n- A current eligible record or field target is needed; no substitute has been selected.\n`;
+  if (invalid) return `# Form prompt: ${title}\n\nThe requested target is unavailable or outside this stage's eligible records. Do not fill a different scope.\n\n## Unavailable target\n\nA current eligible record or field target is needed; do not substitute another.\n`;
   const diagram = diagramPromptField(scoped?.fields || fields);
   if (diagram && (!scoped || scoped.active)) {
     return buildDiagramPrompt(section, diagram, scoped ? [scoped.model] : record ? [record] : section.repeatable ? records : [model], documentModel, { batch: !scoped && !record && Boolean(section.repeatable) });
