@@ -9,4 +9,4 @@ The application uses a Fluent-inspired, neutral interface with semantic styling 
 - Light/dark palettes are defined by `src/styles/themes.css`, and components consume tokens rather than hard-coded mode-specific colors.
 - Keyboard navigation, focus visibility, escape-to-close for the narrow sidebar, touch-friendly targets, responsive layouts, and reduced-motion settings remain baseline requirements.
 
-The document views are a navigation foundation, not a commitment to a particular SRS workflow or content-editing UI. Add content functionality as its requirements are defined.
+Client Requirements (CR) now has a deliberately lightweight intake: paste the client's exact words or upload and retain an original document, then optionally expand AI interpretation or interview notes. Originals, AI drafts, and human-provided follow-ups are visually distinct, additive, and never conflated. All other document areas remain empty until their workflows are specified. There are no CR completion gates or automatically created technical requirements.

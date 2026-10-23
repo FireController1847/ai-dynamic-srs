@@ -22,7 +22,7 @@ Dynamic SRS uses the following self-contained frontend and build conventions:
 - Fluent-inspired neutral surfaces, blue accent, responsive layout, and a local theme module with system-following light/dark settings, persisted preferences, and an accessible settings dialog.
 - Node.js 24+ and GitHub Actions build verification.
 
-The application has seven navigable document areas: Client Requirements (CR), System Request (SR), Cost-Benefit Analysis (CBA), Feasibility & Stakeholder Analysis (FSA), Software Requirements Specification (SRS), Effort Breakdown (EB), and General Notes (GN). Select one in the collapsible sidebar (or link to `#/documents/<id>`). Each currently has an intentionally empty view; no domain editors, records, agents, diagrams, or phases have been implemented. The underlying workspace is stored in IndexedDB. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
+The application has seven navigable document areas: Client Requirements (CR), System Request (SR), Cost-Benefit Analysis (CBA), Feasibility & Stakeholder Analysis (FSA), Software Requirements Specification (SRS), Effort Breakdown (EB), and General Notes (GN). Select one in the collapsible sidebar (or link to `#/documents/<id>`). Client Requirements now has a simple intake for exact pasted client statements and original uploaded files. Optional AI interpretation and interview notes are stored separately, not treated as client-provided source material. The other document areas remain intentionally empty. No detailed requirements, diagrams, or phased workflows have been implemented. The underlying workspace is stored in IndexedDB. See [architecture](docs/architecture.md), [design](docs/design.md), and [theme behavior](docs/theme.md) for this scaffold's self-contained implementation conventions.
 
 ## Run locally
 
@@ -46,11 +46,11 @@ The build writes a static site to ignored `dist/`. The development server reload
 
 Dynamic SRS stores the active working workspace in the browser's IndexedDB database (`dynamic-srs-data`). Records are keyed individually, with guarded revision updates so future features won't rewrite unrelated data. A `.dsrs` file is a portable JSON snapshot, **not an IndexedDB database dump**.
 
-The document sidebar contains **Download .dsrs** and **Import .dsrs** controls. Imports are validated and reviewed before replacing the active workspace; staging and atomic activation prevent partial restores. Work in this browser is not automatically backed up anywhere else. Themes and other local preferences stay outside the `.dsrs` file.
+The document sidebar contains **Download .dsrs** and **Import .dsrs** controls. Imports are validated and reviewed before replacing the active workspace; staging and atomic activation prevent partial restores. CR attachments are stored as original file bytes inside the backup, rather than as external file links. Work in this browser is not automatically backed up anywhere else. Themes and other local preferences stay outside the `.dsrs` file.
 
 This redesign starts with `.dsrs` format **version 1**, independent of the IndexedDB schema version. The old Dynamic SRS format v2 is *not* yet supported by the new import contract. See [workspace format and persistence](docs/workspace-data.md).
 
-## Deployment
+## Optional CR interpretation\n\nWithin Client Requirements, **Copy AI prompt** prepares a short request to identify business needs, client goals, and unanswered questions. You can use an external AI chat and paste its response into CR as an explicitly labeled draft. No text or documents are automatically sent to an AI provider. Text-based originals are copied into the prompt; uploaded PDF/Word documents must be attached separately to the chat for the AI to read them. Interview answers can be added later without modifying the original material.\n\n## Deployment
 
 `.github/workflows/verify-build.yml` runs on every push. `.github/workflows/deploy-pages.yml` deploys manually through GitHub Actions after a production build. The build supports GitHub Pages' configured base path. Neither a deployment nor a finished application is implied by this redesign branch.
 

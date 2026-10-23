@@ -7,14 +7,14 @@ export const DocumentView = defineComponent({
   props: {
     document: { type: Object as PropType<DocumentDefinition>, required: true },
   },
-  setup(props) {
+  setup(props, { slots }) {
     return () => h('section', { class: 'document-page', 'aria-label': props.document.title }, [
       h('header', { class: 'document-page-header' }, [
         h('p', { class: 'document-eyebrow' }, 'Document · ' + props.document.abbreviation),
         h('h2', { class: 'document-page-title' }, props.document.title),
         h('p', { class: 'document-page-description' }, props.document.description),
       ]),
-      h('section', { class: 'document-empty', 'aria-label': 'Empty document' }, [
+      ...(slots.default ? slots.default() : [h('section', { class: 'document-empty', 'aria-label': 'Empty document' }, [
         h('svg', {
           class: 'document-empty-icon',
           viewBox: '0 0 48 48', width: 48, height: 48,
@@ -27,7 +27,7 @@ export const DocumentView = defineComponent({
         ]),
         h('h3', 'Nothing here yet'),
         h('p', 'This document has its own workspace. Content and editing tools have not been added yet.'),
-      ]),
+      ])]),
     ]);
   },
 });

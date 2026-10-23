@@ -1,6 +1,7 @@
 import { computed, createApp, defineComponent, h, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { DOCUMENTS, findDocument, type DocumentId } from '../features/documents/catalog.ts';
 import { DocumentView } from '../features/documents/document-view.ts';
+import { ClientRequirements } from '../features/client-requirements/client-requirements.ts';
 import { DocumentSidebar } from './document-sidebar.ts';
 import { initializeTheme } from './theme.ts';
 import { ThemeMenu, type ThemeMenuHandle } from './theme-menu.ts';
@@ -157,7 +158,11 @@ const App = defineComponent({
                 }, workspace.problem.value || 'Opening locally saved workspace…')
               : null,
             h('div', { ref: pageHeading, tabindex: -1, class: 'document-heading-focus' }, [
-              h(DocumentView, { document: selectedDocument.value }),
+              selectedId.value === 'cr'
+                ? h(DocumentView, { document: selectedDocument.value }, {
+                  default: () => h(ClientRequirements, { workspace }),
+                })
+                : h(DocumentView, { document: selectedDocument.value }),
             ]),
           ]),
         ]),
