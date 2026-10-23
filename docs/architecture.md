@@ -2,8 +2,8 @@
 
 Dynamic SRS remains a frontend-only application. The redesign now has a fixed document navigation catalog and separate views for each named document, with a lightweight Client Requirements intake but no autonomous AI orchestration or diagram tools.
 
-- `src/app/app.ts` — application header, responsive collapsible sidebar, URL-hash document navigation, and workspace status.
-- `src/app/document-sidebar.ts` — navigation among the seven document areas plus workspace-wide backup tools.
+- `src/app/app.ts` — application header, modal document-navigation drawer and animated hamburger trigger, URL-hash document navigation, and workspace status.
+- `src/app/document-sidebar.ts` — animated modal drawer, navigation among the seven document areas, and workspace-wide backup tools.
 - `src/features/documents/catalog.ts` — stable IDs, acronyms, names, and descriptions for CR, SR, CBA, FSA, SRS, EB, and GN.
 - `src/features/documents/document-view.ts` — shared document headers with a slot for implemented content; other documents still have empty states.
 - `src/features/client-requirements/model.ts` — typed and validated CR source, AI-draft, and interview-note records, plus file and AI handoff helpers.

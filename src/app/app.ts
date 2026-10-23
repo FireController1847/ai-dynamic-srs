@@ -20,31 +20,37 @@ const App = defineComponent({
   setup() {
     const themeMenu = ref<ThemeMenuHandle | null>(null);
     const workspace = useWorkspace();
-    const narrow = window.matchMedia('(max-width: 760px)');
-    const sidebarOpen = ref(!narrow.matches);
+    const sidebarOpen = ref(false);
     const selectedId = ref<DocumentId>(documentIdFromLocation());
     const selectedDocument = computed(() => findDocument(selectedId.value) ?? DOCUMENTS[0]);
-    const sidebarToggle = ref<HTMLButtonElement | null>(null);
+    const menuButton = ref<HTMLButtonElement | null>(null);
+    const main = ref<HTMLElement | null>(null);
     const pageHeading = ref<HTMLElement | null>(null);
+    let focusDocumentOnClose = false;
 
-    function focusHeading() {
-      void nextTick(() => pageHeading.value?.focus());
+    function focusDocument() {
+      void nextTick(() => {
+        if (main.value) main.value.scrollTop = 0;
+        pageHeading.value?.focus();
+      });
     }
 
-    function closeSidebar(restoreFocus = false) {
+    function openSidebar() {
+      focusDocumentOnClose = false;
+      sidebarOpen.value = true;
+    }
+
+    function closeSidebar() {
+      focusDocumentOnClose = false;
       sidebarOpen.value = false;
-      if (restoreFocus) void nextTick(() => sidebarToggle.value?.focus());
     }
 
-    function toggleSidebar() {
-      sidebarOpen.value = !sidebarOpen.value;
-      if (sidebarOpen.value && narrow.matches) {
-        void nextTick(() => {
-          const current = document.querySelector<HTMLAnchorElement>(
-            '.document-navigation-link[aria-current="page"]');
-          current?.focus();
-        });
-      }
+    function afterSidebarClosed() {
+      void nextTick(() => {
+        if (focusDocumentOnClose) focusDocument();
+        else menuButton.value?.focus();
+        focusDocumentOnClose = false;
+      });
     }
 
     function selectDocument(id: DocumentId) {
@@ -52,61 +58,44 @@ const App = defineComponent({
         selectedId.value = id;
         window.history.pushState(null, '', '#/documents/' + id);
       }
-      if (narrow.matches) closeSidebar();
-      focusHeading();
+      focusDocumentOnClose = true;
+      if (sidebarOpen.value) sidebarOpen.value = false;
+      else focusDocument();
     }
 
     function syncLocation() {
       selectedId.value = documentIdFromLocation();
-      if (narrow.matches) closeSidebar();
-      focusHeading();
-    }
-
-    function onViewportChange(event: MediaQueryListEvent) {
-      sidebarOpen.value = !event.matches;
-    }
-
-    function onEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape' && sidebarOpen.value && narrow.matches &&
-          !document.querySelector('dialog[open]')) closeSidebar(true);
+      focusDocumentOnClose = true;
+      if (sidebarOpen.value) sidebarOpen.value = false;
+      else focusDocument();
     }
 
     onMounted(() => {
-      narrow.addEventListener('change', onViewportChange);
       window.addEventListener('hashchange', syncLocation);
       window.addEventListener('popstate', syncLocation);
-      window.addEventListener('keydown', onEscape);
     });
     onBeforeUnmount(() => {
-      narrow.removeEventListener('change', onViewportChange);
       window.removeEventListener('hashchange', syncLocation);
       window.removeEventListener('popstate', syncLocation);
-      window.removeEventListener('keydown', onEscape);
     });
 
     return () => h('div', { class: 'app-shell' }, [
       h('header', { class: 'app-header' }, [
         h('button', {
-          ref: sidebarToggle, type: 'button',
-          class: 'icon-button sidebar-toggle',
-          title: sidebarOpen.value ? 'Hide documents' : 'Show documents',
-          'aria-label': sidebarOpen.value ? 'Hide documents sidebar' : 'Show documents sidebar',
+          ref: menuButton,
+          type: 'button',
+          class: 'menu-toggle',
+          'aria-label': 'Open document navigation',
           'aria-controls': 'documents-sidebar',
           'aria-expanded': sidebarOpen.value,
-          onClick: toggleSidebar,
+          onClick: openSidebar,
         }, [
-          h('svg', {
-            viewBox: '0 0 24 24', width: 20, height: 20,
-            fill: 'none', stroke: 'currentColor', 'stroke-width': 1.7,
-            'stroke-linecap': 'round', 'stroke-linejoin': 'round',
-            'aria-hidden': 'true', focusable: 'false',
-          }, [
-            h('rect', { x: 3, y: 4, width: 18, height: 16, rx: 2 }),
-            h('path', { d: 'M9 4v16' }),
+          h('span', { class: 'menu-icon', 'aria-hidden': 'true' }, [
+            h('span'), h('span'), h('span'),
           ]),
         ]),
-        h('span', { class: 'app-brand-mark', 'aria-hidden': 'true' }, 'S'),
-        h('h1', 'Dynamic SRS'),
+        h('span', { class: 'app-brand-mark app-header-mark', 'aria-hidden': 'true' }, 'S'),
+        h('h1', selectedDocument.value.title),
         h('div', { class: 'app-header-actions' }, [
           h('button', {
             type: 'button',
@@ -130,25 +119,21 @@ const App = defineComponent({
           ]),
         ]),
       ]),
+      h(DocumentSidebar, {
+        open: sidebarOpen.value,
+        selected: selectedId.value,
+        workspace,
+        onClose: closeSidebar,
+        onClosed: afterSidebarClosed,
+        onSelect: selectDocument,
+      }),
       h(ThemeMenu, { ref: themeMenu }),
-      h('div', {
-        class: ['app-layout', sidebarOpen.value ? 'sidebar-open' : 'sidebar-collapsed'],
-      }, [
-        h('button', {
-          type: 'button', class: 'sidebar-scrim', tabindex: -1,
-          'aria-label': 'Close documents sidebar',
-          onClick: () => closeSidebar(true),
-        }),
-        h(DocumentSidebar, {
-          selected: selectedId.value,
-          workspace,
-          inert: !sidebarOpen.value,
-          'aria-hidden': !sidebarOpen.value ? 'true' : undefined,
-          onSelect: selectDocument,
-        }),
+      h('div', { class: 'app-layout' }, [
         h('main', {
-          class: 'app-content', id: 'document-content',
-          inert: narrow.matches && sidebarOpen.value,
+          ref: main,
+          class: 'app-content',
+          id: 'document-content',
+          tabindex: -1,
         }, [
           h('div', { class: 'document-page-container' }, [
             !workspace.ready.value || workspace.problem.value

@@ -2,10 +2,10 @@
 
 The application uses a Fluent-inspired, neutral interface with semantic styling tokens, restrained blue accents, and system typography.
 
-- The 48px header provides a document-sidebar toggle and the existing accessible theme dialog.
-- The sidebar lists seven distinct documents (CR, SR, CBA, FSA, SRS, EB, GN) with stable, shareable `#/documents/<id>` URLs and an active-document indicator.
-- The sidebar is collapsible on desktop and becomes an overlay drawer on narrow screens. The selected view has its own title, description, and intentionally blank content area.
-- Workspace-level **Download .dsrs** and **Import .dsrs** controls live at the bottom of the sidebar. Restoring requires a confirmation dialog; storage is browser-local.
+- The compact header displays the current document title, a three-line navigation trigger, and the existing accessible theme dialog.
+- The navigation drawer lists seven distinct documents (CR, SR, CBA, FSA, SRS, EB, GN) with stable, shareable `#/documents/<id>` URLs and an active-document indicator.
+- The same overlay drawer is used at all screen sizes: opening the three-line menu fades in a scrim and slides the drawer into view, without taking permanent space from the page. Its close glyph animates from three lines into an X. The drawer supports outside-click dismissal, Escape, keyboard focus management, reduced motion, small-screen touch targets, and device safe areas. The selected view retains its own document content.
+- Workspace-level **Download .dsrs** and **Import .dsrs** controls live at the bottom of the drawer. Restoring requires a confirmation dialog; storage is browser-local.
 - Light/dark palettes are defined by `src/styles/themes.css`, and components consume tokens rather than hard-coded mode-specific colors.
 - Keyboard navigation, focus visibility, escape-to-close for the narrow sidebar, touch-friendly targets, responsive layouts, and reduced-motion settings remain baseline requirements.
 
